@@ -4,6 +4,7 @@ export default function Home() {
   return (
     <div>
       <h1 className='text-green'>Welcome!</h1>
+      <h1 className='text-green'>Welcome!</h1>
       
     </div>
   );
