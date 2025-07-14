@@ -11,7 +11,7 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
-          Create an Account
+          Login
         </h2>
         <p className="text-center text-gray-500 mb-6">
           Sign up to access CRM
@@ -49,9 +49,9 @@ export default function RegisterPage() {
         </form>
 
         <p className="mt-6 text-center text-gray-600 text-sm">
-          Already have an account?{" "}
-          <Link href="/login" className="text-blue-600 hover:underline">
-            Sign in
+          Create an account?{" "}
+          <Link href="/registration" className="text-blue-600 hover:underline">
+            Sign up
           </Link>
         </p>
       </div>
