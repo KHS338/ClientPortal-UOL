@@ -1,13 +1,16 @@
 "use client";
  
-import { useState } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { FiCamera } from "react-icons/fi";
+import { useState, useRef } from "react";
+import { FiCamera, FiEye, FiEyeOff, FiUser, FiBriefcase, FiMail, FiPhone, FiLock } from "react-icons/fi";
+import { motion } from "framer-motion";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
 export default function ClientRegistrationPage() {
   const [form, setForm] = useState({
     companymail: "",
-    password:"",
+    password: "",
+    confirmPassword: "",
     firstName: "",
     lastName: "",
     companyName: "",
@@ -16,6 +19,11 @@ export default function ClientRegistrationPage() {
     phone: "",
     avatar: null
   });
+  
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const fileRef = useRef();
  
   const handleChange = (e) => {
     const { name, value, files, type } = e.target;
@@ -25,140 +33,307 @@ export default function ClientRegistrationPage() {
     }));
   };
  
-  const handleDate = (name, date) => {
-    setForm((f) => ({ ...f, [name]: date }));
-  };
- 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    
+    // Basic validation
+    if (form.password !== form.confirmPassword) {
+      alert("Passwords don't match!");
+      setIsLoading(false);
+      return;
+    }
+    
     console.log("Submitting:", form);
     // TODO: call your API here
+    
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
+      alert("Registration successful!");
+    }, 2000);
   };
  
+  const primary = "#19AF1A";
+  const primaryDark = "#158A15";
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-8">
-      <div className="bg-white p-12 rounded-2xl shadow-xl w-full max-w-4xl">
-        <div className="flex justify-center">
-          <img src="/images/Logoname.jpg" alt="Asset" className="h-40" />
-        </div>
-        <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-4">
-          Add New Client
-        </h2>
-        <p className="text-center text-gray-600 mb-8">
-          Fill in the details below to register your client
-        </p>
- 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Avatar Upload */}
-          <div className="flex justify-center mb-8">
-            <label className="cursor-pointer">
-              <input
-                type="file"
-                name="avatar"
-                accept="image/*"
-                className="hidden"
-                onChange={handleChange}
-              />
-              <div className="w-28 h-28 rounded-full bg-[#19AF1A] flex items-center justify-center text-gray-600 hover:bg-[#158A15] transition">
-                {form.avatar ? (
-                  <img
-                    src={URL.createObjectURL(form.avatar)}
-                    alt="avatar"
-                    className="w-full h-full object-cover rounded-full"
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-5xl"
+      >
+        <Card className="bg-white/80 backdrop-blur-sm shadow-2xl border-0 overflow-hidden">
+          <div className="p-8 md:p-12">
+            {/* Header */}
+            <div className="text-center mb-10">
+              <motion.div
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="flex justify-center mb-6"
+              >
+                <img src="/images/Logoname.jpg" alt="Company Logo" className="h-32 md:h-40 object-contain" />
+              </motion.div>
+              <motion.h1
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="text-4xl md:text-5xl font-bold text-gray-800 mb-3"
+              >
+                Join Our Platform
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                className="text-lg text-gray-600 max-w-2xl mx-auto"
+              >
+                Create your account and start managing your business with ease
+              </motion.p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Avatar Upload */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
+                className="flex justify-center mb-8"
+              >
+                <div className="relative">
+                  <div
+                    onClick={() => fileRef.current?.click()}
+                    className="w-32 h-32 rounded-full bg-gradient-to-br from-[#19AF1A] to-[#158A15] flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-105 border-4 border-white shadow-xl"
+                  >
+                    {form.avatar ? (
+                      <img
+                        src={URL.createObjectURL(form.avatar)}
+                        alt="avatar"
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    ) : (
+                      <FiCamera size={32} className="text-white" />
+                    )}
+                  </div>
+                  <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-2 shadow-lg border-2 border-gray-100">
+                    <FiUser size={16} className="text-gray-600" />
+                  </div>
+                  <input
+                    type="file"
+                    name="avatar"
+                    accept="image/*"
+                    ref={fileRef}
+                    className="hidden"
+                    onChange={handleChange}
                   />
-                ) : (
-                  <FiCamera size={28} />
-                )}
-              </div>
-            </label>
+                </div>
+              </motion.div>
+
+              {/* Form Fields */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 1 }}
+                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              >
+                <InputField
+                  name="firstName"
+                  type="text"
+                  placeholder="First Name"
+                  value={form.firstName}
+                  onChange={handleChange}
+                  icon={<FiUser />}
+                  required
+                />
+                <InputField
+                  name="lastName"
+                  type="text"
+                  placeholder="Last Name"
+                  value={form.lastName}
+                  onChange={handleChange}
+                  icon={<FiUser />}
+                  required
+                />
+                <InputField
+                  name="companymail"
+                  type="email"
+                  placeholder="Company Email"
+                  value={form.companymail}
+                  onChange={handleChange}
+                  icon={<FiMail />}
+                  required
+                />
+                <InputField
+                  name="email"
+                  type="email"
+                  placeholder="Personal Email"
+                  value={form.email}
+                  onChange={handleChange}
+                  icon={<FiMail />}
+                  required
+                />
+                <div className="relative">
+                  <InputField
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    value={form.password}
+                    onChange={handleChange}
+                    icon={<FiLock />}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition"
+                  >
+                    {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                  </button>
+                </div>
+                <div className="relative">
+                  <InputField
+                    name="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm Password"
+                    value={form.confirmPassword}
+                    onChange={handleChange}
+                    icon={<FiLock />}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition"
+                  >
+                    {showConfirmPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                  </button>
+                </div>
+                <InputField
+                  name="companyName"
+                  type="text"
+                  placeholder="Company Name"
+                  value={form.companyName}
+                  onChange={handleChange}
+                  icon={<FiBriefcase />}
+                  required
+                />
+                <SelectField
+                  name="companySize"
+                  value={form.companySize}
+                  onChange={handleChange}
+                  options={["1-10", "11-50", "51-200", "201-500", "501-1000", "1001-5000", "5001-10000", "10000+"]}
+                  placeholder="Select Company Size"
+                  icon={<FiBriefcase />}
+                  required
+                />
+                <InputField
+                  name="phone"
+                  type="tel"
+                  placeholder="Phone Number"
+                  value={form.phone}
+                  onChange={handleChange}
+                  icon={<FiPhone />}
+                  required
+                />
+              </motion.div>
+
+              {/* Submit Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 1.2 }}
+                className="pt-6"
+              >
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-[#19AF1A] to-[#158A15] hover:from-[#158A15] hover:to-[#0F6B0F] text-white py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Creating Account...</span>
+                    </div>
+                  ) : (
+                    "Create Account"
+                  )}
+                </Button>
+              </motion.div>
+
+              {/* Terms */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 1.4 }}
+                className="text-center text-sm text-gray-600 mt-6"
+              >
+                By creating an account, you agree to our{" "}
+                <a href="#" className="text-[#19AF1A] hover:text-[#158A15] font-medium transition">
+                  Terms of Service
+                </a>{" "}
+                and{" "}
+                <a href="#" className="text-[#19AF1A] hover:text-[#158A15] font-medium transition">
+                  Privacy Policy
+                </a>
+              </motion.p>
+            </form>
           </div>
- 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
-            <input
-              name="companymail"
-              type="text"
-              placeholder="Email"
-              value={form.companymail}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            />    
-            <input
-              name="password"
-              type="text"
-              placeholder="Password"
-              value={form.companymail}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            />
-            <input
-              name="firstName"
-              type="text"
-              placeholder="First Name"
-              value={form.firstName}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            />
-            <input
-              name="lastName"
-              type="text"
-              placeholder="Last Name"
-              value={form.lastName}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            />
-            <input
-              name="companyName"
-              type="text"
-              placeholder="Company Name"
-              value={form.companyName}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            />
-            <select
-              name="companySize"
-              value={form.companySize}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            >
-              <option value="" disabled>
-                Select Company Size
-              </option>
-              <option>1-10</option>
-              <option>11-50</option>
-              <option>201-500</option>
-              <option>501-1000</option>
-              <option>1001-5000</option>
-              <option>5001-10000</option>
-              <option>10000+</option>
-            </select>
- 
-            <input
-              name="email"
-              type="email"
-              placeholder="Email"
-              value={form.email}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            />
-            <input
-              name="phone"
-              type="tel"
-              placeholder="Phone Number"
-              value={form.phone}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-[#19AF1A] text-white py-4 rounded-lg hover:bg-[#158A15] transition-transform duration-300 transform hover:scale-105"
-          >
-            Register Now
-          </button>
-        </form>
+        </Card>
+      </motion.div>
+    </div>
+  );
+}
+
+// Helper Components
+function InputField({ name, type, placeholder, value, onChange, icon, required = false, className = "" }) {
+  return (
+    <div className="relative">
+      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+        {icon}
+      </div>
+      <input
+        name={name}
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        required={required}
+        className={`w-full pl-10 pr-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#19AF1A] focus:border-transparent transition-all duration-300 bg-white/50 backdrop-blur-sm hover:bg-white/80 text-gray-800 placeholder-gray-500 ${className}`}
+      />
+    </div>
+  );
+}
+
+function SelectField({ name, value, onChange, options, placeholder, icon, required = false, className = "" }) {
+  return (
+    <div className="relative">
+      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">
+        {icon}
+      </div>
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        required={required}
+        className={`w-full pl-10 pr-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#19AF1A] focus:border-transparent transition-all duration-300 bg-white/50 backdrop-blur-sm hover:bg-white/80 text-gray-800 appearance-none cursor-pointer ${className}`}
+      >
+        <option value="" disabled>
+          {placeholder}
+        </option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
       </div>
     </div>
   );
 }
- 
- 
