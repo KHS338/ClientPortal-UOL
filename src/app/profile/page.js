@@ -17,7 +17,8 @@ export default function ClientProfilePage({ initial = {} }) {
     email: initial.email || "john.personal@gmail.com",
     phone: initial.phone || "+1 (555) 123-4567",
     avatar: initial.avatar || null,
-    currentPlan: initial.currentPlan || "Monthly",
+    currentPlan: initial.currentPlan || "prequalification-monthly",
+    currentService: initial.currentService || "Prequalification",
     joinDate: initial.joinDate || "January 2025",
     lastLogin: initial.lastLogin || "2 hours ago",
   });
@@ -25,6 +26,7 @@ export default function ClientProfilePage({ initial = {} }) {
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [billingCycle, setBillingCycle] = useState("monthly");
   const fileRef = useRef();
 
   const handleChange = (e) => {
@@ -40,20 +42,49 @@ export default function ClientProfilePage({ initial = {} }) {
     setTimeout(() => {
       setIsLoading(false);
       setIsEditing(false);
-      alert("Profile updated successfully!");
     }, 1500);
   };
 
+  const handlePlanChange = (serviceTitle, cycle) => {
+    console.log(`Plan switch requested: ${serviceTitle} (${cycle})`);
+    
+    // const planKey = `${serviceTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${cycle}`;
+    // setForm(prev => ({
+    //   ...prev,
+    //   currentPlan: planKey,
+    //   currentService: serviceTitle
+    // }));
+  };
+
   const billingOptions = [
-    { title: "Monthly", price: "$29/mo", key: "Monthly", features: ["Full Access", "Priority Support", "Advanced Analytics"] },
-    { title: "Annual", price: "$290/yr", key: "Annual", features: ["Full Access", "Priority Support", "Advanced Analytics", "2 Months Free"] },
+    {
+      title: "CV Sourcing",
+      monthly: { price: "$19/mo", key: "cv-sourcing-monthly" },
+      annual: { price: "$190/yr", key: "cv-sourcing-annual", savings: "Save $38" },
+      features: ["Basic CV Collection", "Standard Filtering", "Email Support", "Monthly Reports"],
+      description: "Essential CV sourcing and basic candidate filtering"
+    },
+    {
+      title: "Prequalification", 
+      monthly: { price: "$39/mo", key: "prequalification-monthly" },
+      annual: { price: "$390/yr", key: "prequalification-annual", savings: "Save $78" },
+      features: ["Advanced CV Sourcing", "Skill Assessment", "Video Interviews", "Priority Support", "Weekly Reports"],
+      description: "Comprehensive candidate prequalification and assessment"
+    },
+    {
+      title: "360/Direct",
+      monthly: { price: "$69/mo", key: "360-direct-monthly" },
+      annual: { price: "$690/yr", key: "360-direct-annual", savings: "Save $138" },
+      features: ["Full 360° Assessment", "Direct Placement", "Custom Integrations", "Dedicated Support", "Real-time Analytics", "White-label Options"],
+      description: "Complete recruitment solution with direct placement services"
+    }
   ];
 
   const primary = "#19AF1A";
   const primaryDark = "#158A15";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50">
+    <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50">
       <div className="max-w-7xl mx-auto p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -89,51 +120,51 @@ export default function ClientProfilePage({ initial = {} }) {
               transition={{ duration: 0.5, delay: 0.6 }}
               className="xl:col-span-4"
             >
-              <Card className="p-8 bg-gradient-to-br from-[#19AF1A] to-[#158A15] text-white shadow-2xl border-0">
-                <div className="text-center">
-                  {/* Avatar */}
-                  <div className="relative mx-auto mb-6">
-                    <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-white shadow-xl">
-                      <img
-                        src={form.avatar ? URL.createObjectURL(form.avatar) : "/default-avatar.png"}
-                        alt="Profile"
-                        className="w-full h-full object-cover"
-                      />
+              <Card className="p-8 bg-gradient-to-br from-[#19AF1A] to-[#158A15] text-white shadow-2xl border-0 flex flex-col h-full">
+                <div className="text-center flex-1 flex flex-col justify-center">
+                  {/* Avatar and User Info - Centered */}
+                  <div className="space-y-6">
+                    {/* Avatar */}
+                    <div className="mx-auto">
+                      <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-white shadow-xl">
+                        <img
+                          src={form.avatar ? URL.createObjectURL(form.avatar) : "/default-avatar.png"}
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <button
+                        onClick={() => fileRef.current?.click()}
+                        className="mx-auto mt-4 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 group flex"
+                      >
+                        <FiCamera size={18} className="text-[#19AF1A] group-hover:scale-110 transition-transform" />
+                        <input
+                          type="file"
+                          name="avatar"
+                          accept="image/*"
+                          ref={fileRef}
+                          className="hidden"
+                          onChange={handleChange}
+                        />
+                      </button>
                     </div>
-                    <button
-                      onClick={() => fileRef.current?.click()}
-                      className="absolute bottom-2 right-1/2 transform translate-x-6 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 group"
-                    >
-                      <FiCamera size={18} className="text-[#19AF1A] group-hover:scale-110 transition-transform" />
-                      <input
-                        type="file"
-                        name="avatar"
-                        accept="image/*"
-                        ref={fileRef}
-                        className="hidden"
-                        onChange={handleChange}
-                      />
-                    </button>
-                  </div>
 
-                  {/* User Info */}
-                  <h2 className="text-2xl font-bold mb-2">
-                    {form.firstName} {form.lastName}
-                  </h2>
-                  <p className="text-green-100 mb-1">{form.companyName}</p>
-                  <p className="text-green-200 text-sm mb-6">{form.companymail}</p>
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                    <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
-                      <FiCalendar className="mx-auto mb-2" size={20} />
-                      <div className="text-sm text-green-100">Member Since</div>
-                      <div className="font-semibold">{form.joinDate}</div>
+                    {/* User Info */}
+                    <div>
+                      <h2 className="text-2xl font-bold mb-2">
+                        {form.firstName} {form.lastName}
+                      </h2>
+                      <p className="text-green-100 text-base mb-1">{form.companyName}</p>
+                      <p className="text-green-200 text-sm">{form.companymail}</p>
                     </div>
-                    <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
-                      <FiCheckCircle className="mx-auto mb-2" size={20} />
-                      <div className="text-sm text-green-100">Last Login</div>
-                      <div className="font-semibold">{form.lastLogin}</div>
+
+                    {/* Stats */}
+                    <div className="w-full">
+                      <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm text-center">
+                        <FiCalendar className="mx-auto mb-2" size={20} />
+                        <div className="text-xs text-green-100 mb-1">Member Since</div>
+                        <div className="font-bold text-sm">{form.joinDate}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -147,7 +178,7 @@ export default function ClientProfilePage({ initial = {} }) {
               transition={{ duration: 0.5, delay: 0.8 }}
               className="xl:col-span-8"
             >
-              <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="space-y-8">
                 {/* Profile Information */}
                 <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border-0">
                   <div className="flex items-center justify-between mb-6">
@@ -282,52 +313,127 @@ export default function ClientProfilePage({ initial = {} }) {
                     </motion.div>
                   )}
                 </Card>
+              </div>
+            </motion.div>
+          </div>
 
-                {/* Subscription & Billing */}
+          {/* Subscription & Billing - Full Width */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 1.0 }}
+          >
+            <form onSubmit={handleSubmit}>
                 <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border-0">
                   <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
                     <FiCheckCircle className="text-[#19AF1A]" />
-                    Subscription & Billing
+                    Subscription & Services
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {billingOptions.map((option) => {
-                      const isCurrent = form.currentPlan === option.key;
+                  
+                  {/* Billing Cycle Toggle */}
+                  <div className="flex justify-center mb-8">
+                    <div className="bg-gray-100 p-1 rounded-xl inline-flex">
+                      <button
+                        onClick={() => setBillingCycle("monthly")}
+                        className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                          billingCycle === "monthly"
+                            ? "bg-[#19AF1A] text-white shadow-md"
+                            : "text-gray-600 hover:text-gray-800"
+                        }`}
+                      >
+                        Monthly
+                      </button>
+                      <button
+                        onClick={() => setBillingCycle("annual")}
+                        className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                          billingCycle === "annual"
+                            ? "bg-[#19AF1A] text-white shadow-md"
+                            : "text-gray-600 hover:text-gray-800"
+                        }`}
+                      >
+                        Annual
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {billingOptions.map((service, index) => {
+                      const currentPlan = billingCycle === "monthly" ? service.monthly : service.annual;
+                      const isCurrentPlan = form.currentPlan === currentPlan.key;
+                      
                       return (
                         <motion.div
-                          key={option.key}
-                          whileHover={{ scale: 1.02 }}
-                          transition={{ duration: 0.2 }}
-                          className={`relative p-6 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
-                            isCurrent
-                              ? "border-[#19AF1A] bg-gradient-to-br from-[#19AF1A]/10 to-[#158A15]/10 shadow-lg"
-                              : "border-gray-200 bg-white hover:border-[#19AF1A]/50 hover:shadow-md"
+                          key={service.title}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: index * 0.1 }}
+                          className={`relative p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col ${
+                            isCurrentPlan
+                              ? "border-[#19AF1A] bg-gradient-to-br from-[#19AF1A]/10 to-[#158A15]/10 shadow-xl"
+                              : "border-gray-200 bg-white hover:border-[#19AF1A]/50 hover:shadow-lg"
                           }`}
                         >
-                          {isCurrent && (
-                            <div className="absolute -top-3 left-6 bg-[#19AF1A] text-white px-4 py-1 rounded-full text-sm font-medium">
+                          {isCurrentPlan && (
+                            <div className="absolute -top-3 right-6 bg-[#19AF1A] text-white px-4 py-1 rounded-full text-sm font-medium">
                               Current Plan
                             </div>
                           )}
-                          <div className="text-center">
-                            <h4 className="text-xl font-bold text-gray-800 mb-2">{option.title}</h4>
-                            <p className="text-3xl font-bold text-[#19AF1A] mb-4">{option.price}</p>
-                            <ul className="space-y-2 text-sm text-gray-600">
-                              {option.features.map((feature, index) => (
-                                <li key={index} className="flex items-center gap-2">
-                                  <FiCheckCircle className="text-[#19AF1A] flex-shrink-0" size={14} />
-                                  {feature}
-                                </li>
-                              ))}
-                            </ul>
+
+                          <div className="text-center flex-1 flex flex-col">
+                            <div className="flex-1">
+                              <h4 className="text-xl font-bold text-gray-800 mb-2">{service.title}</h4>
+                              <p className="text-sm text-gray-600 mb-4">{service.description}</p>
+                              
+                              <div className="mb-4">
+                                <p className="text-4xl font-bold text-[#19AF1A] mb-1">{currentPlan.price}</p>
+                                {billingCycle === "annual" && service.annual.savings && (
+                                  <p className="text-sm text-green-600 font-medium">{service.annual.savings}</p>
+                                )}
+                              </div>
+
+                              <ul className="space-y-3 text-sm text-gray-600 mb-6">
+                                {service.features.map((feature, featureIndex) => (
+                                  <li key={featureIndex} className="flex items-center gap-2">
+                                    <FiCheckCircle className="text-[#19AF1A] flex-shrink-0" size={16} />
+                                    {feature}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+
+                            <Button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isCurrentPlan) {
+                                  handlePlanChange(service.title, billingCycle);
+                                }
+                              }}
+                              className={`w-full transition-all duration-300 mt-auto ${
+                                isCurrentPlan
+                                  ? "bg-gray-100 text-gray-500 cursor-default"
+                                  : "bg-gradient-to-r from-[#19AF1A] to-[#158A15] hover:from-[#158A15] hover:to-[#0F6B0F] text-white"
+                              }`}
+                              disabled={isCurrentPlan}
+                            >
+                              {isCurrentPlan ? "Current Plan" : "Switch to This Plan"}
+                            </Button>
                           </div>
                         </motion.div>
                       );
                     })}
                   </div>
-                </Card>
-              </form>
-            </motion.div>
-          </div>
+
+                  {/* Current Plan Summary */}
+              <div className="mt-8 p-6 bg-gradient-to-r from-[#19AF1A]/10 to-[#158A15]/10 rounded-xl border border-[#19AF1A]/20">
+                <h4 className="font-semibold text-gray-800 mb-2">Current Subscription</h4>
+                <p className="text-gray-600">
+                  You are currently subscribed to <span className="font-semibold text-[#19AF1A]">{form.currentService}</span> 
+                  {" "}({billingCycle === "monthly" ? "Monthly" : "Annual"} billing)
+                </p>
+              </div>
+            </Card>
+            </form>
+          </motion.div>
         </motion.div>
       </div>
     </div>
