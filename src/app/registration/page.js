@@ -8,27 +8,13 @@ export default function ClientRegistrationPage() {
   const [form, setForm] = useState({
     companymail: "",
     password:"", 
-    service: "",
-    clientNumber: "",
     firstName: "",
     lastName: "",
-    jobTitle: "",
-    sector: "",
     companyName: "",
-    companyLi: "",
     companySize: "",
     email: "",
-    clientLi: "",
     phone: "",
-    subscription: "",
-    credits: "",
-    creditsPerDay: "",
-    amount: "",
-    startDate: null,
-    endDate: null,
-    reminder: null,
-    avatar: null,
-
+    avatar: null
   });
 
   const handleChange = (e) => {
@@ -101,32 +87,6 @@ export default function ClientRegistrationPage() {
               onChange={handleChange}
               className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
             /> 
-
-
-            
-            <select
-              name="service"
-              value={form.service}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            >
-              <option value="" disabled>
-                Select Service
-              </option>
-              <option>Consulting</option>
-              <option>Implementation</option>
-              <option>Support</option>
-            </select>
-
-            <input
-              name="clientNumber"
-              type="text"
-              placeholder="Client Number"
-              value={form.clientNumber}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            />
-
             <input
               name="firstName"
               type="text"
@@ -143,30 +103,6 @@ export default function ClientRegistrationPage() {
               onChange={handleChange}
               className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
             />
-
-            <input
-              name="jobTitle"
-              type="text"
-              placeholder="Job Title"
-              value={form.jobTitle}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition col-span-full"
-            />
-
-            <select
-              name="sector"
-              value={form.sector}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            >
-              <option value="" disabled>
-                Select Sector
-              </option>
-              <option>Finance</option>
-              <option>Healthcare</option>
-              <option>Education</option>
-            </select>
-
             <input
               name="companyName"
               type="text"
@@ -175,15 +111,6 @@ export default function ClientRegistrationPage() {
               onChange={handleChange}
               className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
             />
-            <input
-              name="companyLi"
-              type="text"
-              placeholder="Company LI"
-              value={form.companyLi}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            />
-
             <select
               name="companySize"
               value={form.companySize}
@@ -195,7 +122,11 @@ export default function ClientRegistrationPage() {
               </option>
               <option>1-10</option>
               <option>11-50</option>
-              <option>51-200</option>
+              <option>201-500</option>
+              <option>501-1000</option>
+              <option>1001-5000</option>
+              <option>5001-10000</option>
+              <option>10000+</option>
             </select>
 
             <input
@@ -207,15 +138,6 @@ export default function ClientRegistrationPage() {
               className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
             />
             <input
-              name="clientLi"
-              type="text"
-              placeholder="Client LI"
-              value={form.clientLi}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            />
-
-            <input
               name="phone"
               type="tel"
               placeholder="Phone Number"
@@ -223,72 +145,12 @@ export default function ClientRegistrationPage() {
               onChange={handleChange}
               className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
             />
-
-            <select
-              name="subscription"
-              value={form.subscription}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            >
-              <option value="" disabled>
-                Subscription Type
-              </option>
-              <option>Monthly</option>
-              <option>Yearly</option>
-            </select>
-
-            <input
-              name="credits"
-              type="number"
-              placeholder="Credits"
-              value={form.credits}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            />
-            <input
-              name="creditsPerDay"
-              type="number"
-              placeholder="Credits/Day"
-              value={form.creditsPerDay}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            />
-
-            <input
-              name="amount"
-              type="number"
-              placeholder="Amount"
-              value={form.amount}
-              onChange={handleChange}
-              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            />
-
-            <DatePicker
-              selected={form.startDate}
-              onChange={(d) => handleDate("startDate", d)}
-              placeholderText="Start Date"
-              className="block w-full placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            />
-            <DatePicker
-              selected={form.endDate}
-              onChange={(d) => handleDate("endDate", d)}
-              placeholderText="End Date"
-              className="block w-full placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
-            />
-
-            <DatePicker
-              selected={form.reminder}
-              onChange={(d) => handleDate("reminder", d)}
-              placeholderText="Reminder Date"
-              className="block w-full placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition col-span-full"
-            />
           </div>
-
           <button
             type="submit"
             className="w-full bg-green-600 text-white py-4 rounded-lg hover:bg-green-700 transition-transform transform hover:scale-105"
           >
-            Add Client
+            Register Now 
           </button>
         </form>
       </div>
