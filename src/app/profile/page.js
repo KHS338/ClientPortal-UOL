@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { FiCalendar, FiLock, FiCamera } from "react-icons/fi";
+import { FiCamera } from "react-icons/fi";
 import { motion } from "framer-motion";
 import {
   Card,
@@ -14,156 +14,119 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-export default function ProfilePage({ initial = {} }) {
-  const [form, setForm] = useState({ ...initial });
-  const [avatar, setAvatar] = useState(initial.avatar ?? "");
-  const [showChange, setShowChange] = useState(false);
+export default function ClientProfilePage({ initial = {} }) {
+  const [form, setForm] = useState({
+    companymail: initial.companymail || "", 
+    password: initial.password || "",
+    firstName: initial.firstName || "",
+    lastName: initial.lastName || "",
+    companyName: initial.companyName || "",
+    companySize: initial.companySize || "",
+    email: initial.email || "",
+    phone: initial.phone || "",
+    avatar: initial.avatar || null,
+  });
   const fileRef = useRef();
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value, files, type } = e.target;
+    setForm((f) => ({ ...f, [name]: type === "file" ? files[0] : value }));
   };
 
-  const handleDate = (name, date) => {
-    setForm((prev) => ({ ...prev, [name]: date }));
-  };
-
-  const handleSave = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: send form + avatar to API
-    console.log("Saved profile:", { ...form, avatar });
+    console.log("Submitting:", form);
+    // TODO: API call
   };
 
-  const handlePassword = (e) => {
-    e.preventDefault();
-    // TODO: password change logic
-    setShowChange(false);
-  };
-
-  const onAvatarChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setAvatar(URL.createObjectURL(file));
-  };
+  const subscriptionPlans = [
+    { title: "Basic", price: "$10/mo", features: ["Feature A", "Feature B"], color: "bg-blue-200" },
+    { title: "Standard", price: "$30/mo", features: ["Feature A", "Feature B", "Feature C"], color: "bg-green-200" },
+    { title: "Premium", price: "$60/mo", features: ["Feature A", "Feature B", "Feature C", "Feature D"], color: "bg-purple-200" },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-8">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden"
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-4xl bg-white rounded-2xl shadow-lg overflow-hidden"
       >
         <Card>
-          <CardHeader className="bg-gradient-to-r from-green-500 to-indigo-500 text-white p-8 flex flex-col items-center">
-            <div className="relative">
+          <CardHeader className="bg-indigo-600 text-white p-6 text-center">
+            <div className="relative inline-block">
               <img
-                src={avatar || "/default-avatar.png"}
+                src={
+                  form.avatar ? URL.createObjectURL(form.avatar) : "/default-avatar.png"
+                }
                 alt="Avatar"
-                className="w-32 h-32 rounded-full border-4 border-white object-cover shadow-lg"
+                className="w-24 h-24 rounded-full border-4 border-white object-cover shadow-md"
               />
               <button
                 onClick={() => fileRef.current.click()}
-                className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-md hover:bg-gray-50 transition"
+                className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow hover:bg-gray-100 transition"
               >
-                <FiCamera className="text-green-500" size={20} />
+                <FiCamera className="text-indigo-600" size={18} />
+                <input
+                  type="file"
+                  name="avatar"
+                  accept="image/*"
+                  ref={fileRef}
+                  className="hidden"
+                  onChange={handleChange}
+                />
               </button>
-              <input
-                type="file"
-                accept="image/*"
-                ref={fileRef}
-                className="hidden"
-                onChange={onAvatarChange}
-              />
             </div>
-            <CardTitle className="mt-4 text-3xl font-semibold">
-              {form.firstName || "First"} {form.lastName || "Last"}
+            <CardTitle className="mt-4 text-2xl font-semibold">
+              {form.firstName} {form.lastName}
             </CardTitle>
-            <span className="mt-1 text-sm opacity-90">
-              {form.jobTitle || "Your Title"}
-            </span>
           </CardHeader>
 
           <CardContent className="p-8">
-            <form onSubmit={handleSave} className="space-y-8">
-              {/* Contact Section */}
-              <div>
-                <h3 className="text-lg font-medium mb-4">Contact Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Input label="Company Email" name="companymail" value={form.companymail || ""} onChange={handleChange} />
-                  <Input label="Phone Number" name="phone" type="tel" value={form.phone || ""} onChange={handleChange} />
-                </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <Input label="Company Email" name="companymail" value={form.companymail} onChange={handleChange} />
+                <Input label="Password" name="password" type="password" value={form.password} onChange={handleChange} />
+                <Input label="First Name" name="firstName" value={form.firstName} onChange={handleChange} />
+                <Input label="Last Name" name="lastName" value={form.lastName} onChange={handleChange} />
+                <Input label="Company Name" name="companyName" value={form.companyName} onChange={handleChange} />
+                <Select
+                  label="Company Size"
+                  name="companySize"
+                  value={form.companySize}
+                  options={["1-10","11-50","201-500","501-1000","1001-5000","5001-10000","10000+"]}
+                  onChange={handleChange}
+                />
+                <Input label="Email" name="email" type="email" value={form.email} onChange={handleChange} />
+                <Input label="Phone" name="phone" type="tel" value={form.phone} onChange={handleChange} />
               </div>
-
-              {/* Subscription Section */}
-              <div>
-                <h3 className="text-lg font-medium mb-4">Subscription Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <Input label="Subscription Plan" name="subscription" value={form.subscription || ""} onChange={handleChange} />
-                  <Input label="Credits/Day" name="creditsPerDay" type="number" value={form.creditsPerDay || ""} onChange={handleChange} />
-                  <Input label="Company Size" name="companySize" value={form.companySize || ""} onChange={handleChange} />
-                </div>
-              </div>
-
-              {/* Dates Section */}
-              <div>
-                <h3 className="text-lg font-medium mb-4">Important Dates</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <DateInput label="Start Date" selected={form.startDate || null} onChange={(d) => handleDate("startDate", d)} />
-                  <DateInput label="End Date" selected={form.endDate || null} onChange={(d) => handleDate("endDate", d)} />
-                  <DateInput label="Reminder Date" selected={form.reminder || null} onChange={(d) => handleDate("reminder", d)} />
-                </div>
-              </div>
-
-              {/* Additional Info Section */}
-              <div>
-                <h3 className="text-lg font-medium mb-4">Company Profile</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Input label="LinkedIn Profile" name="clientLi" value={form.clientLi || ""} onChange={handleChange} />
-                  <Input label="Sector" name="sector" value={form.sector || ""} onChange={handleChange} />
-                </div>
+              <div className="flex justify-end">
+                <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg shadow">
+                  Save Profile
+                </Button>
               </div>
             </form>
-          </CardContent>
 
-          <CardFooter className="bg-gray-50 p-6 flex justify-end space-x-4">
-            <Button variant="outline" onClick={() => setShowChange(true)} className="flex items-center">
-              <FiLock className="mr-2" /> Change Password
-            </Button>
-            <Button type="submit" onClick={handleSave} className="shadow-md">
-              Save Changes
-            </Button>
-          </CardFooter>
-        </Card>
-
-        {/* Password Modal */}
-        {showChange && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
-          >
-            <Card className="w-full max-w-lg">
-              <CardHeader className="pb-0">
-                <CardTitle>Change Password</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handlePassword} className="space-y-6">
-                  <Input label="Current Password" name="currentPassword" type="password" value={form.currentPassword || ''} onChange={handleChange} />
-                  <Input label="New Password" name="newPassword" type="password" value={form.newPassword || ''} onChange={handleChange} />
-                  <Input label="Confirm Password" name="confirmPassword" type="password" value={form.confirmPassword || ''} onChange={handleChange} />
-
-                  <div className="flex justify-end space-x-4 pt-4">
-                    <Button variant="outline" onClick={() => setShowChange(false)}>Cancel</Button>
-                    <Button type="submit">Update</Button>
+            {/* Subscription Plans Cards */}
+            <div className="mt-12">
+              <h3 className="text-lg font-medium mb-4">Current Subscription Plans</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {subscriptionPlans.map((plan) => (
+                  <div key={plan.title} className={`${plan.color} p-6 rounded-lg shadow-md`}>
+                    <h4 className="text-xl font-semibold mb-2">{plan.title}</h4>
+                    <p className="text-2xl font-bold mb-4">{plan.price}</p>
+                    <ul className="list-disc list-inside space-y-1">
+                      {plan.features.map((feat) => (
+                        <li key={feat}>{feat}</li>
+                      ))}
+                    </ul>
                   </div>
-                </form>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
     </div>
   );
@@ -172,34 +135,35 @@ export default function ProfilePage({ initial = {} }) {
 function Input({ label, name, type = "text", value, onChange }) {
   return (
     <div className="flex flex-col">
-      <label htmlFor={name} className="text-sm font-medium text-gray-700 mb-2">
-        {label}
-      </label>
+      <label htmlFor={name} className="text-sm font-medium text-gray-700 mb-1">{label}</label>
       <input
         id={name}
         name={name}
         type={type}
         value={value}
         onChange={onChange}
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 transition"
+        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition"
       />
     </div>
   );
 }
 
-function DateInput({ label, selected, onChange }) {
+function Select({ label, name, value, options, onChange }) {
   return (
     <div className="flex flex-col">
-      <label className="text-sm font-medium text-gray-700 mb-2">{label}</label>
-      <div className="relative">
-        <DatePicker
-          selected={selected}
-          onChange={onChange}
-          placeholderText={label}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 transition"
-        />
-        <FiCalendar className="absolute right-3 top-3 text-gray-400" />
-      </div>
+      <label htmlFor={name} className="text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <select
+        id={name}
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition"
+      >
+        <option value="" disabled>Select {label}</option>
+        {options.map((opt) => (
+          <option key={opt} value={opt}>{opt}</option>
+        ))}
+      </select>
     </div>
   );
 }
