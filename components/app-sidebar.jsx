@@ -14,18 +14,18 @@ import {
 // Menu items.
 const items = [
   {
-    title: "Home",
+    title: "Dashboard",
     url: "#",
     icon: Home,
   },
   {
     title: "Manage Roles",
-    url: "#",
+    url: "/roles",
     icon: LaptopMinimalCheck,
   },
   {
     title: "Invoices",
-    url: "#",
+    url: "/invoice",
     icon: CircleDollarSign,
   },
 //   {
@@ -35,7 +35,7 @@ const items = [
 //   },
   {
     title: "Profile",
-    url: "#",
+    url: "/profile",
     icon: UserCircleIcon,
   },
 ]
