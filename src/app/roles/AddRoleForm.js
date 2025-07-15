@@ -2,8 +2,85 @@
 
 import { useState } from "react"
 
-export default function AddRoleForm() {
+export default function AddRoleForm({ onSuccess }) {
   const [salaryNotDefined, setSalaryNotDefined] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  
+  const [roleData, setRoleData] = useState({
+    roleTitle: '',
+    rolePriority: '',
+    location: '',
+    postalCode: '',
+    country: '',
+    salaryFrom: '',
+    salaryTo: '',
+    salaryCurrency: '',
+    salaryType: '',
+    industry: '',
+    experienceRequired: '',
+    searchRadius: '',
+    acmCategory: ''
+  })
+
+  
+  const handleInputChange = (field, value) => {
+    setRoleData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    
+    try {
+      const completeRoleData = {
+        ...roleData,
+        salaryNotDefined,
+        createdAt: new Date().toISOString(),
+        id: Date.now() // Temporary ID
+      }
+      
+      console.log('Role Data:', completeRoleData)
+      
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      // Call success callback to close sheet and show message
+      if (onSuccess) {
+        onSuccess('Role Created Successfully! 🎉')
+      }
+      
+      // Reset form
+      setRoleData({
+        roleTitle: '',
+        rolePriority: '',
+        location: '',
+        postalCode: '',
+        country: '',
+        salaryFrom: '',
+        salaryTo: '',
+        salaryCurrency: '',
+        salaryType: '',
+        industry: '',
+        experienceRequired: '',
+        searchRadius: '',
+        acmCategory: ''
+      })
+      setSalaryNotDefined(false)
+      
+    } catch (error) {
+      console.error('Error creating role:', error)
+      if (onSuccess) {
+        onSuccess('Error creating role. Please try again.', 'error')
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <div className="h-full flex flex-col">
@@ -13,7 +90,7 @@ export default function AddRoleForm() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 bg-white">
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Role Title */}
           <div className="md:col-span-2">
@@ -23,6 +100,8 @@ export default function AddRoleForm() {
             <input
               type="text"
               required
+              value={roleData.roleTitle}
+              onChange={(e) => handleInputChange('roleTitle', e.target.value)}
               className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               placeholder="e.g., Senior Frontend Developer"
             />
@@ -33,7 +112,11 @@ export default function AddRoleForm() {
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Role Priority <span className="text-red-500">*</span>
             </label>
-            <select className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+            <select 
+              value={roleData.rolePriority}
+              onChange={(e) => handleInputChange('rolePriority', e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            >
               <option value="">..</option>
               <option value="low">🟢 Low</option>
               <option value="medium">🟡 Medium</option>
@@ -50,6 +133,8 @@ export default function AddRoleForm() {
             <input
               type="text"
               required
+              value={roleData.location}
+              onChange={(e) => handleInputChange('location', e.target.value)}
               className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               placeholder="e.g., London, New York"
             />
@@ -60,6 +145,8 @@ export default function AddRoleForm() {
             <label className="block text-sm font-semibold text-gray-700 mb-2">Postal Code</label>
             <input
               type="text"
+              value={roleData.postalCode}
+              onChange={(e) => handleInputChange('postalCode', e.target.value)}
               className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               placeholder="e.g., SW1A 1AA"
             />
@@ -70,7 +157,11 @@ export default function AddRoleForm() {
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Country <span className="text-red-500">*</span>
             </label>
-            <select className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+            <select 
+              value={roleData.country}
+              onChange={(e) => handleInputChange('country', e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            >
               <option value="">..</option>
               <option value="us">🇺🇸 United States</option>
               <option value="uk">🇬🇧 United Kingdom</option>
@@ -106,6 +197,8 @@ export default function AddRoleForm() {
                 <label className="block text-sm font-semibold text-gray-700 mb-2">From</label>
                 <input
                   type="number"
+                  value={roleData.salaryFrom}
+                  onChange={(e) => handleInputChange('salaryFrom', e.target.value)}
                   className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="50,000"
                   min="0"
@@ -117,6 +210,8 @@ export default function AddRoleForm() {
                 <label className="block text-sm font-semibold text-gray-700 mb-2">To</label>
                 <input
                   type="number"
+                  value={roleData.salaryTo}
+                  onChange={(e) => handleInputChange('salaryTo', e.target.value)}
                   className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   placeholder="80,000"
                   min="0"
@@ -126,7 +221,11 @@ export default function AddRoleForm() {
               {/* Salary Currency */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Currency</label>
-                <select className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                <select 
+                  value={roleData.salaryCurrency}
+                  onChange={(e) => handleInputChange('salaryCurrency', e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                >
                   <option value="">..</option>
                   <option value="usd">💵 USD - US Dollar</option>
                   <option value="gbp">💷 GBP - British Pound</option>
@@ -138,7 +237,11 @@ export default function AddRoleForm() {
               {/* Salary Type */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Type</label>
-                <select className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                <select 
+                  value={roleData.salaryType}
+                  onChange={(e) => handleInputChange('salaryType', e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                >
                   <option value="">..</option>
                   <option value="annual">📅 Annual</option>
                   <option value="monthly">📆 Monthly</option>
@@ -160,6 +263,8 @@ export default function AddRoleForm() {
               <label className="block text-sm font-semibold text-gray-700 mb-2">Industry</label>
               <input
                 type="text"
+                value={roleData.industry}
+                onChange={(e) => handleInputChange('industry', e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 placeholder="e.g., Technology, Healthcare"
               />
@@ -168,7 +273,11 @@ export default function AddRoleForm() {
             {/* Months Back */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Required EXP</label>
-              <select className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+              <select 
+                value={roleData.experienceRequired}
+                onChange={(e) => handleInputChange('experienceRequired', e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              >
                 <option value="">..</option>
                 <option value="1">1+ Years</option>
                 <option value="3">3+ Years</option>
@@ -180,7 +289,11 @@ export default function AddRoleForm() {
             {/* Radius Miles */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Search Radius</label>
-              <select className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+              <select 
+                value={roleData.searchRadius}
+                onChange={(e) => handleInputChange('searchRadius', e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              >
                 <option value="">..</option>
                 <option value="5">📍 5 Miles</option>
                 <option value="10">📍 10 Miles</option>
@@ -194,7 +307,11 @@ export default function AddRoleForm() {
             {/* ACM */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">ACM Category</label>
-              <select className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+              <select 
+                value={roleData.acmCategory}
+                onChange={(e) => handleInputChange('acmCategory', e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              >
                 <option value="">..</option>
                 <option value="technical">Technical</option>
                 <option value="management">Management</option>
@@ -222,9 +339,21 @@ export default function AddRoleForm() {
         <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
           <button
             type="submit"
-            className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            disabled={isSubmitting}
+            className={`flex-1 font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+              isSubmitting
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 hover:scale-[1.02] text-white'
+            }`}
           >
-            🚀 Create Role
+            {isSubmitting ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Creating Role...
+              </span>
+            ) : (
+              '🚀 Create Role'
+            )}
           </button>
          
         </div>

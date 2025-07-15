@@ -42,19 +42,61 @@ async function getData() {
 
 export default function RolesPage() {
   const [data, setData] = useState([])
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
+  const [messageType, setMessageType] = useState('success')
 
   useEffect(() => {
     getData().then(setData)
   }, [])
 
+  const handleRoleSuccess = (message, type = 'success') => {
+    setSuccessMessage(message)
+    setMessageType(type)
+    setIsSheetOpen(false)
+    
+    // Clear message after 5 seconds
+    setTimeout(() => {
+      setSuccessMessage('')
+    }, 5000)
+  }
+
+  const closeSuccessMessage = () => {
+    setSuccessMessage('')
+  }
+
   return (
     <>
+      {/* Success Message */}
+      {successMessage && (
+        <div className={`fixed top-4 right-4 z-50 max-w-md rounded-lg border p-4 shadow-lg transition-all duration-300 ${
+          messageType === 'success' 
+            ? 'border-green-200 bg-green-50 text-green-800' 
+            : 'border-red-200 bg-red-50 text-red-800'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">
+                {messageType === 'success' ? '✅' : '❌'}
+              </span>
+              <span className="font-medium">{successMessage}</span>
+            </div>
+            <button
+              onClick={closeSuccessMessage}
+              className="ml-4 text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="container mx-auto px-4 py-8 flex flex-col items-center">
         <h1 className="mb-4 text-center text-4xl font-bold text-gray-900">
           Manage Your Roles
         </h1>
 
-        <Sheet>
+        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
             <button className="rounded-lg bg-green-600 px-6 py-2 font-semibold text-white transition-colors hover:bg-green-700">
               Add Roles
@@ -69,7 +111,7 @@ export default function RolesPage() {
             <SheetHeader className="sr-only">
               <SheetTitle>Add New Role</SheetTitle>
             </SheetHeader>
-            <AddRoleForm />
+            <AddRoleForm onSuccess={handleRoleSuccess} />
             <SheetClose className="absolute top-4 right-4" />
           </SheetContent>
         </Sheet>
