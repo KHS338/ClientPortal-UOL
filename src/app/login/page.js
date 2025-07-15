@@ -11,7 +11,7 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md my-5">
         <div className="flex justify-center">
-          <img src="/images/asset.jpg" alt="Asset" className="h-40" />
+          <img src="/images/Logoname.jpg" alt="Asset" className="h-40" />
         </div>
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
           Login
