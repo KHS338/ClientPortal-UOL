@@ -1,152 +1,296 @@
 "use client";
-import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
 
-export default function RegisterPage() {
-  const [companyName, setCompanyName] = useState("");
-  const [contactName, setContactName] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+import { useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { FiCamera } from "react-icons/fi";
+export default function ClientRegistrationPage() {
+  const [form, setForm] = useState({
+    companymail: "",
+    password:"", 
+    service: "",
+    clientNumber: "",
+    firstName: "",
+    lastName: "",
+    jobTitle: "",
+    sector: "",
+    companyName: "",
+    companyLi: "",
+    companySize: "",
+    email: "",
+    clientLi: "",
+    phone: "",
+    subscription: "",
+    credits: "",
+    creditsPerDay: "",
+    amount: "",
+    startDate: null,
+    endDate: null,
+    reminder: null,
+    avatar: null,
+
+  });
+
+  const handleChange = (e) => {
+    const { name, value, files, type } = e.target;
+    setForm((f) => ({
+      ...f,
+      [name]: type === "file" ? files[0] : value,
+    }));
+  };
+
+  const handleDate = (name, date) => {
+    setForm((f) => ({ ...f, [name]: date }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: handle registration logic (e.g., validate, call API)
-    if (password !== confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
-    console.log({ companyName, contactName, contactEmail, contactPhone, password });
+    console.log("Submitting:", form);
+    // TODO: call your API here
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
-        <div className="flex justify-center mb-6">
-          <Image
-            src="/logo.png"
-            alt="Logo"
-            width={150}
-            height={50}
-            className="object-contain"
-          />
-        </div>
-        <h2 className="text-2xl font-semibold text-gray-800 mb-2">Create Account</h2>
-        <p className="text-gray-600 mb-6">Register your company to access CRM</p>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Company Name */}
-          <div>
-            <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">
-              Company Name
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-8">
+      <div className="bg-white p-12 rounded-2xl shadow-xl w-full max-w-4xl">
+        <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-4">
+          Add New Client
+        </h2>
+        <p className="text-center text-gray-600 mb-8">
+          Fill in the details below to register your client
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Avatar Upload */}
+          <div className="flex justify-center mb-8">
+            <label className="cursor-pointer">
+              <input
+                type="file"
+                name="avatar"
+                accept="image/*"
+                className="hidden"
+                onChange={handleChange}
+              />
+              <div className="w-28 h-28 rounded-full bg-green-200 flex items-center justify-center text-gray-600 hover:bg-green-400 transition">
+                {form.avatar ? (
+                  <img
+                    src={URL.createObjectURL(form.avatar)}
+                    alt="avatar"
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  <FiCamera size={28} />
+                )}
+              </div>
             </label>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
             <input
-              id="companyName"
+              name="companymail"
               type="text"
-              required
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-              className="block w-full px-4 py-3 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="Acme Corp"
-            />
-          </div>
-
-          {/* Contact Name */}
-          <div>
-            <label htmlFor="contactName" className="block text-sm font-medium text-gray-700 mb-1">
-              Contact Name
-            </label>
+              placeholder="Email"
+              value={form.companymail}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            />    
             <input
-              id="contactName"
+              name="password"
               type="text"
-              required
-              value={contactName}
-              onChange={(e) => setContactName(e.target.value)}
-              className="block w-full px-4 py-3 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="John Doe"
-            />
-          </div>
-
-          {/* Contact Email */}
-          <div>
-            <label htmlFor="contactEmail" className="block text-sm font-medium text-gray-700 mb-1">
-              Contact Email
-            </label>
-            <input
-              id="contactEmail"
-              type="email"
-              required
-              value={contactEmail}
-              onChange={(e) => setContactEmail(e.target.value)}
-              className="block w-full px-4 py-3 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="email@company.com"
-            />
-          </div>
-
-          {/* Contact Phone */}
-          <div>
-            <label htmlFor="contactPhone" className="block text-sm font-medium text-gray-700 mb-1">
-              Contact Phone
-            </label>
-            <input
-              id="contactPhone"
-              type="tel"
-              required
-              value={contactPhone}
-              onChange={(e) => setContactPhone(e.target.value)}
-              className="block w-full px-4 py-3 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="+1 (555) 123-4567"
-            />
-          </div>
-
-          {/* Password */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="block w-full px-4 py-3 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder="Password"
-            />
-          </div>
+              value={form.companymail}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            /> 
 
-          {/* Confirm Password */}
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm Password
-            </label>
+
+            
+            <select
+              name="service"
+              value={form.service}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            >
+              <option value="" disabled>
+                Select Service
+              </option>
+              <option>Consulting</option>
+              <option>Implementation</option>
+              <option>Support</option>
+            </select>
+
             <input
-              id="confirmPassword"
-              type="password"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="block w-full px-4 py-3 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              placeholder="Confirm Password"
+              name="clientNumber"
+              type="text"
+              placeholder="Client Number"
+              value={form.clientNumber}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            />
+
+            <input
+              name="firstName"
+              type="text"
+              placeholder="First Name"
+              value={form.firstName}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            />
+            <input
+              name="lastName"
+              type="text"
+              placeholder="Last Name"
+              value={form.lastName}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            />
+
+            <input
+              name="jobTitle"
+              type="text"
+              placeholder="Job Title"
+              value={form.jobTitle}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition col-span-full"
+            />
+
+            <select
+              name="sector"
+              value={form.sector}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            >
+              <option value="" disabled>
+                Select Sector
+              </option>
+              <option>Finance</option>
+              <option>Healthcare</option>
+              <option>Education</option>
+            </select>
+
+            <input
+              name="companyName"
+              type="text"
+              placeholder="Company Name"
+              value={form.companyName}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            />
+            <input
+              name="companyLi"
+              type="text"
+              placeholder="Company LI"
+              value={form.companyLi}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            />
+
+            <select
+              name="companySize"
+              value={form.companySize}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            >
+              <option value="" disabled>
+                Select Company Size
+              </option>
+              <option>1-10</option>
+              <option>11-50</option>
+              <option>51-200</option>
+            </select>
+
+            <input
+              name="email"
+              type="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            />
+            <input
+              name="clientLi"
+              type="text"
+              placeholder="Client LI"
+              value={form.clientLi}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            />
+
+            <input
+              name="phone"
+              type="tel"
+              placeholder="Phone Number"
+              value={form.phone}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            />
+
+            <select
+              name="subscription"
+              value={form.subscription}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            >
+              <option value="" disabled>
+                Subscription Type
+              </option>
+              <option>Monthly</option>
+              <option>Yearly</option>
+            </select>
+
+            <input
+              name="credits"
+              type="number"
+              placeholder="Credits"
+              value={form.credits}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            />
+            <input
+              name="creditsPerDay"
+              type="number"
+              placeholder="Credits/Day"
+              value={form.creditsPerDay}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            />
+
+            <input
+              name="amount"
+              type="number"
+              placeholder="Amount"
+              value={form.amount}
+              onChange={handleChange}
+              className="block w-full text-black placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            />
+
+            <DatePicker
+              selected={form.startDate}
+              onChange={(d) => handleDate("startDate", d)}
+              placeholderText="Start Date"
+              className="block w-full placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            />
+            <DatePicker
+              selected={form.endDate}
+              onChange={(d) => handleDate("endDate", d)}
+              placeholderText="End Date"
+              className="block w-full placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition"
+            />
+
+            <DatePicker
+              selected={form.reminder}
+              onChange={(d) => handleDate("reminder", d)}
+              placeholderText="Reminder Date"
+              className="block w-full placeholder-gray-500 border border-green-300 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition col-span-full"
             />
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full py-3 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition"
+            className="w-full bg-green-600 text-white py-4 rounded-lg hover:bg-green-700 transition-transform transform hover:scale-105"
           >
-            Sign Up
+            Add Client
           </button>
         </form>
-
-        <p className="text-center text-sm text-gray-600 mt-6">
-          Already have an account?{' '}
-          <Link href="/login" className="text-green-600 hover:underline">
-            Sign In
-          </Link>
-        </p>
       </div>
     </div>
   );
