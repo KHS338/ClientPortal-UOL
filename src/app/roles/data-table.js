@@ -1,19 +1,20 @@
+// app/roles/data-table.js
 "use client"
 
 import React from "react"
 import {
+  useReactTable,
   flexRender,
   getCoreRowModel,
-  useReactTable,
 } from "@tanstack/react-table"
 
 import {
   Table,
-  TableBody,
-  TableCell,
-  TableHead,
   TableHeader,
+  TableBody,
   TableRow,
+  TableHead,
+  TableCell,
 } from "@/components/ui/table"
 
 export function DataTable({ columns, data }) {
@@ -24,12 +25,12 @@ export function DataTable({ columns, data }) {
   })
 
   return (
-    <div className="rounded-md border">
+    <div className="w-full overflow-x-auto rounded-md border">
       <Table>
         <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
+          {table.getHeaderGroups().map((hg) => (
+            <TableRow key={hg.id}>
+              {hg.headers.map((header) => (
                 <TableHead key={header.id}>
                   {header.isPlaceholder
                     ? null

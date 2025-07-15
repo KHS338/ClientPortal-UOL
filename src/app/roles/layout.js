@@ -1,19 +1,22 @@
-// app/roles/layout.js
-"use client"
-
+// app/dashboard/layout.js
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 
-export default function Layout({ children }) {
+export default function DashboardLayout({ children }) {
   return (
     <SidebarProvider>
-      <div className="flex">
-        <AppSidebar />
-        <main className="flex-1 pl-4">
+      <AppSidebar />
+      <main className="flex-1 min-w-0 w-full">
+        <div className="sm:hidden p-2">
           <SidebarTrigger />
+        </div>
+        <div className="hidden sm:block p-2">
+          <SidebarTrigger />
+        </div>
+        <div className="w-full overflow-x-auto">
           {children}
-        </main>
-      </div>
+        </div>
+      </main>
     </SidebarProvider>
   )
 }

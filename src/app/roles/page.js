@@ -1,3 +1,4 @@
+// app/roles/page.js
 "use client"
 
 import { useState, useEffect } from "react"
@@ -60,35 +61,39 @@ export default function RolesPage() {
             </button>
           </SheetTrigger>
 
-          <SheetContent side="right" className="w-[420px] sm:w-[480px]">
-            <SheetHeader>
-              <SheetTitle>Add a new role</SheetTitle>
+          <SheetContent
+            side="right"
+            size="full"                     
+            className="sm:max-w-[480px] sm:rounded-l-lg"
+          >
+            <SheetHeader className="sr-only">
+              <SheetTitle>Add New Role</SheetTitle>
             </SheetHeader>
-
             <AddRoleForm />
+            <SheetClose className="absolute top-4 right-4" />
           </SheetContent>
         </Sheet>
       </div>
 
       <section className="container mx-auto px-4 py-10">
-          <div className="mb-6 rounded-lg bg-gray-100 px-6 py-4">
-            <h2 className="text-3xl font-bold text-gray-900">CV Sourcing</h2>
-          </div>
-          <DataTable columns={columns} data={data} />
+        <div className="mb-6 rounded-lg bg-gray-100 px-6 py-4">
+          <h2 className="text-3xl font-bold text-gray-900">CV Sourcing</h2>
+        </div>
+        <DataTable columns={columns} data={data} />
       </section>
 
       <section className="container mx-auto px-4 py-10">
-          <div className="mb-6 rounded-lg bg-gray-100 px-6 py-4">
-            <h2 className="text-3xl font-bold text-gray-900">Pre Qualificaiton</h2>
-          </div>
-          <DataTable columns={columns} data={data} />
+        <div className="mb-6 rounded-lg bg-gray-100 px-6 py-4">
+          <h2 className="text-3xl font-bold text-gray-900">Pre Qualification</h2>
+        </div>
+        <DataTable columns={columns} data={data} />
       </section>
 
-      <section  className="container mx-auto px-4 py-10">
-          <div className="mb-6 rounded-lg bg-gray-100 px-6 py-4">
-            <h2 className="text-3xl font-bold text-gray-900">360/Direct</h2>
-          </div>
-          <DataTable columns={columns} data={data} />
+      <section className="container mx-auto px-4 py-10">
+        <div className="mb-6 rounded-lg bg-gray-100 px-6 py-4">
+          <h2 className="text-3xl font-bold text-gray-900">360/Direct</h2>
+        </div>
+        <DataTable columns={columns} data={data} />
       </section>
     </>
   )
