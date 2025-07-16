@@ -18,4 +18,29 @@ export const columns = [
   { accessorKey: "rejectedCvs",    header: "Rejected CVs" },
   { accessorKey: "rejectedLis",    header: "Rejected LIs" },
   { accessorKey: "rCandidates",    header: "R Candidates" },
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => {
+      const role = row.original;
+      return (
+        <div className="flex gap-2">
+          <button
+            onClick={() => window.handleEditRole?.(role)}
+            className="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-700"
+            title="Edit Role"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => window.handleDeleteRole?.(role)}
+            className="rounded bg-red-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-red-700"
+            title="Delete Role"
+          >
+            Delete
+          </button>
+        </div>
+      );
+    },
+  },
 ]
