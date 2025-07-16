@@ -164,7 +164,7 @@ export default function RolesPage() {
               Delete Role
             </h3>
             <p className="mb-6 text-gray-600">
-              Are you sure you want to delete the role "{roleToDelete?.role}"? This action cannot be undone.
+              Are you sure you want to delete the role &quot;{roleToDelete?.role}&quot;? This action cannot be undone.
             </p>
             <div className="flex gap-3">
               <button

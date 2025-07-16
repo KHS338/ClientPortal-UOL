@@ -1,6 +1,7 @@
 "use client";
  
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { FiMail, FiLock, FiEye, FiEyeOff, FiUser, FiArrowRight } from "react-icons/fi";
 import { motion } from "framer-motion";
@@ -51,7 +52,7 @@ export default function LoginPage() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="flex justify-center mb-6"
               >
-                <img src="/images/Logoname.jpg" alt="Company Logo" className="h-24 md:h-32 object-contain" />
+                <Image src="/images/Logoname.jpg" alt="Company Logo" width={128} height={128} className="h-24 md:h-32 object-contain" />
               </motion.div>
               <motion.h1
                 initial={{ opacity: 0 }}
@@ -171,7 +172,7 @@ export default function LoginPage() {
               className="mt-8 text-center"
             >
               <p className="text-gray-600">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link
                   href="/registration"
                   className="text-[#19AF1A] hover:text-[#158A15] font-semibold transition-colors duration-300 hover:underline"
