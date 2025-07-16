@@ -1,5 +1,13 @@
-import { UserCircleIcon,CircleDollarSign,LaptopMinimalCheck,Calendar, Home, Inbox, Search, Settings, DollarSignIcon, User } from "lucide-react"
- 
+"use client";
+
+import { useState } from "react";
+import {
+  UserCircleIcon,
+  CircleDollarSign,
+  LaptopMinimalCheck,
+  Home,
+} from "lucide-react";
+
 import {
   Sidebar,
   SidebarContent,
@@ -9,9 +17,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
- 
-// Menu items.
+} from "@/components/ui/sidebar";
+
 const items = [
   {
     title: "Dashboard",
@@ -46,10 +53,17 @@ const items = [
     url: "/profile",
     icon: UserCircleIcon,
   },
-]
+];
 
 export function AppSidebar() {
-  const [openMenu, setOpenMenu] = useState(null)
+  const [openSubmenus, setOpenSubmenus] = useState({});
+
+  const toggleSubmenu = (title) => {
+    setOpenSubmenus((prev) => ({
+      ...prev,
+      [title]: !prev[title],
+    }));
+  };
 
   return (
     <Sidebar>
@@ -59,22 +73,50 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a
-                      href={item.url}
-                      className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300 ease-in-out hover:bg-gradient-to-r hover:from-[#158A15] hover:to-[#0F6B0F] hover:text-white hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#19AF1A] focus:ring-offset-2"
-                    >
-                      <item.icon className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
-                      <span className="transition-all duration-200">{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <div key={item.title}>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      {item.submenu ? (
+                        <button
+                          onClick={() => toggleSubmenu(item.title)}
+                          className="w-full text-left group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300 ease-in-out hover:bg-gradient-to-r hover:from-[#158A15] hover:to-[#0F6B0F] hover:text-white hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#19AF1A] focus:ring-offset-2"
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <span>{item.title}</span>
+                        </button>
+                      ) : (
+                        <a
+                          href={item.url}
+                          className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300 ease-in-out hover:bg-gradient-to-r hover:from-[#158A15] hover:to-[#0F6B0F] hover:text-white hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#19AF1A] focus:ring-offset-2"
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <span>{item.title}</span>
+                        </a>
+                      )}
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+
+                  {/* ✅ Submenu rendering */}
+                  {item.submenu && openSubmenus[item.title] && (
+                    <div className="ml-8 mt-1 space-y-1">
+                      {item.submenu.map((sub) => (
+                        <a
+                          key={sub.title}
+                          href={sub.url}
+                          className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-[#158A15] hover:to-[#0F6B0F] hover:text-white hover:shadow-md transition-all duration-300 ease-in-out"
+                        >
+                          {sub.title}
+                        </a>
+
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }
