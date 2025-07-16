@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import { FiCamera, FiEdit3, FiSave, FiUser, FiBriefcase, FiMail, FiPhone, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiCalendar } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -129,8 +130,10 @@ export default function ClientProfilePage({ initial = {} }) {
                     <div className="mx-auto">
                       <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-white shadow-xl">
                         <img
-                          src={form.avatar ? URL.createObjectURL(form.avatar) : "/images/profile.png"}
+                          src={form.avatar ? URL.createObjectURL(form.avatar) : "/default-avatar.png"}
                           alt="Profile"
+                          width={128}
+                          height={128}
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -369,7 +372,7 @@ export default function ClientProfilePage({ initial = {} }) {
                             <p className="text-4xl font-bold text-transparent bg-[#1a84de] bg-clip-text mb-4">
                               Custom Pricing
                             </p>
-                            <p className="text-lg text-gray-500 font-medium">Tailored to your organization's needs</p>
+                            <p className="text-lg text-gray-500 font-medium">Tailored to your organization&apos;s needs</p>
                           </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">

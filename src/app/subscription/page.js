@@ -142,7 +142,7 @@ export default function SubscriptionPage() {
                     <p className="text-4xl font-bold text-transparent bg-gradient-to-r from-[#19AF1A] to-[#158A15] bg-clip-text mb-4">
                       Custom Pricing
                     </p>
-                    <p className="text-lg text-gray-500 font-medium">Tailored to your organization's needs</p>
+                    <p className="text-lg text-gray-500 font-medium">Tailored to your organization&apos;s needs</p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">

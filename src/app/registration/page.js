@@ -1,6 +1,7 @@
 "use client";
  
 import { useState, useRef } from "react";
+import Image from "next/image";
 import { FiCamera, FiEye, FiEyeOff, FiUser, FiBriefcase, FiMail, FiPhone, FiLock } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
@@ -75,7 +76,7 @@ export default function ClientRegistrationPage() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="flex justify-center mb-6"
               >
-                <img src="/images/Logoname.jpg" alt="Company Logo" className="h-32 md:h-40 object-contain" />
+                <Image src="/images/Logoname.jpg" alt="Company Logo" width={160} height={160} className="h-32 md:h-40 object-contain" />
               </motion.div>
               <motion.h1
                 initial={{ opacity: 0 }}
@@ -109,9 +110,11 @@ export default function ClientRegistrationPage() {
                     className="w-32 h-32 rounded-full bg-gradient-to-br from-[#19AF1A] to-[#158A15] flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-105 border-4 border-white shadow-xl"
                   >
                     {form.avatar ? (
-                      <img
+                      <Image
                         src={URL.createObjectURL(form.avatar)}
                         alt="avatar"
+                        width={128}
+                        height={128}
                         className="w-full h-full object-cover rounded-full"
                       />
                     ) : (
