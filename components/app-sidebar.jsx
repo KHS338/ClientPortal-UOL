@@ -1,13 +1,5 @@
-"use client";
-
-import { useState } from "react";
-import {
-  UserCircleIcon,
-  CircleDollarSign,
-  LaptopMinimalCheck,
-  Home,
-} from "lucide-react";
-
+import { UserCircleIcon,CircleDollarSign,LaptopMinimalCheck,Calendar, Home, Inbox, Search, Settings, DollarSignIcon, User } from "lucide-react"
+ 
 import {
   Sidebar,
   SidebarContent,
@@ -17,37 +9,30 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
-
+} from "@/components/ui/sidebar"
+ 
+// Menu items.
 const items = [
   {
     title: "Dashboard",
-    url: "/dashboard",
+    url: "#",
     icon: Home,
   },
   {
     title: "Manage Roles",
+    url: "/roles",
     icon: LaptopMinimalCheck,
-    submenu: [
-      {
-        title: "CV Sourcing",
-        url: "/roles/cvSourcing",
-      },
-      {
-        title: "PreQualification",
-        url: "/roles/PreQualification",
-      },
-      {
-        title: "360/Direct",
-        url: "/roles/360Direct",
-      },
-    ],
   },
   {
     title: "Invoices",
     url: "/invoice",
     icon: CircleDollarSign,
   },
+//   {
+//     title: "Search",
+//     url: "#",
+//     icon: Search,
+//   },
   {
     title: "Profile",
     url: "/profile",
@@ -56,14 +41,7 @@ const items = [
 ];
 
 export function AppSidebar() {
-  const [openSubmenus, setOpenSubmenus] = useState({});
-
-  const toggleSubmenu = (title) => {
-    setOpenSubmenus((prev) => ({
-      ...prev,
-      [title]: !prev[title],
-    }));
-  };
+  const [openMenu, setOpenMenu] = useState(null)
 
   return (
     <Sidebar>
@@ -73,45 +51,17 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <div key={item.title}>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      {item.submenu ? (
-                        <button
-                          onClick={() => toggleSubmenu(item.title)}
-                          className="w-full text-left group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300 ease-in-out hover:bg-gradient-to-r hover:from-[#158A15] hover:to-[#0F6B0F] hover:text-white hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#19AF1A] focus:ring-offset-2"
-                        >
-                          <item.icon className="h-5 w-5" />
-                          <span>{item.title}</span>
-                        </button>
-                      ) : (
-                        <a
-                          href={item.url}
-                          className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300 ease-in-out hover:bg-gradient-to-r hover:from-[#158A15] hover:to-[#0F6B0F] hover:text-white hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#19AF1A] focus:ring-offset-2"
-                        >
-                          <item.icon className="h-5 w-5" />
-                          <span>{item.title}</span>
-                        </a>
-                      )}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-
-                  {/* ✅ Submenu rendering */}
-                  {item.submenu && openSubmenus[item.title] && (
-                    <div className="ml-8 mt-1 space-y-1">
-                      {item.submenu.map((sub) => (
-                        <a
-                          key={sub.title}
-                          href={sub.url}
-                          className="group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gradient-to-r hover:from-[#158A15] hover:to-[#0F6B0F] hover:text-white hover:shadow-md transition-all duration-300 ease-in-out"
-                        >
-                          {sub.title}
-                        </a>
-
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <a
+                      href={item.url}
+                      className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300 ease-in-out hover:bg-gradient-to-r hover:from-[#158A15] hover:to-[#0F6B0F] hover:text-white hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#19AF1A] focus:ring-offset-2"
+                    >
+                      <item.icon className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
+                      <span className="transition-all duration-200">{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>

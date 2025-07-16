@@ -207,6 +207,21 @@ export default function RolesPage() {
           </SheetContent>
         </Sheet>
       </div>
+
+      <section className="container mx-auto px-4 py-10">
+        <div className="mb-6 rounded-lg bg-gray-100 px-6 py-4">
+          <h2 className="text-3xl font-bold text-gray-900">CV Sourcing</h2>
+        </div>
+        <DataTable columns={columns} data={data} />
+      </section>
+
+      <section className="container mx-auto px-4 py-10">
+        <div className="mb-6 rounded-lg bg-gray-100 px-6 py-4">
+          <h2 className="text-3xl font-bold text-gray-900">Pre Qualification</h2>
+        </div>
+        <DataTable columns={columns} data={data} />
+      </section>
+
       <section className="container mx-auto px-4 py-10">
         <div className="mb-6 rounded-lg bg-gray-100 px-6 py-4">
           <h2 className="text-3xl font-bold text-gray-900">360/Direct</h2>
