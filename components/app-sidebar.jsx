@@ -82,18 +82,18 @@ export function AppSidebar() {
                 {items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     {item.submenu ? (
-                      <SidebarMenuButton className="group flex items-center justify-between w-full rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300 ease-in-out hover:bg-gradient-to-r hover:from-[#158A15] hover:to-[#0F6B0F] hover:text-white hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#19AF1A] focus:ring-offset-2">
+                      <SidebarMenuButton className="group flex items-center justify-between w-full rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300 ease-in-out hover:bg-gradient-to-r hover:from-[#1a84de] hover:to-[#1a84de] hover:text-white hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#1a84de] focus:ring-offset-2">
                         <div className="flex items-center gap-2">
                           <item.icon className="h-5 w-5" />
                           <span>{item.title}</span>
                         </div>
-                        <span className="min-w-[16px] text-right">▶</span>
+                        <span className="min-w-[16px] text-right">=</span>
                       </SidebarMenuButton>
                     ) : (
                       <SidebarMenuButton asChild>
                         <a
                           href={item.url}
-                          className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300 ease-in-out hover:bg-gradient-to-r hover:from-[#158A15] hover:to-[#0F6B0F] hover:text-white hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#19AF1A] focus:ring-offset-2"
+                          className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300 ease-in-out hover:bg-gradient-to-r hover:from-[#1a84de] hover:to-[#1a84de] hover:text-white hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#1a84de] focus:ring-offset-2"
                         >
                           <item.icon className="h-5 w-5" />
                           <span>{item.title}</span>
@@ -128,7 +128,7 @@ export function AppSidebar() {
                         onClick={() =>
                           setOpenMenu(openMenu === item.title ? null : item.title)
                         }
-                        className="group relative w-full rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-gradient-to-r hover:from-[#19AF1A] hover:to-[#158A15] hover:text-white text-gray-700"
+                        className="group relative w-full rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-gradient-to-r hover:from-[#1a84de] hover:to-[#1a84de] hover:text-white text-gray-700"
                       >
                         <div className="flex items-center justify-between w-full">
                           <div className="flex items-center gap-3">
@@ -145,7 +145,7 @@ export function AppSidebar() {
                       <SidebarMenuButton asChild>
                         <Link
                           href={item.url}
-                          className="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-gradient-to-r hover:from-[#19AF1A] hover:to-[#158A15] hover:text-white text-gray-700"
+                          className="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-gradient-to-r hover:from-[#1a84de] hover:to-[#1a84de] hover:text-white text-gray-700"
                         >
                           <item.icon className="h-5 w-5 flex-shrink-0" />
                           <span className="truncate">{item.title}</span>
@@ -162,7 +162,7 @@ export function AppSidebar() {
                           <SidebarMenuButton asChild>
                             <Link
                               href={sub.url}
-                              className="group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-gradient-to-r hover:from-[#19AF1A] hover:to-[#158A15] hover:text-white text-gray-600"
+                              className="group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-gradient-to-r hover:from-[#1a84de] hover:to-[#1a84de] hover:text-white text-gray-600"
                             >
                               <span className="w-6 text-center text-gray-400 group-hover:text-white">
                                 •

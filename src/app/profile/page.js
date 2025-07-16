@@ -101,8 +101,8 @@ export default function ClientProfilePage({ initial = {} }) {
     }
   ];
 
-  const primary = "#19AF1A";
-  const primaryDark = "#158A15";
+  const primary = "#1a84de";
+  const primaryDark = "#06398e";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50">
@@ -121,7 +121,7 @@ export default function ClientProfilePage({ initial = {} }) {
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
             {/* Left Column - Profile Card */}
             <div className="xl:col-span-4">
-              <Card className="p-8 bg-gradient-to-br from-[#19AF1A] to-[#158A15] text-white shadow-2xl border-0 flex flex-col h-full">
+              <Card className="p-8 bg-gradient-to-br from-[#1a84de] to-[#1a84de] text-white shadow-2xl border-0 flex flex-col h-full">
                 <div className="text-center flex-1 flex flex-col justify-center">
                   {/* Avatar and User Info - Centered */}
                   <div className="space-y-6">
@@ -129,7 +129,7 @@ export default function ClientProfilePage({ initial = {} }) {
                     <div className="mx-auto">
                       <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-white shadow-xl">
                         <img
-                          src={form.avatar ? URL.createObjectURL(form.avatar) : "/default-avatar.png"}
+                          src={form.avatar ? URL.createObjectURL(form.avatar) : "/images/profile.png"}
                           alt="Profile"
                           className="w-full h-full object-cover"
                         />
@@ -138,7 +138,7 @@ export default function ClientProfilePage({ initial = {} }) {
                         onClick={() => fileRef.current?.click()}
                         className="mx-auto mt-4 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 group flex"
                       >
-                        <FiCamera size={18} className="text-[#19AF1A] group-hover:scale-110 transition-transform" />
+                        <FiCamera size={18} className="text-[#1a84de] group-hover:scale-110 transition-transform" />
                         <input
                           type="file"
                           name="avatar"
@@ -179,14 +179,14 @@ export default function ClientProfilePage({ initial = {} }) {
                 <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border-0">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-                      <FiUser className="text-[#19AF1A]" />
+                      <FiUser className="text-black]" />
                       Profile Information
                     </h3>
                     <Button
                       type="button"
                       onClick={() => setIsEditing(!isEditing)}
                       variant="outline"
-                      className="flex items-center gap-2 border-[#19AF1A] text-[#19AF1A] hover:bg-[#19AF1A] hover:text-white transition-all duration-300"
+                      className="flex items-center gap-2 border-[#0958d9] text-[#0958d9] hover:bg-[#24AC4A] hover:text-white transition-all duration-300"
                     >
                       {isEditing ? <FiSave size={16} /> : <FiEdit3 size={16} />}
                       {isEditing ? "Cancel" : "Edit"}
@@ -269,7 +269,7 @@ export default function ClientProfilePage({ initial = {} }) {
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-8 text-gray-500 hover:text-gray-700 transition"
+                          className="absolute right-3 top-10 text-gray-500 contnent-center hover:text-gray-700 transition"
                         >
                           {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
                         </button>
@@ -290,7 +290,7 @@ export default function ClientProfilePage({ initial = {} }) {
                       <Button
                         type="submit"
                         disabled={isLoading}
-                        className="px-8 py-2 bg-gradient-to-r from-[#19AF1A] to-[#158A15] hover:from-[#158A15] hover:to-[#0F6B0F] text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                        className="px-8 py-2  bg-[#0958d9]  hover:bg-[#24AC4A] text-white shadow-lg hover:shadow-xl transition-all hover:ease-in-out duration-300 hover:-translate-y-1 hover:scale-[1.02]"
                       >
                         {isLoading ? (
                           <div className="flex items-center space-x-2">
@@ -313,7 +313,7 @@ export default function ClientProfilePage({ initial = {} }) {
             <form onSubmit={handleSubmit}>
                 <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border-0">
                   <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-                    <FiCheckCircle className="text-[#19AF1A]" />
+                    <FiCheckCircle className="text-[#0958d9]" />
                     Subscription & Services
                   </h3>
                   
@@ -324,7 +324,7 @@ export default function ClientProfilePage({ initial = {} }) {
                         onClick={() => setBillingCycle("monthly")}
                         className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
                           billingCycle === "monthly"
-                            ? "bg-[#19AF1A] text-white shadow-md"
+                            ? "bg-[#0958d9] hover:bg-[#24AC4A] text-white shadow-md"
                             : "text-gray-600 hover:text-gray-800"
                         }`}
                       >
@@ -334,7 +334,7 @@ export default function ClientProfilePage({ initial = {} }) {
                         onClick={() => setBillingCycle("annual")}
                         className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
                           billingCycle === "annual"
-                            ? "bg-[#19AF1A] text-white shadow-md"
+                            ? "bg-[#0958d9] hover:bg-[#24AC4A] text-white shadow-md"
                             : "text-gray-600 hover:text-gray-800"
                         }`}
                       >
@@ -344,7 +344,7 @@ export default function ClientProfilePage({ initial = {} }) {
                         onClick={() => setBillingCycle("enterprise")}
                         className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
                           billingCycle === "enterprise"
-                            ? "bg-gradient-to-r from-[#19AF1A] to-[#158A15] text-white shadow-md"
+                            ? "bg-[#0958d9] hover:bg-[#24AC4A] text-white shadow-md"
                             : "text-gray-600 hover:text-gray-800"
                         }`}
                       >
@@ -356,9 +356,9 @@ export default function ClientProfilePage({ initial = {} }) {
                   {billingCycle === "enterprise" ? (
                     /* Enterprise Solutions Display */
                     <div className="max-w-4xl mx-auto">
-                      <div className="relative p-8 rounded-2xl border-2 border-[#19AF1A] bg-white shadow-2xl">
+                      <div className="relative p-8 rounded-2xl border-2 border-[#0958d9] bg-white shadow-2xl">
                         <div className="text-center">
-                          <h4 className="text-3xl font-bold text-transparent bg-gradient-to-r from-[#19AF1A] to-[#158A15] bg-clip-text mb-4">
+                          <h4 className="text-3xl font-bold text-transparent bg-[#1a84de] bg-clip-text mb-4">
                             Enterprise Plan
                           </h4>
                           <p className="text-lg text-gray-600 mb-6">
@@ -366,7 +366,7 @@ export default function ClientProfilePage({ initial = {} }) {
                           </p>
                           
                           <div className="mb-8">
-                            <p className="text-4xl font-bold text-transparent bg-gradient-to-r from-[#19AF1A] to-[#158A15] bg-clip-text mb-4">
+                            <p className="text-4xl font-bold text-transparent bg-[#1a84de] bg-clip-text mb-4">
                               Custom Pricing
                             </p>
                             <p className="text-lg text-gray-500 font-medium">Tailored to your organization's needs</p>
@@ -387,7 +387,7 @@ export default function ClientProfilePage({ initial = {} }) {
                                 key={index} 
                                 className="flex items-center gap-3 bg-white/70 rounded-lg px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-white/90"
                               >
-                                <FiCheckCircle className="text-[#19AF1A] flex-shrink-0" size={18} />
+                                <FiCheckCircle className="text-[#0958d9] flex-shrink-0" size={18} />
                                 <span className="font-medium text-gray-700">{feature}</span>
                               </div>
                             ))}
@@ -395,12 +395,12 @@ export default function ClientProfilePage({ initial = {} }) {
 
                           <Button
                             onClick={() => console.log("Enterprise quotation requested")}
-                            className="w-full md:w-auto px-12 py-4 text-lg bg-gradient-to-r from-[#19AF1A] to-[#158A15] hover:from-[#158A15] hover:to-[#0F6B0F] text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
+                            className="w-full md:w-auto px-12 py-4 text-lg bg-[#1a84de] hover:from-[#06398e] hover:bg-[#24AC4A] text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
                           >
                             Get Custom Quote
                           </Button>
 
-                          <div className="mt-6 p-4 bg-gradient-to-r from-[#19AF1A]/10 to-[#158A15]/10 rounded-xl border border-[#19AF1A]/20">
+                          <div className="mt-6 p-4 bg-gradient-to-r from-[#0958d9]/10 to-[#06398e]/10 rounded-xl border border-[#0958d9]/20">
                             <p className="text-sm text-gray-600">
                               <strong>Ready to scale?</strong> Our enterprise solutions are designed for organizations with complex requirements. 
                               Contact our sales team for a personalized demo and custom pricing.
@@ -421,12 +421,12 @@ export default function ClientProfilePage({ initial = {} }) {
                             key={service.title}
                             className={`relative p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col ${
                               isCurrentPlan
-                                ? "border-[#19AF1A] bg-gradient-to-br from-[#19AF1A]/10 to-[#158A15]/10 shadow-xl"
-                                : "border-gray-200 bg-white hover:border-[#19AF1A]/50 hover:shadow-lg"
+                                ? "border-[#0958d9] bg-gradient-to-br from-[#0958d9]/10 to-[#06398e]/10 shadow-xl"
+                                : "border-gray-200 bg-white hover:border-[#0958d9]/50 hover:shadow-lg"
                             }`}
                           >
                             {isCurrentPlan && (
-                              <div className="absolute -top-3 right-6 bg-[#19AF1A] text-white px-4 py-1 rounded-full text-sm font-medium">
+                              <div className="absolute -top-3 right-6 bg-[#0958d9] text-white px-4 py-1 rounded-full text-sm font-medium">
                                 Current Plan
                               </div>
                             )}
@@ -437,16 +437,16 @@ export default function ClientProfilePage({ initial = {} }) {
                                 <p className="text-sm text-gray-600 mb-4">{service.description}</p>
                                 
                                 <div className="mb-4">
-                                  <p className="text-4xl font-bold text-[#19AF1A] mb-1">{currentPlan.price}</p>
+                                  <p className="text-4xl font-bold text-[#0958d9] mb-1">{currentPlan.price}</p>
                                   {billingCycle === "annual" && service.annual.savings && (
-                                    <p className="text-sm text-green-600 font-medium">{service.annual.savings}</p>
+                                    <p className="text-sm text-[#1a84de] font-medium">{service.annual.savings}</p>
                                   )}
                                 </div>
 
                                 <ul className="space-y-3 text-sm text-gray-600 mb-6">
                                   {service.features.map((feature, featureIndex) => (
                                     <li key={featureIndex} className="flex items-center gap-2">
-                                      <FiCheckCircle className="text-[#19AF1A] flex-shrink-0" size={16} />
+                                      <FiCheckCircle className="text-[#0958d9] flex-shrink-0" size={16} />
                                       <span>{feature}</span>
                                     </li>
                                   ))}
@@ -463,7 +463,7 @@ export default function ClientProfilePage({ initial = {} }) {
                                 className={`w-full transition-all duration-300 mt-auto ${
                                   isCurrentPlan
                                     ? "bg-gray-100 text-gray-500 cursor-default"
-                                    : "bg-gradient-to-r from-[#19AF1A] to-[#158A15] hover:from-[#158A15] hover:to-[#0F6B0F] text-white"
+                                    : "bg-[#1a84de] hover:from-[#06398e] hover:bg-[#24AC4A] text-white"
                                 }`}
                                 disabled={isCurrentPlan}
                               >
@@ -477,10 +477,10 @@ export default function ClientProfilePage({ initial = {} }) {
                   )}
 
                   {/* Current Plan Summary */}
-                  <div className="mt-8 p-6 bg-gradient-to-r from-[#19AF1A]/10 to-[#158A15]/10 rounded-xl border border-[#19AF1A]/20">
+                  <div className="mt-8 p-6 bg-gradient-to-r from-[#0958d9]/10 to-[#06398e]/10 rounded-xl border border-[#0958d9]/20">
                     <h4 className="font-semibold text-gray-800 mb-2">Current Subscription</h4>
                     <p className="text-gray-600">
-                      You are currently subscribed to <span className="font-semibold text-[#19AF1A]">{form.currentService}</span> 
+                      You are currently subscribed to <span className="font-semibold text-[#0958d9]">{form.currentService}</span> 
                       {" "}({billingCycle === "monthly" ? "Monthly" : "Annual"} billing)
                     </p>
                   </div>
@@ -512,10 +512,10 @@ function InputField({ label, name, type = "text", value, onChange, icon, disable
           onChange={onChange}
           disabled={disabled}
           placeholder={placeholder}
-          className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#19AF1A] focus:border-transparent transition-all duration-300 ${
+          className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0958d9] focus:border-transparent transition-all duration-300 ${
             disabled 
               ? "bg-gray-50 text-gray-500 cursor-not-allowed" 
-              : "bg-white hover:border-[#19AF1A]/50"
+              : "bg-white hover:border-[#0958d9]/50"
           } ${className}`}
         />
       </div>
@@ -539,10 +539,10 @@ function SelectField({ label, name, value, onChange, options, icon, disabled = f
           value={value}
           onChange={onChange}
           disabled={disabled}
-          className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#19AF1A] focus:border-transparent transition-all duration-300 appearance-none cursor-pointer ${
+          className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0958d9] focus:border-transparent transition-all duration-300 appearance-none cursor-pointer ${
             disabled 
               ? "bg-gray-50 text-gray-500 cursor-not-allowed" 
-              : "bg-white hover:border-[#19AF1A]/50"
+              : "bg-white hover:border-[#0958d9]/50"
           } ${className}`}
         >
           <option value="" disabled>
