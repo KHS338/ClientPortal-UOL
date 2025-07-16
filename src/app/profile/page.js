@@ -2,7 +2,6 @@
 
 import { useState, useRef } from "react";
 import { FiCamera, FiEdit3, FiSave, FiUser, FiBriefcase, FiMail, FiPhone, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiCalendar } from "react-icons/fi";
-import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -108,40 +107,20 @@ export default function ClientProfilePage({ initial = {} }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50">
       <div className="max-w-7xl mx-auto p-6 lg:p-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="space-y-8"
-        >
+        <div className="space-y-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <motion.h1
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-4xl font-bold text-gray-800 mb-2"
-            >
+            <h1 className="text-4xl font-bold text-gray-800 mb-2">
               My Profile
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="text-lg text-gray-600"
-            >
+            </h1>
+            <p className="text-lg text-gray-600">
               Manage your account settings and preferences
-            </motion.p>
+            </p>
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
             {/* Left Column - Profile Card */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              className="xl:col-span-4"
-            >
+            <div className="xl:col-span-4">
               <Card className="p-8 bg-gradient-to-br from-[#19AF1A] to-[#158A15] text-white shadow-2xl border-0 flex flex-col h-full">
                 <div className="text-center flex-1 flex flex-col justify-center">
                   {/* Avatar and User Info - Centered */}
@@ -191,15 +170,10 @@ export default function ClientProfilePage({ initial = {} }) {
                   </div>
                 </div>
               </Card>
-            </motion.div>
+            </div>
 
             {/* Right Column - Form */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.8 }}
-              className="xl:col-span-8"
-            >
+            <div className="xl:col-span-8">
               <div className="space-y-8">
                 {/* Profile Information */}
                 <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border-0">
@@ -304,12 +278,7 @@ export default function ClientProfilePage({ initial = {} }) {
                   </div>
 
                   {isEditing && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="mt-8 flex justify-end space-x-4"
-                    >
+                    <div className="mt-8 flex justify-end space-x-4">
                       <Button
                         type="button"
                         onClick={() => setIsEditing(false)}
@@ -332,19 +301,15 @@ export default function ClientProfilePage({ initial = {} }) {
                           "Save Changes"
                         )}
                       </Button>
-                    </motion.div>
+                    </div>
                   )}
                 </Card>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           {/* Subscription & Billing - Full Width */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 1.0 }}
-          >
+          <div>
             <form onSubmit={handleSubmit}>
                 <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border-0">
                   <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
@@ -391,14 +356,7 @@ export default function ClientProfilePage({ initial = {} }) {
                   {billingCycle === "enterprise" ? (
                     /* Enterprise Solutions Display */
                     <div className="max-w-4xl mx-auto">
-                      <motion.div
-                        key="enterprise"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.5 }}
-                        className="relative p-8 rounded-2xl border-2 border-[#19AF1A] bg-white shadow-2xl"
-                      >
+                      <div className="relative p-8 rounded-2xl border-2 border-[#19AF1A] bg-white shadow-2xl">
                         <div className="text-center">
                           <h4 className="text-3xl font-bold text-transparent bg-gradient-to-r from-[#19AF1A] to-[#158A15] bg-clip-text mb-4">
                             Enterprise Plan
@@ -449,27 +407,18 @@ export default function ClientProfilePage({ initial = {} }) {
                             </p>
                           </div>
                         </div>
-                      </motion.div>
+                      </div>
                     </div>
                   ) : (
                     /* Regular Plans Display */
-                    <motion.div 
-                      key="regular-plans" 
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4 }}
-                      className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"
-                    >
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                       {billingOptions.filter(service => !service.isEnterprise).map((service, index) => {
                         const currentPlan = billingCycle === "monthly" ? service.monthly : service.annual;
                         const isCurrentPlan = form.currentPlan === currentPlan.key;
                         
                         return (
-                          <motion.div
+                          <div
                             key={service.title}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: index * 0.1 }}
                             className={`relative p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col ${
                               isCurrentPlan
                                 ? "border-[#19AF1A] bg-gradient-to-br from-[#19AF1A]/10 to-[#158A15]/10 shadow-xl"
@@ -521,24 +470,24 @@ export default function ClientProfilePage({ initial = {} }) {
                                 {isCurrentPlan ? "Current Plan" : "Switch to This Plan"}
                               </Button>
                             </div>
-                          </motion.div>
+                          </div>
                         );
                       })}
-                    </motion.div>
+                    </div>
                   )}
 
                   {/* Current Plan Summary */}
-              <div className="mt-8 p-6 bg-gradient-to-r from-[#19AF1A]/10 to-[#158A15]/10 rounded-xl border border-[#19AF1A]/20">
-                <h4 className="font-semibold text-gray-800 mb-2">Current Subscription</h4>
-                <p className="text-gray-600">
-                  You are currently subscribed to <span className="font-semibold text-[#19AF1A]">{form.currentService}</span> 
-                  {" "}({billingCycle === "monthly" ? "Monthly" : "Annual"} billing)
-                </p>
-              </div>
+                  <div className="mt-8 p-6 bg-gradient-to-r from-[#19AF1A]/10 to-[#158A15]/10 rounded-xl border border-[#19AF1A]/20">
+                    <h4 className="font-semibold text-gray-800 mb-2">Current Subscription</h4>
+                    <p className="text-gray-600">
+                      You are currently subscribed to <span className="font-semibold text-[#19AF1A]">{form.currentService}</span> 
+                      {" "}({billingCycle === "monthly" ? "Monthly" : "Annual"} billing)
+                    </p>
+                  </div>
             </Card>
             </form>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </div>
   );
