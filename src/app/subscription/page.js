@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { FiCheckCircle, FiStar, FiArrowRight, FiGift, FiZap } from "react-icons/fi";
-import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -74,54 +73,29 @@ export default function SubscriptionPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50">
       <div className="max-w-7xl mx-auto p-6 lg:p-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="space-y-8"
-        >
+        <div className="space-y-8">
           {/* Header */}
           <div className="text-center mb-12">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="mb-4"
-            >
+            <div className="mb-4">
               <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#19AF1A] to-[#158A15] text-white px-6 py-2 rounded-full text-sm font-medium shadow-lg">
                 <FiGift className="w-4 h-4" />
                 Welcome! Choose Your Plan
               </div>
-            </motion.div>
-            <motion.h1
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="text-4xl lg:text-5xl font-bold text-gray-800 mb-4"
-            >
+            </div>
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-800 mb-4">
               Get Started with Your Subscription
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              className="text-lg text-gray-600 max-w-2xl mx-auto"
-            >
+            </h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Choose the perfect plan for your needs. Start with our free trial and upgrade anytime.
-            </motion.p>
+            </p>
           </div>
 
           {/* Billing Cycle Toggle */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.8 }}
-            className="flex justify-center mb-8"
-          >
+          <div className="flex justify-center mb-8">
             <div className="bg-gray-100 p-1 rounded-xl inline-flex">
               <button
                 onClick={() => setBillingCycle("monthly")}
-                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
                   billingCycle === "monthly"
                     ? "bg-[#19AF1A] text-white shadow-md"
                     : "text-gray-600 hover:text-gray-800"
@@ -131,7 +105,7 @@ export default function SubscriptionPage() {
               </button>
               <button
                 onClick={() => setBillingCycle("annual")}
-                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
                   billingCycle === "annual"
                     ? "bg-[#19AF1A] text-white shadow-md"
                     : "text-gray-600 hover:text-gray-800"
@@ -141,16 +115,16 @@ export default function SubscriptionPage() {
               </button>
               <button
                 onClick={() => setBillingCycle("enterprise")}
-                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
                   billingCycle === "enterprise"
-                    ? "bg-gradient-to-r from-[#19AF1A] to-[#158A15] text-white shadow-md"
+                    ? "bg-[#19AF1A] text-white shadow-md"
                     : "text-gray-600 hover:text-gray-800"
                 }`}
               >
                 Enterprise
               </button>
             </div>
-          </motion.div>
+          </div>
 
           {billingCycle === "enterprise" ? (
             /* Enterprise Solutions Display */
@@ -184,7 +158,7 @@ export default function SubscriptionPage() {
                     ].map((feature, index) => (
                       <div 
                         key={index} 
-                        className="flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-gray-100"
+                        className="flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-3 shadow-sm"
                       >
                         <FiCheckCircle className="text-[#19AF1A] flex-shrink-0" size={18} />
                         <span className="font-medium text-gray-700">{feature}</span>
@@ -194,7 +168,7 @@ export default function SubscriptionPage() {
 
                   <Button
                     onClick={() => handlePlanSelection("Enterprise", billingCycle, "Custom Quote")}
-                    className="w-full md:w-auto px-12 py-4 text-lg bg-gradient-to-r from-[#19AF1A] to-[#158A15] hover:from-[#158A15] hover:to-[#0F6B0F] text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
+                    className="w-full md:w-auto px-12 py-4 text-lg bg-gradient-to-r from-[#19AF1A] to-[#158A15] hover:from-[#158A15] hover:to-[#0F6B0F] text-white"
                   >
                     <span>Get Custom Quote</span>
                     <FiArrowRight className="ml-2" />
@@ -222,10 +196,10 @@ export default function SubscriptionPage() {
                 return (
                   <div
                     key={service.title}
-                    className={`relative p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col ${
+                    className={`relative p-6 rounded-2xl border-2 flex flex-col ${
                       isHighlighted
                         ? "border-[#19AF1A] bg-gradient-to-br from-[#19AF1A]/10 to-[#158A15]/10 shadow-xl scale-105"
-                        : "border-gray-200 bg-white hover:border-[#19AF1A]/50 hover:shadow-lg"
+                        : "border-gray-200 bg-white hover:border-[#19AF1A]/50"
                     }`}
                   >
                     {isTrialPlan && (
@@ -272,7 +246,7 @@ export default function SubscriptionPage() {
 
                       <Button
                         onClick={() => handlePlanSelection(service.title, billingCycle, currentPlan.price)}
-                        className="w-full transition-all duration-300 mt-auto bg-gradient-to-r from-[#19AF1A] to-[#158A15] hover:from-[#158A15] hover:to-[#0F6B0F] text-white shadow-lg hover:shadow-xl"
+                        className="w-full mt-auto bg-gradient-to-r from-[#19AF1A] to-[#158A15] hover:from-[#158A15] hover:to-[#0F6B0F] text-white"
                       >
                         <span className="flex items-center justify-center gap-2">
                           {isTrialPlan ? "Start Free Trial" : "Choose Plan"}
@@ -287,12 +261,7 @@ export default function SubscriptionPage() {
           )}
 
           {/* Additional Information */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 1.2 }}
-            className="mt-12 text-center"
-          >
+          <div className="mt-12 text-center">
             <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border-0 max-w-4xl mx-auto">
               <h3 className="text-2xl font-bold text-gray-800 mb-4">
                 Why Choose Our Platform?
@@ -321,8 +290,8 @@ export default function SubscriptionPage() {
                 </div>
               </div>
             </Card>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </div>
   );
