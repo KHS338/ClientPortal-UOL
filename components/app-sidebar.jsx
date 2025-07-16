@@ -53,7 +53,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <a 
                       href={item.url}
-                      className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ease-in-out hover:bg-gradient-to-r hover:from-green-500 hover:to-green-600 hover:text-white hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                      className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ease-in-out hover:bg-gradient-to-r hover:from-green-500 hover:to-green-600 hover:text-white hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 lg:text-2xl "
                     >
                       <item.icon className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
                       <span className="transition-all duration-200">{item.title}</span>
