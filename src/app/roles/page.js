@@ -37,6 +37,25 @@ async function getData() {
       rejectedLis: 0,
       rCandidates: NaN,
     },
+    {
+      no: 2,
+      role: "Frontend Dev",
+      focusPoint: "React UI",
+      stages: "Interview",
+      status: "pending",
+      resourcers: "Alice",
+      months: 3,
+      salary: 75000,
+      miles: 120,
+      industry: "Tech",
+      cvs: 5,
+      lis: 2,
+      zi: 0,
+      tCandidates: 4,
+      rejectedCvs: 1,
+      rejectedLis: 0,
+      rCandidates: NaN,
+    },
   ]
 }
 
@@ -45,15 +64,48 @@ export default function RolesPage() {
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const [messageType, setMessageType] = useState('success')
+  const [editingRole, setEditingRole] = useState(null)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [roleToDelete, setRoleToDelete] = useState(null)
 
   useEffect(() => {
     getData().then(setData)
   }, [])
 
+  const handleEdit = (role) => {
+    setEditingRole(role)
+    setIsSheetOpen(true)
+  }
+
+  const handleDelete = (role) => {
+    setRoleToDelete(role)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const confirmDelete = () => {
+    if (roleToDelete) {
+      // Remove role from data
+      setData(prevData => prevData.filter(item => item.no !== roleToDelete.no))
+      
+      // Show success message
+      handleRoleSuccess(`Role "${roleToDelete.role}" deleted successfully!`, 'success')
+      
+      // Reset delete state
+      setRoleToDelete(null)
+      setIsDeleteDialogOpen(false)
+    }
+  }
+
+  const cancelDelete = () => {
+    setRoleToDelete(null)
+    setIsDeleteDialogOpen(false)
+  }
+
   const handleRoleSuccess = (message, type = 'success') => {
     setSuccessMessage(message)
     setMessageType(type)
     setIsSheetOpen(false)
+    setEditingRole(null)
     
     // Clear message after 5 seconds
     setTimeout(() => {
@@ -64,6 +116,17 @@ export default function RolesPage() {
   const closeSuccessMessage = () => {
     setSuccessMessage('')
   }
+
+  // Make handlers available globally for columns
+  useEffect(() => {
+    window.handleEditRole = handleEdit
+    window.handleDeleteRole = handleDelete
+    
+    return () => {
+      delete window.handleEditRole
+      delete window.handleDeleteRole
+    }
+  }, [])
 
   return (
     <>
@@ -91,6 +154,34 @@ export default function RolesPage() {
         </div>
       )}
 
+      {/* Delete Confirmation Dialog */}
+      {isDeleteDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="mx-4 max-w-md rounded-lg bg-white p-6 shadow-xl">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">
+              Delete Role
+            </h3>
+            <p className="mb-6 text-gray-600">
+              Are you sure you want to delete the role "{roleToDelete?.role}"? This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={confirmDelete}
+                className="flex-1 rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition-colors hover:bg-red-700"
+              >
+                Delete
+              </button>
+              <button
+                onClick={cancelDelete}
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="container mx-auto px-4 py-8 flex flex-col items-center">
         <h1 className="mb-4 text-center text-4xl font-bold text-gray-900">
           Manage Your Roles
@@ -111,7 +202,7 @@ export default function RolesPage() {
             <SheetHeader className="sr-only">
               <SheetTitle>Add New Role</SheetTitle>
             </SheetHeader>
-            <AddRoleForm onSuccess={handleRoleSuccess} />
+            <AddRoleForm onSuccess={handleRoleSuccess} editingRole={editingRole} />
             <SheetClose className="absolute top-4 right-4" />
           </SheetContent>
         </Sheet>

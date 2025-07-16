@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
-export default function AddRoleForm({ onSuccess }) {
+export default function AddRoleForm({ onSuccess, editingRole = null }) {
   const [salaryNotDefined, setSalaryNotDefined] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
@@ -22,6 +22,42 @@ export default function AddRoleForm({ onSuccess }) {
     searchRadius: '',
     acmCategory: ''
   })
+
+  // Populate form when editing
+  useEffect(() => {
+    if (editingRole) {
+      // Handle salary - could be number or string
+      let salaryFrom = ''
+      let salaryTo = ''
+      
+      if (editingRole.salary) {
+        if (typeof editingRole.salary === 'string' && editingRole.salary.includes('-')) {
+          const salaryParts = editingRole.salary.split('-')
+          salaryFrom = salaryParts[0] || ''
+          salaryTo = salaryParts[1] || ''
+        } else {
+          // If it's a number or string without dash, put it in salaryFrom
+          salaryFrom = editingRole.salary.toString()
+        }
+      }
+      
+      setRoleData({
+        roleTitle: editingRole.role || '',
+        rolePriority: editingRole.stages || '',
+        location: editingRole.focusPoint || '',
+        postalCode: '',
+        country: '',
+        salaryFrom,
+        salaryTo,
+        salaryCurrency: '',
+        salaryType: '',
+        industry: editingRole.industry || '',
+        experienceRequired: '',
+        searchRadius: editingRole.miles?.toString() || '',
+        acmCategory: ''
+      })
+    }
+  }, [editingRole])
 
   
   const handleInputChange = (field, value) => {
@@ -51,7 +87,10 @@ export default function AddRoleForm({ onSuccess }) {
       
       // Call success callback to close sheet and show message
       if (onSuccess) {
-        onSuccess('Role Created Successfully! 🎉')
+        const message = editingRole 
+          ? 'Role Updated Successfully! 🎉' 
+          : 'Role Created Successfully! 🎉'
+        onSuccess(message)
       }
       
       // Reset form
@@ -85,8 +124,15 @@ export default function AddRoleForm({ onSuccess }) {
   return (
     <div className="h-full flex flex-col">
       <div className="flex-shrink-0 bg-white border-b p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Create New Role</h2>
-        <p className="text-gray-600 text-sm">Fill out the form below to add a new role to the system.</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          {editingRole ? 'Edit Role' : 'Create New Role'}
+        </h2>
+        <p className="text-gray-600 text-sm">
+          {editingRole 
+            ? 'Update the role information below.' 
+            : 'Fill out the form below to add a new role to the system.'
+          }
+        </p>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 bg-white">
@@ -349,10 +395,10 @@ export default function AddRoleForm({ onSuccess }) {
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Creating Role...
+                {editingRole ? 'Updating Role...' : 'Creating Role...'}
               </span>
             ) : (
-              '🚀 Create Role'
+              editingRole ? '✏️ Update Role' : '🚀 Create Role'
             )}
           </button>
          
