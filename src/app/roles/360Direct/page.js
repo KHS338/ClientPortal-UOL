@@ -86,10 +86,10 @@ export default function RolesPage() {
     if (roleToDelete) {
       // Remove role from data
       setData(prevData => prevData.filter(item => item.no !== roleToDelete.no))
-      
+
       // Show success message
       handleRoleSuccess(`Role "${roleToDelete.role}" deleted successfully!`, 'success')
-      
+
       // Reset delete state
       setRoleToDelete(null)
       setIsDeleteDialogOpen(false)
@@ -106,7 +106,7 @@ export default function RolesPage() {
     setMessageType(type)
     setIsSheetOpen(false)
     setEditingRole(null)
-    
+
     // Clear message after 5 seconds
     setTimeout(() => {
       setSuccessMessage('')
@@ -121,7 +121,7 @@ export default function RolesPage() {
   useEffect(() => {
     window.handleEditRole = handleEdit
     window.handleDeleteRole = handleDelete
-    
+
     return () => {
       delete window.handleEditRole
       delete window.handleDeleteRole
@@ -132,11 +132,10 @@ export default function RolesPage() {
     <>
       {/* Success Message */}
       {successMessage && (
-        <div className={`fixed top-4 right-4 z-50 max-w-md rounded-lg border p-4 shadow-lg transition-all duration-300 ${
-          messageType === 'success' 
-            ? 'border-green-200 bg-green-50 text-green-800' 
+        <div className={`fixed top-4 right-4 z-50 max-w-md rounded-lg border p-4 shadow-lg transition-all duration-300 ${messageType === 'success'
+            ? 'border-green-200 bg-green-50 text-green-800'
             : 'border-red-200 bg-red-50 text-red-800'
-        }`}>
+          }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-lg">
@@ -196,7 +195,7 @@ export default function RolesPage() {
 
           <SheetContent
             side="right"
-            size="full"                     
+            size="full"
             className="sm:max-w-[480px] sm:rounded-l-lg"
           >
             <SheetHeader className="sr-only">
@@ -207,21 +206,6 @@ export default function RolesPage() {
           </SheetContent>
         </Sheet>
       </div>
-
-      <section className="container mx-auto px-4 py-10">
-        <div className="mb-6 rounded-lg bg-gray-100 px-6 py-4">
-          <h2 className="text-3xl font-bold text-gray-900">CV Sourcing</h2>
-        </div>
-        <DataTable columns={columns} data={data} />
-      </section>
-
-      <section className="container mx-auto px-4 py-10">
-        <div className="mb-6 rounded-lg bg-gray-100 px-6 py-4">
-          <h2 className="text-3xl font-bold text-gray-900">Pre Qualification</h2>
-        </div>
-        <DataTable columns={columns} data={data} />
-      </section>
-
       <section className="container mx-auto px-4 py-10">
         <div className="mb-6 rounded-lg bg-gray-100 px-6 py-4">
           <h2 className="text-3xl font-bold text-gray-900">360/Direct</h2>
