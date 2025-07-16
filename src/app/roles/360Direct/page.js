@@ -158,8 +158,8 @@ export default function RolesPage() {
 
       {/* Delete Confirmation Dialog */}
       {isDeleteDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="mx-4 max-w-md rounded-lg bg-white p-6 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-lg">
+          <div className="mx-4 max-w-md rounded-xl bg-white/95 backdrop-blur-sm p-6 shadow-2xl border border-gray-200/50">
             <h3 className="mb-4 text-lg font-semibold text-gray-900">
               Delete Role
             </h3>
