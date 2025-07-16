@@ -26,14 +26,28 @@ export const columns = [
       return (
         <div className="flex gap-2">
           <button
-            onClick={() => window.handleEditRole?.(role)}
+            onClick={() => {
+              console.log('Edit button clicked, role:', role) // Debug log
+              if (window.handleEditRole) {
+                window.handleEditRole(role)
+              } else {
+                console.error('handleEditRole not available on window')
+              }
+            }}
             className="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-700"
             title="Edit Role"
           >
             Edit
           </button>
           <button
-            onClick={() => window.handleDeleteRole?.(role)}
+            onClick={() => {
+              console.log('Delete button clicked, role:', role) // Debug log
+              if (window.handleDeleteRole) {
+                window.handleDeleteRole(role)
+              } else {
+                console.error('handleDeleteRole not available on window')
+              }
+            }}
             className="rounded bg-red-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-red-700"
             title="Delete Role"
           >

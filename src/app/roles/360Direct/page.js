@@ -1,7 +1,7 @@
 // app/roles/page.js
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { columns } from "./columns"
 import { DataTable } from "./data-table"
 
@@ -73,11 +73,13 @@ export default function RolesPage() {
   }, [])
 
   const handleEdit = (role) => {
+    console.log('Edit clicked:', role) // Debug log
     setEditingRole(role)
     setIsSheetOpen(true)
   }
 
   const handleDelete = (role) => {
+    console.log('Delete clicked:', role) // Debug log
     setRoleToDelete(role)
     setIsDeleteDialogOpen(true)
   }
@@ -118,7 +120,8 @@ export default function RolesPage() {
   }
 
   // Make handlers available globally for columns
-  useEffect(() => {
+  React.useEffect(() => {
+    console.log('Setting up global handlers') // Debug log
     window.handleEditRole = handleEdit
     window.handleDeleteRole = handleDelete
 
@@ -126,7 +129,7 @@ export default function RolesPage() {
       delete window.handleEditRole
       delete window.handleDeleteRole
     }
-  }, [])
+  }, [handleEdit, handleDelete])
 
   return (
     <>
