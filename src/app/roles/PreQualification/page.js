@@ -211,7 +211,7 @@ export default function RolesPage() {
       </div>
       <section className="container mx-auto px-4 py-10">
         <div className="mb-6 rounded-lg bg-gray-100 px-6 py-4">
-          <h2 className="text-3xl font-bold text-gray-900">360/Direct</h2>
+          <h2 className="text-3xl font-bold text-gray-900">PreQualification</h2>
         </div>
         <DataTable columns={columns} data={data} />
       </section>

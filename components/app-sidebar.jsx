@@ -135,8 +135,8 @@ export function AppSidebar() {
                             <item.icon className="h-5 w-5 flex-shrink-0" />
                             <span>{item.title}</span>
                           </div>
-                          <span className={`min-w-[16px] text-right transition-transform ${openMenu === item.title ? 'rotate-90' : ''}`}>
-                            ▶
+                          <span className={`min-w-[16px] text-right transition-transform `}>
+                            =
                           </span>
                         </div>
                       </SidebarMenuButton>
