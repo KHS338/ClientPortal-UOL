@@ -77,6 +77,28 @@ export default function ClientProfilePage({ initial = {} }) {
       annual: { price: "$690/yr", key: "360-direct-annual", savings: "Save $138" },
       features: ["Full 360° Assessment", "Direct Placement", "Custom Integrations", "Dedicated Support", "Real-time Analytics", "White-label Options"],
       description: "Complete recruitment solution with direct placement services"
+    },
+    {
+      title: "VA",
+      monthly: { price: "$69/mo", key: "360-direct-monthly" },
+      annual: { price: "$690/yr", key: "360-direct-annual", savings: "Save $138" },
+      features: ["Full 360° Assessment", "Direct Placement", "Custom Integrations", "Dedicated Support", "Real-time Analytics", "White-label Options"],
+      description: "Complete recruitment solution with direct placement services"
+    },
+    {
+      title: "Lead Generation",
+      monthly: { price: "$69/mo", key: "lead-generation-monthly" },
+      annual: { price: "$690/yr", key: "lead-generation-annual", savings: "Save $138" },
+      features: ["Lead Identification", "Contact Discovery", "Email Campaigns", "CRM Integration", "Analytics Dashboard", "Lead Scoring"],
+      description: "Comprehensive lead generation and outreach solution"
+    },
+    {
+      title: "Enterprise",
+      isEnterprise: true,
+      monthly: { price: "Get Quote", key: "enterprise-monthly" },
+      annual: { price: "Get Quote", key: "enterprise-annual" },
+      features: ["Unlimited Everything", "White-label Solution", "Custom Development", "24/7 Priority Support", "Dedicated Account Manager", "SLA Guarantee", "Custom Integrations", "On-premise Deployment"],
+      description: "Fully customizable enterprise solution with dedicated support"
     }
   ];
 
@@ -353,75 +375,157 @@ export default function ClientProfilePage({ initial = {} }) {
                       >
                         Annual
                       </button>
+                      <button
+                        onClick={() => setBillingCycle("enterprise")}
+                        className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
+                          billingCycle === "enterprise"
+                            ? "bg-gradient-to-r from-[#19AF1A] to-[#158A15] text-white shadow-md"
+                            : "text-gray-600 hover:text-gray-800"
+                        }`}
+                      >
+                        Enterprise
+                      </button>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {billingOptions.map((service, index) => {
-                      const currentPlan = billingCycle === "monthly" ? service.monthly : service.annual;
-                      const isCurrentPlan = form.currentPlan === currentPlan.key;
-                      
-                      return (
-                        <motion.div
-                          key={service.title}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5, delay: index * 0.1 }}
-                          className={`relative p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col ${
-                            isCurrentPlan
-                              ? "border-[#19AF1A] bg-gradient-to-br from-[#19AF1A]/10 to-[#158A15]/10 shadow-xl"
-                              : "border-gray-200 bg-white hover:border-[#19AF1A]/50 hover:shadow-lg"
-                          }`}
-                        >
-                          {isCurrentPlan && (
-                            <div className="absolute -top-3 right-6 bg-[#19AF1A] text-white px-4 py-1 rounded-full text-sm font-medium">
-                              Current Plan
-                            </div>
-                          )}
+                  {billingCycle === "enterprise" ? (
+                    /* Enterprise Solutions Display */
+                    <div className="max-w-4xl mx-auto">
+                      <motion.div
+                        key="enterprise"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.5 }}
+                        className="relative p-8 rounded-2xl border-2 border-[#19AF1A] bg-white shadow-2xl"
+                      >
+                        <div className="text-center">
+                          <h4 className="text-3xl font-bold text-transparent bg-gradient-to-r from-[#19AF1A] to-[#158A15] bg-clip-text mb-4">
+                            Enterprise Plan
+                          </h4>
+                          <p className="text-lg text-gray-600 mb-6">
+                            Fully customizable enterprise solution with dedicated support
+                          </p>
+                          
+                          <div className="mb-8">
+                            <p className="text-4xl font-bold text-transparent bg-gradient-to-r from-[#19AF1A] to-[#158A15] bg-clip-text mb-4">
+                              Custom Pricing
+                            </p>
+                            <p className="text-lg text-gray-500 font-medium">Tailored to your organization's needs</p>
+                          </div>
 
-                          <div className="text-center flex-1 flex flex-col">
-                            <div className="flex-1">
-                              <h4 className="text-xl font-bold text-gray-800 mb-2">{service.title}</h4>
-                              <p className="text-sm text-gray-600 mb-4">{service.description}</p>
-                              
-                              <div className="mb-4">
-                                <p className="text-4xl font-bold text-[#19AF1A] mb-1">{currentPlan.price}</p>
-                                {billingCycle === "annual" && service.annual.savings && (
-                                  <p className="text-sm text-green-600 font-medium">{service.annual.savings}</p>
-                                )}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                            {[
+                              "Unlimited Everything",
+                              "White-label Solution", 
+                              "Custom Development",
+                              "24/7 Priority Support",
+                              "Dedicated Account Manager",
+                              "SLA Guarantee",
+                              "Custom Integrations",
+                              "On-premise Deployment"
+                            ].map((feature, index) => (
+                              <div 
+                                key={index} 
+                                className="flex items-center gap-3 bg-white/70 rounded-lg px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-white/90"
+                              >
+                                <FiCheckCircle className="text-[#19AF1A] flex-shrink-0" size={18} />
+                                <span className="font-medium text-gray-700">{feature}</span>
+                              </div>
+                            ))}
+                          </div>
+
+                          <Button
+                            onClick={() => console.log("Enterprise quotation requested")}
+                            className="w-full md:w-auto px-12 py-4 text-lg bg-gradient-to-r from-[#19AF1A] to-[#158A15] hover:from-[#158A15] hover:to-[#0F6B0F] text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
+                          >
+                            Get Custom Quote
+                          </Button>
+
+                          <div className="mt-6 p-4 bg-gradient-to-r from-[#19AF1A]/10 to-[#158A15]/10 rounded-xl border border-[#19AF1A]/20">
+                            <p className="text-sm text-gray-600">
+                              <strong>Ready to scale?</strong> Our enterprise solutions are designed for organizations with complex requirements. 
+                              Contact our sales team for a personalized demo and custom pricing.
+                            </p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </div>
+                  ) : (
+                    /* Regular Plans Display */
+                    <motion.div 
+                      key="regular-plans" 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4 }}
+                      className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"
+                    >
+                      {billingOptions.filter(service => !service.isEnterprise).map((service, index) => {
+                        const currentPlan = billingCycle === "monthly" ? service.monthly : service.annual;
+                        const isCurrentPlan = form.currentPlan === currentPlan.key;
+                        
+                        return (
+                          <motion.div
+                            key={service.title}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: index * 0.1 }}
+                            className={`relative p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col ${
+                              isCurrentPlan
+                                ? "border-[#19AF1A] bg-gradient-to-br from-[#19AF1A]/10 to-[#158A15]/10 shadow-xl"
+                                : "border-gray-200 bg-white hover:border-[#19AF1A]/50 hover:shadow-lg"
+                            }`}
+                          >
+                            {isCurrentPlan && (
+                              <div className="absolute -top-3 right-6 bg-[#19AF1A] text-white px-4 py-1 rounded-full text-sm font-medium">
+                                Current Plan
+                              </div>
+                            )}
+
+                            <div className="text-center flex-1 flex flex-col">
+                              <div className="flex-1">
+                                <h4 className="text-xl font-bold text-gray-800 mb-2">{service.title}</h4>
+                                <p className="text-sm text-gray-600 mb-4">{service.description}</p>
+                                
+                                <div className="mb-4">
+                                  <p className="text-4xl font-bold text-[#19AF1A] mb-1">{currentPlan.price}</p>
+                                  {billingCycle === "annual" && service.annual.savings && (
+                                    <p className="text-sm text-green-600 font-medium">{service.annual.savings}</p>
+                                  )}
+                                </div>
+
+                                <ul className="space-y-3 text-sm text-gray-600 mb-6">
+                                  {service.features.map((feature, featureIndex) => (
+                                    <li key={featureIndex} className="flex items-center gap-2">
+                                      <FiCheckCircle className="text-[#19AF1A] flex-shrink-0" size={16} />
+                                      <span>{feature}</span>
+                                    </li>
+                                  ))}
+                                </ul>
                               </div>
 
-                              <ul className="space-y-3 text-sm text-gray-600 mb-6">
-                                {service.features.map((feature, featureIndex) => (
-                                  <li key={featureIndex} className="flex items-center gap-2">
-                                    <FiCheckCircle className="text-[#19AF1A] flex-shrink-0" size={16} />
-                                    {feature}
-                                  </li>
-                                ))}
-                              </ul>
+                              <Button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (!isCurrentPlan) {
+                                    handlePlanChange(service.title, billingCycle);
+                                  }
+                                }}
+                                className={`w-full transition-all duration-300 mt-auto ${
+                                  isCurrentPlan
+                                    ? "bg-gray-100 text-gray-500 cursor-default"
+                                    : "bg-gradient-to-r from-[#19AF1A] to-[#158A15] hover:from-[#158A15] hover:to-[#0F6B0F] text-white"
+                                }`}
+                                disabled={isCurrentPlan}
+                              >
+                                {isCurrentPlan ? "Current Plan" : "Switch to This Plan"}
+                              </Button>
                             </div>
-
-                            <Button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (!isCurrentPlan) {
-                                  handlePlanChange(service.title, billingCycle);
-                                }
-                              }}
-                              className={`w-full transition-all duration-300 mt-auto ${
-                                isCurrentPlan
-                                  ? "bg-gray-100 text-gray-500 cursor-default"
-                                  : "bg-gradient-to-r from-[#19AF1A] to-[#158A15] hover:from-[#158A15] hover:to-[#0F6B0F] text-white"
-                              }`}
-                              disabled={isCurrentPlan}
-                            >
-                              {isCurrentPlan ? "Current Plan" : "Switch to This Plan"}
-                            </Button>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
+                          </motion.div>
+                        );
+                      })}
+                    </motion.div>
+                  )}
 
                   {/* Current Plan Summary */}
               <div className="mt-8 p-6 bg-gradient-to-r from-[#19AF1A]/10 to-[#158A15]/10 rounded-xl border border-[#19AF1A]/20">
