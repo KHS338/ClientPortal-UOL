@@ -48,12 +48,12 @@ export default function ClientProfilePage({ initial = {} }) {
   const handlePlanChange = (serviceTitle, cycle) => {
     console.log(`Plan switch requested: ${serviceTitle} (${cycle})`);
 
-    // const planKey = `${serviceTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${cycle}`;
-    // setForm(prev => ({
-    //   ...prev,
-    //   currentPlan: planKey,
-    //   currentService: serviceTitle
-    // }));
+    const planKey = `${serviceTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${cycle}`;
+    setForm(prev => ({
+      ...prev,
+      currentPlan: planKey,
+      currentService: serviceTitle
+    }));
   };
 
   const billingOptions = [
@@ -80,8 +80,8 @@ export default function ClientProfilePage({ initial = {} }) {
     },
     {
       title: "VA",
-      monthly: { price: "$69/mo", key: "360-direct-monthly" },
-      annual: { price: "$690/yr", key: "360-direct-annual", savings: "Save $138" },
+      monthly: { price: "$69/mo", key: "va-monthly" },
+      annual: { price: "$690/yr", key: "va-annual", savings: "Save $138" },
       features: ["Full 360° Assessment", "Direct Placement", "Custom Integrations", "Dedicated Support", "Real-time Analytics", "White-label Options"],
       description: "Complete recruitment solution with direct placement services"
     },
@@ -189,7 +189,7 @@ export default function ClientProfilePage({ initial = {} }) {
                       type="button"
                       onClick={() => setIsEditing(!isEditing)}
                       variant="outline"
-                      className="flex items-center gap-2 border-[#0958d9] text-[#0958d9] hover:bg-[#24AC4A] hover:text-white transition-all duration-300"
+                      className="flex items-center gap-2 border-[#0958d9] text-[#0958d9] hover:border-[#24AC4A] hover:bg-[#24AC4A] hover:text-white transition-all duration-300"
                     >
                       {isEditing ? <FiSave size={16} /> : <FiEdit3 size={16} />}
                       {isEditing ? "Cancel" : "Edit"}
@@ -324,27 +324,30 @@ export default function ClientProfilePage({ initial = {} }) {
                 <div className="flex justify-center mb-8">
                   <div className="bg-gray-100 p-1 rounded-xl inline-flex">
                     <button
+                      type="button"
                       onClick={() => setBillingCycle("monthly")}
                       className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${billingCycle === "monthly"
-                        ? "bg-[#0958d9] hover:bg-[#24AC4A] text-white shadow-md"
+                        ? "bg-[#0958d9] text-white shadow-md"
                         : "text-gray-600 hover:text-gray-800"
                         }`}
                     >
                       Monthly
                     </button>
                     <button
+                      type="button"
                       onClick={() => setBillingCycle("annual")}
                       className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${billingCycle === "annual"
-                        ? "bg-[#0958d9] hover:bg-[#24AC4A] text-white shadow-md"
+                        ? "bg-[#0958d9] text-white shadow-md"
                         : "text-gray-600 hover:text-gray-800"
                         }`}
                     >
                       Annual
                     </button>
                     <button
+                      type="button"
                       onClick={() => setBillingCycle("enterprise")}
                       className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${billingCycle === "enterprise"
-                        ? "bg-[#0958d9] hover:bg-[#24AC4A] text-white shadow-md"
+                        ? "bg-[#0958d9] text-white shadow-md"
                         : "text-gray-600 hover:text-gray-800"
                         }`}
                     >
@@ -419,9 +422,9 @@ export default function ClientProfilePage({ initial = {} }) {
                       return (
                         <div
                           key={service.title}
-                          className={`relative p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col ${isCurrentPlan
+                          className={`relative p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col group ${isCurrentPlan
                             ? "border-[#0958d9] bg-gradient-to-br from-[#0958d9]/10 to-[#06398e]/10 shadow-xl"
-                            : "border-gray-200 bg-white hover:border-[#0958d9]/50 hover:shadow-lg"
+                            : "border-gray-200 bg-white hover:border-[#24AC4A]/50 hover:shadow-lg"
                             }`}
                         >
                           {isCurrentPlan && (
@@ -436,16 +439,28 @@ export default function ClientProfilePage({ initial = {} }) {
                               <p className="text-sm text-gray-600 mb-4">{service.description}</p>
 
                               <div className="mb-4">
-                                <p className="text-4xl font-bold text-[#0958d9] mb-1">{currentPlan.price}</p>
+                                <p className={`text-4xl font-bold mb-1 transition-colors duration-300 ${
+                                  isCurrentPlan 
+                                    ? "text-[#0958d9]" 
+                                    : "text-[#0958d9] group-hover:text-[#24AC4A]"
+                                }`}>{currentPlan.price}</p>
                                 {billingCycle === "annual" && service.annual.savings && (
-                                  <p className="text-sm text-[#1a84de] font-medium">{service.annual.savings}</p>
+                                  <p className={`text-sm font-medium transition-colors duration-300 ${
+                                    isCurrentPlan 
+                                      ? "text-[#1a84de]" 
+                                      : "text-[#1a84de] group-hover:text-[#24AC4A]"
+                                  }`}>{service.annual.savings}</p>
                                 )}
                               </div>
 
                               <ul className="space-y-3 text-sm text-gray-600 mb-6">
                                 {service.features.map((feature, featureIndex) => (
                                   <li key={featureIndex} className="flex items-center gap-2">
-                                    <FiCheckCircle className="text-[#0958d9] flex-shrink-0" size={16} />
+                                    <FiCheckCircle className={`flex-shrink-0 transition-colors duration-300 ${
+                                      isCurrentPlan 
+                                        ? "text-[#0958d9]" 
+                                        : "text-[#0958d9] group-hover:text-[#24AC4A]"
+                                    }`} size={16} />
                                     <span>{feature}</span>
                                   </li>
                                 ))}
@@ -461,7 +476,7 @@ export default function ClientProfilePage({ initial = {} }) {
                               }}
                               className={`w-full transition-all duration-300 mt-auto ${isCurrentPlan
                                 ? "bg-gray-100 text-gray-500 cursor-default"
-                                : "bg-[#1a84de] hover:from-[#06398e] hover:bg-[#24AC4A] text-white"
+                                : "bg-[#1a84de] hover:bg-[#24AC4A] text-white group-hover:bg-[#24AC4A]"
                                 }`}
                               disabled={isCurrentPlan}
                             >
