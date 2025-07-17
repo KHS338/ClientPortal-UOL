@@ -1,6 +1,9 @@
 // app/roles/leadsGeneration/page.js
 "use client";
 import React, { useState, useEffect } from "react";
+import { DataTable } from "./data-table";
+import { jobsColumns, industryColumns } from "./columns";
+import AddRoleForm from "./AddRoleForm";
 
 // Add animation keyframes using style tag
 const styles = `
@@ -94,7 +97,7 @@ const countries = [
 ];
 
 // Industry Form Component
-const IndustryForm = () => {
+const IndustryForm = ({ onSubmit, editingData, onCancel }) => {
   const [formData, setFormData] = useState({
     industryType: "",
     companySize: "",
@@ -104,6 +107,18 @@ const IndustryForm = () => {
   
   const [isCountryListOpen, setIsCountryListOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  
+  // Load editing data if provided
+  useEffect(() => {
+    if (editingData) {
+      setFormData({
+        industryType: editingData.industryType || "",
+        companySize: editingData.companySize || "",
+        cityCountry: editingData.cityCountry || "",
+        leadPriority: editingData.leadPriority || ""
+      });
+    }
+  }, [editingData]);
   
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -125,8 +140,18 @@ const IndustryForm = () => {
   };
 
   const handleSubmit = () => {
-    console.log("Industry Form Data:", formData);
-    // Handle form submission here
+    if (!formData.industryType || !formData.companySize || !formData.cityCountry || !formData.leadPriority) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    onSubmit(formData);
+    // Reset form
+    setFormData({
+      industryType: "",
+      companySize: "",
+      cityCountry: "",
+      leadPriority: ""
+    });
   };
 
   return (
@@ -311,14 +336,21 @@ const IndustryForm = () => {
           </div>
         </div>
 
-        {/* Submit Button */}
-        <div className="flex justify-end pt-4">
+        {/* Submit Buttons */}
+        <div className="flex justify-end gap-4 pt-4">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-xl focus:outline-none transition-all duration-300 flex items-center gap-2"
+          >
+            <span>Cancel</span>
+          </button>
           <button
             type="button"
             onClick={handleSubmit}
             className="px-8 py-3 bg-[#1a84de] hover:bg-[#24AC4A] text-white font-semibold rounded-xl focus:outline-none transition-all duration-300 flex items-center gap-2"
           >
-            <span>Submit Industry Info</span>
+            <span>{editingData ? 'Update' : 'Submit'} Industry Info</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14"></path>
               <path d="m12 5 7 7-7 7"></path>
@@ -331,7 +363,7 @@ const IndustryForm = () => {
 };
 
 // Jobs Form Component
-const JobsForm = () => {
+const JobsForm = ({ onSubmit, editingData, onCancel }) => {
   const [formData, setFormData] = useState({
     industryType: "",
     companySize: "",
@@ -346,6 +378,22 @@ const JobsForm = () => {
   const [currentSkill, setCurrentSkill] = useState("");
   const [isCountryListOpen, setIsCountryListOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  
+  // Load editing data if provided
+  useEffect(() => {
+    if (editingData) {
+      setFormData({
+        industryType: editingData.industryType || "",
+        companySize: editingData.companySize || "",
+        workType: editingData.workType || "",
+        location: editingData.location || "",
+        hiringUrgency: editingData.hiringUrgency || "",
+        skills: editingData.skills || [],
+        experience: editingData.experience || "",
+        jobTitle: editingData.jobTitle || ""
+      });
+    }
+  }, [editingData]);
   
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -391,8 +439,23 @@ const JobsForm = () => {
   };
 
   const handleSubmit = () => {
-    console.log("Jobs Form Data:", formData);
-    // Handle form submission here
+    if (!formData.jobTitle || !formData.industryType || !formData.companySize || !formData.location || !formData.experience) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    onSubmit(formData);
+    // Reset form
+    setFormData({
+      industryType: "",
+      companySize: "",
+      workType: "",
+      location: "",
+      hiringUrgency: "",
+      skills: [],
+      experience: "",
+      jobTitle: ""
+    });
+    setCurrentSkill("");
   };
 
   return (
@@ -679,14 +742,21 @@ const JobsForm = () => {
           </div>
         </div>
 
-        {/* Submit Button */}
-        <div className="flex justify-end pt-4">
+        {/* Submit Buttons */}
+        <div className="flex justify-end gap-4 pt-4">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white font-semibold rounded-xl focus:outline-none transition-all duration-300 flex items-center gap-2"
+          >
+            <span>Cancel</span>
+          </button>
           <button
             type="button"
             onClick={handleSubmit}
             className="px-8 py-3 bg-[#1a84de] hover:bg-[#24AC4A] text-white font-semibold rounded-xl focus:outline-none transition-all duration-300 flex items-center gap-2"
           >
-            <span>Submit Job Info</span>
+            <span>{editingData ? 'Update' : 'Submit'} Job Info</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14"></path>
               <path d="m12 5 7 7-7 7"></path>
@@ -702,50 +772,89 @@ const JobsForm = () => {
 export default function RolesPage() {
   const [data, setData] = useState([]);
   const [selected, setSelected] = useState("jobs");
+  const [submittedData, setSubmittedData] = useState([]);
+  const [showForm, setShowForm] = useState(true);
+  const [editingEntry, setEditingEntry] = useState(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState(null);
+
+  // Function to handle form submissions
+  const handleFormSubmit = (formData, formType) => {
+    if (editingEntry) {
+      // Update existing entry
+      const updatedEntry = {
+        ...editingEntry,
+        ...formData,
+        submittedAt: editingEntry.submittedAt // Keep original submission date
+      };
+
+      setSubmittedData(submittedData.map(item => 
+        item.id === editingEntry.id ? updatedEntry : item
+      ));
+    } else {
+      // Create new entry
+      const newEntry = {
+        id: Date.now(),
+        no: submittedData.length + 1,
+        type: formType,
+        submittedAt: new Date().toLocaleDateString(),
+        ...formData
+      };
+
+      setSubmittedData([...submittedData, newEntry]);
+    }
+    
+    setShowForm(false);
+    setEditingEntry(null);
+  };
+
+  // Function to handle edit
+  const handleEdit = (entry) => {
+    setEditingEntry(entry);
+    setSelected(entry.type);
+    setShowForm(true);
+  };
+
+  // Function to handle delete
+  const handleDelete = (entry) => {
+    setEntryToDelete(entry);
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Function to confirm delete
+  const confirmDelete = () => {
+    if (entryToDelete) {
+      setSubmittedData(submittedData.filter(item => item.id !== entryToDelete.id));
+      setEntryToDelete(null);
+      setIsDeleteDialogOpen(false);
+    }
+  };
+
+  // Function to cancel delete
+  const cancelDelete = () => {
+    setEntryToDelete(null);
+    setIsDeleteDialogOpen(false);
+  };
+
+  // Make functions available globally for column actions
+  useEffect(() => {
+    window.handleEditRole = handleEdit;
+    window.handleDeleteRole = handleDelete;
+    
+    return () => {
+      delete window.handleEditRole;
+      delete window.handleDeleteRole;
+    };
+  }, [submittedData]);
+
+  // Filter data based on type
+  const jobsData = submittedData.filter(entry => entry.type === 'jobs');
+  const industryData = submittedData.filter(entry => entry.type === 'industry');
 
   useEffect(() => {
     // Simulate data loading
     const getData = async () => {
-      return [
-        {
-          no: 1,
-          role: "Frontend Dev",
-          focusPoint: "React UI",
-          stages: "Interview",
-          status: "pending",
-          resourcers: "Alice",
-          months: 3,
-          salary: 75000,
-          miles: 120,
-          industry: "Tech",
-          cvs: 5,
-          lis: 2,
-          zi: 0,
-          tCandidates: 4,
-          rejectedCvs: 1,
-          rejectedLis: 0,
-          rCandidates: NaN,
-        },
-        {
-          no: 2,
-          role: "Frontend Dev",
-          focusPoint: "React UI",
-          stages: "Interview",
-          status: "pending",
-          resourcers: "Alice",
-          months: 3,
-          salary: 75000,
-          miles: 120,
-          industry: "Tech",
-          cvs: 5,
-          lis: 2,
-          zi: 0,
-          tCandidates: 4,
-          rejectedCvs: 1,
-          rejectedLis: 0,
-          rCandidates: NaN,
-        },
-      ];
+      return [];
     };
 
     getData().then(setData);
@@ -753,47 +862,144 @@ export default function RolesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50 p-4 sm:p-6 animate-fadeIn">
-      {/* Toggle Buttons */}
-      <div className="mx-auto mb-8 flex w-full max-w-md overflow-hidden rounded-xl border border-gray-300 shadow-md bg-white animate-slideUpFade hover:shadow-lg transition-all duration-500">
+      {/* Delete Dialog */}
+      {isDeleteDialogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-lg">
+          <div className="mx-4 max-w-md rounded-xl bg-white/95 backdrop-blur-sm p-6 shadow-2xl border border-gray-200/50">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">
+              Delete Entry
+            </h3>
+            <p className="mb-6 text-gray-600">
+              Are you sure you want to delete this {entryToDelete?.type === 'jobs' ? 'job' : 'industry'} entry? This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={confirmDelete}
+                className="flex-1 rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition-colors hover:bg-red-700"
+              >
+                Delete
+              </button>
+              <button
+                onClick={cancelDelete}
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header with Add Button */}
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <h1 className="text-3xl font-bold text-gray-800">Lead Generation</h1>
         <button
-          onClick={() => setSelected("jobs")}
-          className={`w-1/2 px-6 py-4 text-center font-bold transition-all duration-300 ${
-            selected === "jobs"
-              ? "bg-gradient-to-r from-[#1a84de] to-[#1a84de] text-white shadow-inner"
-              : "bg-white text-gray-700"
-          }`}
+          onClick={() => {
+            setShowForm(true);
+            setEditingEntry(null);
+          }}
+          className="px-6 py-3 bg-[#1a84de] hover:bg-[#24AC4A] text-white font-semibold rounded-xl focus:outline-none transition-all duration-300 flex items-center gap-2"
         >
-          Jobs
-        </button>
-        <button
-          onClick={() => setSelected("industry")}
-          className={`w-1/2 px-6 py-4 text-center font-bold transition-all duration-300 ${
-            selected === "industry"
-              ? "bg-gradient-to-r from-[#1a84de] to-[#1a84de] text-white shadow-inner"
-              : "bg-white text-gray-700"
-          }`}
-        >
-          Industry
+          <span>Add New Lead</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14"></path>
+            <path d="M12 5v14"></path>
+          </svg>
         </button>
       </div>
 
-      {/* Form Container with Transition */}
-      <div className="transition-all duration-500 ease-in-out perspective-1000">
-        {selected === "jobs" && (
-          <div className="opacity-100 transform transition-all duration-500 animate-slideUpFade">
-            <div className="animate-float">
-              <JobsForm />
-            </div>
+      {showForm && (
+        <div className="mb-8">
+          {/* Toggle Buttons */}
+          <div className="mx-auto mb-8 flex w-full max-w-md overflow-hidden rounded-xl border border-gray-300 shadow-md bg-white animate-slideUpFade hover:shadow-lg transition-all duration-500">
+            <button
+              onClick={() => setSelected("jobs")}
+              className={`w-1/2 px-6 py-4 text-center font-bold transition-all duration-300 ${
+                selected === "jobs"
+                  ? "bg-gradient-to-r from-[#1a84de] to-[#1a84de] text-white shadow-inner"
+                  : "bg-white text-gray-700"
+              }`}
+            >
+              Jobs
+            </button>
+            <button
+              onClick={() => setSelected("industry")}
+              className={`w-1/2 px-6 py-4 text-center font-bold transition-all duration-300 ${
+                selected === "industry"
+                  ? "bg-gradient-to-r from-[#1a84de] to-[#1a84de] text-white shadow-inner"
+                  : "bg-white text-gray-700"
+              }`}
+            >
+              Industry
+            </button>
           </div>
-        )}
-        {selected === "industry" && (
-          <div className="opacity-100 transform transition-all duration-500 animate-slideUpFade">
-            <div className="animate-float">
-              <IndustryForm />
-            </div>
+
+          {/* Form Container with Transition */}
+          <div className="transition-all duration-500 ease-in-out perspective-1000">
+            {selected === "jobs" && (
+              <div className="opacity-100 transform transition-all duration-500 animate-slideUpFade">
+                <div className="animate-float">
+                  <JobsForm 
+                    onSubmit={(data) => handleFormSubmit(data, 'jobs')}
+                    editingData={editingEntry && editingEntry.type === 'jobs' ? editingEntry : null}
+                    onCancel={() => {
+                      setShowForm(false);
+                      setEditingEntry(null);
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+            {selected === "industry" && (
+              <div className="opacity-100 transform transition-all duration-500 animate-slideUpFade">
+                <div className="animate-float">
+                  <IndustryForm 
+                    onSubmit={(data) => handleFormSubmit(data, 'industry')}
+                    editingData={editingEntry && editingEntry.type === 'industry' ? editingEntry : null}
+                    onCancel={() => {
+                      setShowForm(false);
+                      setEditingEntry(null);
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Data Tables */}
+      {submittedData.length > 0 && (
+        <div className="space-y-8">
+          {/* Jobs Table */}
+          {jobsData.length > 0 && (
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Jobs Submissions</h2>
+              <DataTable columns={jobsColumns} data={jobsData} />
+            </div>
+          )}
+
+          {/* Industry Table */}
+          {industryData.length > 0 && (
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Industry Submissions</h2>
+              <DataTable columns={industryColumns} data={industryData} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {submittedData.length === 0 && !showForm && (
+        <div className="text-center py-12">
+          <div className="text-gray-500 text-lg mb-4">No submissions yet</div>
+          <button
+            onClick={() => setShowForm(true)}
+            className="px-6 py-3 bg-[#1a84de] hover:bg-[#24AC4A] text-white font-semibold rounded-xl focus:outline-none transition-all duration-300"
+          >
+            Create Your First Lead
+          </button>
+        </div>
+      )}
     </div>
   );
 }
