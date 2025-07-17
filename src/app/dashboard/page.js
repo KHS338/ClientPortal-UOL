@@ -13,6 +13,7 @@ export default function DashboardPage() {
     nextPayment: "N/A",
     planPrice: "N/A"
   });
+  const [userSubscription, setUserSubscription] = useState(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -24,19 +25,46 @@ export default function DashboardPage() {
 
   // Load subscription data from localStorage
   useEffect(() => {
-    const savedSubscription = localStorage.getItem('userSubscription');
-    if (savedSubscription) {
-      const data = JSON.parse(savedSubscription);
-      console.log('Dashboard - Loaded subscription data:', data);
-      setSubscriptionInfo({
-        currentPlan: data.service,
-        billingCycle: data.billingCycle === 'monthly' ? 'Monthly' : 
-                     data.billingCycle === 'annual' ? 'Annual' : 
-                     data.billingCycle === 'enterprise' ? 'Enterprise' : 'Custom',
-        nextPayment: data.nextPayment,
-        planPrice: data.price
-      });
-    }
+    const loadSubscription = () => {
+      const savedSubscription = localStorage.getItem('userSubscription');
+      if (savedSubscription) {
+        const data = JSON.parse(savedSubscription);
+        console.log('Dashboard - Loaded subscription data:', data);
+        setUserSubscription(data.service);
+        setSubscriptionInfo({
+          currentPlan: data.service,
+          billingCycle: data.billingCycle === 'monthly' ? 'Monthly' : 
+                       data.billingCycle === 'annual' ? 'Annual' : 
+                       data.billingCycle === 'enterprise' ? 'Enterprise' : 'Custom',
+          nextPayment: data.nextPayment,
+          planPrice: data.price
+        });
+      } else {
+        // Reset to default state if no subscription
+        setUserSubscription(null);
+        setSubscriptionInfo({
+          currentPlan: "No Active Plan",
+          billingCycle: "N/A",
+          nextPayment: "N/A",
+          planPrice: "N/A"
+        });
+      }
+    };
+
+    // Load initial subscription data
+    loadSubscription();
+
+    // Listen for custom event when subscription is updated
+    const handleSubscriptionUpdate = () => {
+      console.log('Dashboard - Subscription update event detected');
+      loadSubscription();
+    };
+
+    window.addEventListener('subscriptionUpdated', handleSubscriptionUpdate);
+
+    return () => {
+      window.removeEventListener('subscriptionUpdated', handleSubscriptionUpdate);
+    };
   }, []);
 
   // Mock data for dashboard metrics - focused on roles and subscription
@@ -54,10 +82,31 @@ export default function DashboardPage() {
   ];
 
   const subscriptionServices = [
-    { name: "CV Sourcing", status: "active", usage: "45/100 searches", color: "blue" },
-    { name: "Prequalification", status: "active", usage: "12/50 assessments", color: "green" },
-    { name: "360/Direct", status: "inactive", usage: "Not subscribed", color: "gray" },
-    { name: "Lead Generation", status: "inactive", usage: "Not subscribed", color: "gray" },
+    { 
+      name: "CV Sourcing", 
+      status: (userSubscription === "CV Sourcing" || userSubscription === "Free Trial") ? "active" : "inactive", 
+      usage: userSubscription === "CV Sourcing" ? "45/100 searches" : 
+             userSubscription === "Free Trial" ? "3/5 trial searches" : "Not subscribed", 
+      color: (userSubscription === "CV Sourcing" || userSubscription === "Free Trial") ? "blue" : "gray" 
+    },
+    { 
+      name: "Prequalification", 
+      status: userSubscription === "Prequalification" ? "active" : "inactive", 
+      usage: userSubscription === "Prequalification" ? "12/50 assessments" : "Not subscribed", 
+      color: userSubscription === "Prequalification" ? "green" : "gray" 
+    },
+    { 
+      name: "360/Direct", 
+      status: userSubscription === "360/Direct" ? "active" : "inactive", 
+      usage: userSubscription === "360/Direct" ? "8/25 placements" : "Not subscribed", 
+      color: userSubscription === "360/Direct" ? "orange" : "gray" 
+    },
+    { 
+      name: "Lead Generation", 
+      status: userSubscription === "Lead Generation" ? "active" : "inactive", 
+      usage: userSubscription === "Lead Generation" ? "15/50 leads" : "Not subscribed", 
+      color: userSubscription === "Lead Generation" ? "purple" : "gray" 
+    },
   ];
 
   const formatTime = (date) => {
@@ -191,6 +240,8 @@ export default function DashboardPage() {
                       <div className={`w-4 h-4 rounded-full ${
                         service.color === 'blue' ? 'bg-blue-500' :
                         service.color === 'green' ? 'bg-green-500' :
+                        service.color === 'orange' ? 'bg-orange-500' :
+                        service.color === 'purple' ? 'bg-purple-500' :
                         'bg-gray-300'
                       }`}></div>
                       <div>
@@ -219,25 +270,52 @@ export default function DashboardPage() {
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Button 
-                className="h-20 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#1a84de] to-[#06398e] hover:from-[#24AC4A] hover:to-[#1e8f3a] text-white shadow-lg hover:shadow-xl transition-all duration-300"
-                onClick={() => window.location.href = '/roles/cvSourcing'}
+                className={`h-20 flex flex-col items-center justify-center gap-2 shadow-lg transition-all duration-300 ${
+                  (userSubscription === 'CV Sourcing' || userSubscription === 'Free Trial')
+                    ? 'bg-gradient-to-br from-[#1a84de] to-[#06398e] hover:from-[#24AC4A] hover:to-[#1e8f3a] text-white hover:shadow-xl cursor-pointer'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-50'
+                }`}
+                onClick={() => (userSubscription === 'CV Sourcing' || userSubscription === 'Free Trial') && (window.location.href = '/roles/cvSourcing')}
+                disabled={!(userSubscription === 'CV Sourcing' || userSubscription === 'Free Trial')}
               >
                 <FiBriefcase size={20} />
                 <span className="text-sm">CV Sourcing</span>
+                {userSubscription === 'Free Trial' && (
+                  <span className="text-xs mt-1">Trial Access</span>
+                )}
+                {!(userSubscription === 'CV Sourcing' || userSubscription === 'Free Trial') && (
+                  <span className="text-xs mt-1">Not subscribed</span>
+                )}
               </Button>
               <Button 
-                className="h-20 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#24AC4A] to-[#1e8f3a] hover:from-[#1a84de] hover:to-[#06398e] text-white shadow-lg hover:shadow-xl transition-all duration-300"
-                onClick={() => window.location.href = '/roles/PreQualification'}
+                className={`h-20 flex flex-col items-center justify-center gap-2 shadow-lg transition-all duration-300 ${
+                  userSubscription === 'Prequalification'
+                    ? 'bg-gradient-to-br from-[#24AC4A] to-[#1e8f3a] hover:from-[#1a84de] hover:to-[#06398e] text-white hover:shadow-xl cursor-pointer'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-50'
+                }`}
+                onClick={() => userSubscription === 'Prequalification' && (window.location.href = '/roles/PreQualification')}
+                disabled={userSubscription !== 'Prequalification'}
               >
                 <FiUser size={20} />
                 <span className="text-sm">Prequalification</span>
+                {userSubscription !== 'Prequalification' && (
+                  <span className="text-xs mt-1">Not subscribed</span>
+                )}
               </Button>
               <Button 
-                className="h-20 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#f59e0b] to-[#d97706] hover:from-[#1a84de] hover:to-[#06398e] text-white shadow-lg hover:shadow-xl transition-all duration-300"
-                onClick={() => window.location.href = '/roles/360Direct'}
+                className={`h-20 flex flex-col items-center justify-center gap-2 shadow-lg transition-all duration-300 ${
+                  userSubscription === '360/Direct'
+                    ? 'bg-gradient-to-br from-[#f59e0b] to-[#d97706] hover:from-[#1a84de] hover:to-[#06398e] text-white hover:shadow-xl cursor-pointer'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-50'
+                }`}
+                onClick={() => userSubscription === '360/Direct' && (window.location.href = '/roles/360Direct')}
+                disabled={userSubscription !== '360/Direct'}
               >
                 <FiTarget size={20} />
                 <span className="text-sm">360/Direct</span>
+                {userSubscription !== '360/Direct' && (
+                  <span className="text-xs mt-1">Not subscribed</span>
+                )}
               </Button>
               <Button 
                 className="h-20 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] hover:from-[#1a84de] hover:to-[#06398e] text-white shadow-lg hover:shadow-xl transition-all duration-300"

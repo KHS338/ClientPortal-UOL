@@ -90,6 +90,11 @@ export default function SubscriptionInfoPage() {
     localStorage.setItem('userSubscription', JSON.stringify(updatedSubscriptionData));
     setSubscriptionData(updatedSubscriptionData);
     
+    // Dispatch custom event to notify other components (like sidebar) of the update
+    window.dispatchEvent(new CustomEvent('subscriptionUpdated', { 
+      detail: updatedSubscriptionData 
+    }));
+    
     // Show success toast
     setToast({
       isOpen: true,
@@ -114,6 +119,11 @@ export default function SubscriptionInfoPage() {
         
         // Clear localStorage
         localStorage.removeItem('userSubscription');
+        
+        // Dispatch custom event to notify other components
+        window.dispatchEvent(new CustomEvent('subscriptionUpdated', { 
+          detail: null 
+        }));
         
         // Show success toast
         setToast({

@@ -27,6 +27,11 @@ export default function SubscriptionPage() {
     console.log('Subscription - Storing data:', subscriptionData);
     localStorage.setItem('userSubscription', JSON.stringify(subscriptionData));
     
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new CustomEvent('subscriptionUpdated', { 
+      detail: subscriptionData 
+    }));
+    
     setIsRedirecting(true);
     
     // Show a brief loading state before redirecting
