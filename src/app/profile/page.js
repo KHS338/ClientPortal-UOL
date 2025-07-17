@@ -414,7 +414,7 @@ export default function ClientProfilePage({ initial = {} }) {
                   </div>
                 ) : (
                   /* Regular Plans Display */
-                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 grid-rows-2">
                     {billingOptions.filter(service => !service.isEnterprise).map((service, index) => {
                       const currentPlan = billingCycle === "monthly" ? service.monthly : service.annual;
                       const isCurrentPlan = form.currentPlan === currentPlan.key;
@@ -422,7 +422,9 @@ export default function ClientProfilePage({ initial = {} }) {
                       return (
                         <div
                           key={service.title}
-                          className={`relative p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col group ${isCurrentPlan
+                          className={`relative p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col group ${
+                            index === 2 ? "row-span-2" : ""
+                          } ${isCurrentPlan
                             ? "border-[#0958d9] bg-gradient-to-br from-[#0958d9]/10 to-[#06398e]/10 shadow-xl"
                             : "border-gray-200 bg-white hover:border-[#24AC4A]/50 hover:shadow-lg"
                             }`}
@@ -453,7 +455,9 @@ export default function ClientProfilePage({ initial = {} }) {
                                 )}
                               </div>
 
-                              <ul className="space-y-3 text-sm text-gray-600 mb-6">
+                              <ul className={`text-sm text-gray-600 mb-6 ${
+                                service.title === "360/Direct" ? "space-y-14" : "space-y-3"
+                              }`}>
                                 {service.features.map((feature, featureIndex) => (
                                   <li key={featureIndex} className="flex items-center gap-2">
                                     <FiCheckCircle className={`flex-shrink-0 transition-colors duration-300 ${
