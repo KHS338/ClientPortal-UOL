@@ -56,9 +56,9 @@ export default function ClientRegistrationPage() {
       setIsLoading(false);
       setShowSuccess(true);
       
-      // Redirect to login page after showing success message
+      // Redirect to subscription page after showing success message
       setTimeout(() => {
-        router.push('/login');
+        router.push('/subscription');
       }, 2000);
     }, 2000);
   };
@@ -120,7 +120,7 @@ export default function ClientRegistrationPage() {
                   </div>
                   <div className="text-center">
                     <h3 className="text-lg font-semibold text-green-800 mb-1">Account Created Successfully!</h3>
-                    <p className="text-green-700">Welcome to our platform. Redirecting you to login page...</p>
+                    <p className="text-green-700">Welcome to our platform. Redirecting you to choose your subscription...</p>
                   </div>
                 </div>
               </motion.div>

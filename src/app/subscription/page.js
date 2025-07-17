@@ -1,17 +1,56 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { FiCheckCircle, FiStar, FiArrowRight, FiGift, FiZap } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export default function SubscriptionPage() {
+  const router = useRouter();
   const [billingCycle, setBillingCycle] = useState("monthly");
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const handlePlanSelection = (serviceTitle, cycle, price) => {
     console.log(`Plan selected: ${serviceTitle} (${cycle}) - ${price}`);
-    // Redirect to dashboard or payment processing
-    // window.location.href = "/dashboard";
+    
+    // Store subscription information in localStorage
+    const subscriptionData = {
+      service: serviceTitle,
+      billingCycle: cycle,
+      price: price,
+      subscribedDate: new Date().toISOString(),
+      nextPayment: getNextPaymentDate(cycle),
+      planKey: `${serviceTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${cycle}`
+    };
+    
+    console.log('Subscription - Storing data:', subscriptionData);
+    localStorage.setItem('userSubscription', JSON.stringify(subscriptionData));
+    
+    setIsRedirecting(true);
+    
+    // Show a brief loading state before redirecting
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 500);
+  };
+
+  // Helper function to calculate next payment date
+  const getNextPaymentDate = (cycle) => {
+    const now = new Date();
+    if (cycle === 'monthly') {
+      now.setMonth(now.getMonth() + 1);
+    } else if (cycle === 'annual') {
+      now.setFullYear(now.getFullYear() + 1);
+    } else {
+      // For enterprise or other plans, set a placeholder date
+      now.setMonth(now.getMonth() + 1);
+    }
+    return now.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
   };
 
   const billingOptions = [
@@ -71,7 +110,18 @@ export default function SubscriptionPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50">
+    <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50 relative">
+      {/* Loading Overlay */}
+      {isRedirecting && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 text-center shadow-2xl">
+            <div className="w-8 h-8 border-4 border-[#19AF1A] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-lg font-semibold text-gray-800">Setting up your subscription...</p>
+            <p className="text-sm text-gray-600 mt-2">Redirecting to dashboard</p>
+          </div>
+        </div>
+      )}
+      
       <div className="max-w-7xl mx-auto p-6 lg:p-8">
         <div className="space-y-8">
           {/* Header */}

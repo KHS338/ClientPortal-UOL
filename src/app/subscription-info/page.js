@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiCheckCircle, FiCalendar, FiCreditCard } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,28 @@ import { AlertDialog, Toast } from "@/components/ui/alert-dialog";
 
 export default function SubscriptionInfoPage() {
   const [billingCycle, setBillingCycle] = useState("monthly");
-  const [currentPlan, setCurrentPlan] = useState("prequalification-monthly");
-  const [currentService, setCurrentService] = useState("Prequalification");
-  const [currentBillingCycle, setCurrentBillingCycle] = useState("monthly"); // User's actual billing cycle
+  const [currentPlan, setCurrentPlan] = useState("");
+  const [currentService, setCurrentService] = useState("");
+  const [currentBillingCycle, setCurrentBillingCycle] = useState("monthly");
+  const [subscriptionData, setSubscriptionData] = useState(null);
+  
+  // Load subscription data from localStorage on component mount
+  useEffect(() => {
+    const savedSubscription = localStorage.getItem('userSubscription');
+    if (savedSubscription) {
+      const data = JSON.parse(savedSubscription);
+      setSubscriptionData(data);
+      setCurrentService(data.service);
+      setCurrentBillingCycle(data.billingCycle);
+      setCurrentPlan(data.planKey);
+      setBillingCycle(data.billingCycle);
+    } else {
+      // Fallback to default values if no subscription found
+      setCurrentService("No Active Subscription");
+      setCurrentBillingCycle("monthly");
+      setCurrentPlan("");
+    }
+  }, []);
   
   // Alert states
   const [alertConfig, setAlertConfig] = useState({
@@ -156,7 +175,9 @@ export default function SubscriptionInfoPage() {
                   <FiCreditCard size={24} className="text-[#1a84de]" />
                   <h3 className="text-lg font-semibold text-gray-800">Next Payment</h3>
                 </div>
-                <p className="text-2xl font-bold text-gray-800">Feb 15, 2025</p>
+                <p className="text-2xl font-bold text-gray-800">
+                  {subscriptionData?.nextPayment || "Not Available"}
+                </p>
                 <p className="text-gray-600 text-sm">Auto-renewal enabled</p>
               </Card>
             </div>
