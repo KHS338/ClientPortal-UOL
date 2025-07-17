@@ -279,16 +279,9 @@ export default function SubscriptionInfoPage() {
                           }
                         });
                       }}
-                      className="w-full md:w-auto px-12 py-4 text-lg bg-[#1a84de] hover:from-[#06398e] hover:bg-[#24AC4A] text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] mb-4"
+                      className="w-full md:w-auto px-12 py-4 text-lg bg-[#1a84de] hover:from-[#06398e] hover:bg-[#24AC4A] text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
                     >
                       Get Custom Quote
-                    </Button>
-
-                    <Button
-                      onClick={() => handleUnsubscribe("Enterprise")}
-                      className="w-full md:w-auto px-12 py-4 text-lg bg-red-500 hover:bg-red-600 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
-                    >
-                      Unsubscribe from Enterprise
                     </Button>
 
                     <div className="mt-6 p-4 bg-gradient-to-r from-[#0958d9]/10 to-[#06398e]/10 rounded-xl border border-[#0958d9]/20">
