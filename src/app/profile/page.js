@@ -19,6 +19,7 @@ export default function ClientProfilePage({ initial = {} }) {
     avatar: initial.avatar || null,
     currentPlan: initial.currentPlan || "prequalification-monthly",
     currentService: initial.currentService || "Prequalification",
+    currentBillingCycle: initial.currentBillingCycle || "monthly",
     joinDate: initial.joinDate || "January 2025",
     lastLogin: initial.lastLogin || "2 hours ago",
   });
@@ -52,7 +53,8 @@ export default function ClientProfilePage({ initial = {} }) {
     setForm(prev => ({
       ...prev,
       currentPlan: planKey,
-      currentService: serviceTitle
+      currentService: serviceTitle,
+      currentBillingCycle: cycle
     }));
   };
 
@@ -182,7 +184,7 @@ export default function ClientProfilePage({ initial = {} }) {
                 <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border-0">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-                      <FiUser className="text-black]" />
+                      <FiUser className="text-black" />
                       Profile Information
                     </h3>
                     <Button
@@ -498,7 +500,7 @@ export default function ClientProfilePage({ initial = {} }) {
                   <h4 className="font-semibold text-gray-800 mb-2">Current Subscription</h4>
                   <p className="text-gray-600">
                     You are currently subscribed to <span className="font-semibold text-[#0958d9]">{form.currentService}</span>
-                    {" "}({billingCycle === "monthly" ? "Monthly" : "Annual"} billing)
+                    {" "}({form.currentBillingCycle === "monthly" ? "Monthly" : "Annual"} billing)
                   </p>
                 </div>
               </Card>
