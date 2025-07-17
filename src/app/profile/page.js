@@ -122,7 +122,7 @@ export default function ClientProfilePage({ initial = {} }) {
                 <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border-0">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-                      <FiUser className="text-black]" />
+                      <FiUser className="text-black" />
                       Profile Information
                     </h3>
                     <Button
