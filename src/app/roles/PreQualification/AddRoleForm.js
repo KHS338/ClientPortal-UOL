@@ -389,7 +389,7 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
             className={`flex-1 font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
               isSubmitting
                 ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 hover:scale-[1.02] text-white'
+                : 'bg-[#0958d9]  hover:bg-[#24AC4A] hover:scale-[1.02] text-white'
             }`}
           >
             {isSubmitting ? (

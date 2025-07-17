@@ -137,13 +137,13 @@ export default function LoginPage() {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 text-[#19AF1A] bg-gray-100 border-gray-300 rounded focus:ring-[#19AF1A] focus:ring-2"
+                    className="w-4 h-4 text-[#24AC4A] bg-gray-100 border-gray-300 rounded focus:ring-[#0958d9] focus:ring-1"
                   />
                   <span className="ml-2 text-sm text-gray-600">Remember me</span>
                 </label>
                 <Link
                   href="#"
-                  className="text-sm text-[#19AF1A] hover:text-[#158A15] font-medium transition"
+                  className="text-sm text-[#0958d9]  hover:text-[#24AC4A] font-medium transition"
                 >
                   Forgot password?
                 </Link>
@@ -171,7 +171,7 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-[#19AF1A] to-[#158A15] hover:from-[#158A15] hover:to-[#0F6B0F] text-white py-3 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[#0958d9]  hover:bg-[#24AC4A] text-white py-3 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center space-x-2">
@@ -200,7 +200,7 @@ export default function LoginPage() {
                 Don&apos;t have an account?{" "}
                 <Link
                   href="/registration"
-                  className="text-[#19AF1A] hover:text-[#158A15] font-semibold transition-colors duration-300 hover:underline"
+                  className="text-[#0958d9]  hover:text-[#24AC4A] font-semibold transition-colors duration-300 hover:underline"
                 >
                   Create one now
                 </Link>
@@ -216,20 +216,20 @@ export default function LoginPage() {
             >
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div className="flex flex-col items-center space-y-2">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <FiUser className="text-[#19AF1A]" size={20} />
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <FiUser className="text-[#0958d9]" size={20} />
                   </div>
                   <span className="text-xs text-gray-600">Secure Login</span>
                 </div>
                 <div className="flex flex-col items-center space-y-2">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <FiLock className="text-[#19AF1A]" size={20} />
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <FiLock className="text-[#0958d9]" size={20} />
                   </div>
                   <span className="text-xs text-gray-600">Data Protected</span>
                 </div>
                 <div className="flex flex-col items-center space-y-2">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <FiArrowRight className="text-[#19AF1A]" size={20} />
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <FiArrowRight className="text-[#0958d9]" size={20} />
                   </div>
                   <span className="text-xs text-gray-600">Quick Access</span>
                 </div>

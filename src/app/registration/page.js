@@ -84,7 +84,7 @@ export default function ClientRegistrationPage() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="flex justify-center mb-6"
               >
-                <Image src="/images/Logoname.jpg" alt="Company Logo" width={160} height={160} className="h-32 md:h-40 object-contain" />
+                <Image src="/images/Logoname.jpg" alt="Company Logo" width={250} height={250} className="h-32 md:h-40 object-contain" />
               </motion.div>
               <motion.h1
                 initial={{ opacity: 0 }}
@@ -137,19 +137,16 @@ export default function ClientRegistrationPage() {
                 <div className="relative">
                   <div
                     onClick={() => fileRef.current?.click()}
-                    className="w-32 h-32 rounded-full bg-gradient-to-br from-[#19AF1A] to-[#158A15] flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:scale-105 border-4 border-white shadow-xl"
+                    className="w-32 h-32 mx-auto bg-[#0958d9] rounded-full overflow-hidden border-4 border-white shadow-xl"
                   >
-                    {form.avatar ? (
-                      <Image
-                        src={URL.createObjectURL(form.avatar)}
-                        alt="avatar"
-                        width={128}
-                        height={128}
-                        className="w-full h-full object-cover rounded-full"
+                      <img
+                        src={"images/profile.png"}
+                        alt="Profile"
+                        width={130}
+                        height={130}
+                        className="w-full h-full object-cover"
                       />
-                    ) : (
-                      <FiCamera size={32} className="text-white" />
-                    )}
+                    
                   </div>
                   <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-2 shadow-lg border-2 border-gray-100">
                     <FiUser size={16} className="text-gray-600" />
@@ -283,7 +280,7 @@ export default function ClientRegistrationPage() {
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-[#19AF1A] to-[#158A15] hover:from-[#158A15] hover:to-[#0F6B0F] text-white py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[#0958d9]  hover:bg-[#24AC4A] text-white py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center space-x-2">
@@ -304,11 +301,11 @@ export default function ClientRegistrationPage() {
                 className="text-center text-sm text-gray-600 mt-6"
               >
                 By creating an account, you agree to our{" "}
-                <a href="#" className="text-[#19AF1A] hover:text-[#158A15] font-medium transition">
+                <a href="#" className="text-[#0958d9]  hover:text-[#24AC4A] font-medium transition">
                   Terms of Service
                 </a>{" "}
                 and{" "}
-                <a href="#" className="text-[#19AF1A] hover:text-[#158A15] font-medium transition">
+                <a href="#" className="text-[#0958d9]  hover:text-[#24AC4A] font-medium transition">
                   Privacy Policy
                 </a>
               </motion.p>
@@ -324,7 +321,7 @@ export default function ClientRegistrationPage() {
                   type="button"
                   onClick={() => router.push('/login')}
                   variant="outline"
-                  className="inline-flex items-center space-x-2 px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300"
+                  className="inline-flex items-center space-x-2 px-6 py-2 border border-gray-300 rounded-lg text-white hover:text-white bg-[#0958d9]  hover:bg-[#24AC4A] transition-all duration-300"
                 >
                   <FiArrowLeft size={16} />
                   <span>Go back to login</span>
