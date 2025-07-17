@@ -48,10 +48,47 @@ export default function SubscriptionInfoPage() {
   const handlePlanChange = (serviceTitle, cycle) => {
     console.log(`Plan switch requested: ${serviceTitle} (${cycle})`);
 
+    // Get the service details to find the price
+    const service = billingOptions.find(s => s.title === serviceTitle);
+    const planDetails = service[cycle];
+    const price = planDetails?.price || "N/A";
+
+    // Calculate next payment date based on new billing cycle
+    const getNextPaymentDate = (billingCycle) => {
+      const now = new Date();
+      if (billingCycle === 'monthly') {
+        now.setMonth(now.getMonth() + 1);
+      } else if (billingCycle === 'annual') {
+        now.setFullYear(now.getFullYear() + 1);
+      } else {
+        now.setMonth(now.getMonth() + 1);
+      }
+      return now.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    };
+
     const planKey = `${serviceTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${cycle}`;
+    
+    // Update state variables
     setCurrentPlan(planKey);
     setCurrentService(serviceTitle);
-    setCurrentBillingCycle(cycle); // Update the actual billing cycle when plan changes
+    setCurrentBillingCycle(cycle);
+    
+    // Update localStorage with new subscription data
+    const updatedSubscriptionData = {
+      service: serviceTitle,
+      billingCycle: cycle,
+      price: price,
+      subscribedDate: subscriptionData?.subscribedDate || new Date().toISOString(),
+      nextPayment: getNextPaymentDate(cycle),
+      planKey: planKey
+    };
+    
+    localStorage.setItem('userSubscription', JSON.stringify(updatedSubscriptionData));
+    setSubscriptionData(updatedSubscriptionData);
     
     // Show success toast
     setToast({
@@ -71,8 +108,12 @@ export default function SubscriptionInfoPage() {
         console.log(`Unsubscribe requested for: ${serviceTitle}`);
         // Clear the current plan selection
         setCurrentPlan("");
-        setCurrentService("");
-        setCurrentBillingCycle("");
+        setCurrentService("No Active Subscription");
+        setCurrentBillingCycle("monthly");
+        setSubscriptionData(null);
+        
+        // Clear localStorage
+        localStorage.removeItem('userSubscription');
         
         // Show success toast
         setToast({
