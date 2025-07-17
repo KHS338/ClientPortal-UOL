@@ -50,9 +50,7 @@ export default function DashboardPage() {
 
   const recentRoleActivity = [
     { id: 1, action: "New role posted", service: "CV Sourcing", role: "Senior Developer", time: "2 hours ago", status: "active" },
-    { id: 2, action: "Interview completed", service: "Prequalification", role: "Marketing Manager", time: "4 hours ago", status: "completed" },
-    { id: 3, action: "Candidate shortlisted", service: "360/Direct", role: "Project Manager", time: "1 day ago", status: "pending" },
-    { id: 4, action: "Role filled", service: "Prequalification", role: "UX Designer", time: "2 days ago", status: "completed" },
+   
   ];
 
   const subscriptionServices = [
@@ -148,13 +146,7 @@ export default function DashboardPage() {
                   <FiBriefcase className="text-[#1a84de]" />
                   Recent Role Activity
                 </h3>
-                <Button 
-                  variant="outline" 
-                  className="text-[#1a84de] border-[#1a84de] hover:bg-[#1a84de] hover:text-white"
-                  onClick={() => window.location.href = '/roles'}
-                >
-                  View All Roles
-                </Button>
+               
               </div>
               <div className="space-y-4">
                 {recentRoleActivity.map((activity) => (
@@ -186,7 +178,7 @@ export default function DashboardPage() {
                 </h3>
                 <Button 
                   variant="outline" 
-                  className="text-[#1a84de] border-[#1a84de] hover:bg-[#1a84de] hover:text-white"
+                  className="text-[#1a84de] border-[#1a84de] hover:bg-[#1a84de] hover:text-white ml-2"
                   onClick={() => window.location.href = '/subscription-info'}
                 >
                   Manage Plans
