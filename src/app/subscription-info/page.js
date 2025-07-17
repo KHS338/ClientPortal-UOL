@@ -1,5 +1,5 @@
 "use client";
-
+//subscription page
 import { useState, useEffect } from "react";
 import { FiCheckCircle, FiCalendar, FiCreditCard } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
