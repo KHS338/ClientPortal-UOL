@@ -63,9 +63,9 @@ export default function LoginPage() {
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex justify-center mb-6"
+                className="flex justify-center mb-0"
               >
-                <Image src="/images/Logoname.jpg" alt="Company Logo" width={128} height={128} className="h-24 md:h-32 object-contain" />
+              <Image src="/images/Logoname.jpg" alt="Company Logo" width={450} height={250} className="h-40 md:h-48 object-contain" />
               </motion.div>
               <motion.h1
                 initial={{ opacity: 0 }}
@@ -261,7 +261,7 @@ function InputField({ label, name, type = "text", placeholder, value, onChange, 
           value={value}
           onChange={onChange}
           required={required}
-          className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#19AF1A] focus:border-transparent transition-all duration-300 bg-white hover:border-[#19AF1A]/50 text-gray-800 placeholder-gray-500 ${className}`}
+          className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0958d9] focus:border-transparent transition-all duration-300 bg-white hover:border-[#0958d9]/50 text-gray-800 placeholder-gray-500 ${className}`}
         />
       </div>
     </div>

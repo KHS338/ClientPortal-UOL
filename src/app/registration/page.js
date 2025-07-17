@@ -349,7 +349,7 @@ function InputField({ name, type, placeholder, value, onChange, icon, required =
         value={value}
         onChange={onChange}
         required={required}
-        className={`w-full pl-10 pr-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#19AF1A] focus:border-transparent transition-all duration-300 bg-white/50 backdrop-blur-sm hover:bg-white/80 text-gray-800 placeholder-gray-500 ${className}`}
+        className={`w-full pl-10 pr-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0958d9] focus:border-transparent transition-all duration-300 bg-white/50 backdrop-blur-sm hover:border-[#0958d9]/50 text-gray-800 placeholder-gray-500 ${className}`}
       />
     </div>
   );
@@ -366,7 +366,7 @@ function SelectField({ name, value, onChange, options, placeholder, icon, requir
         value={value}
         onChange={onChange}
         required={required}
-        className={`w-full pl-10 pr-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#19AF1A] focus:border-transparent transition-all duration-300 bg-white/50 backdrop-blur-sm hover:bg-white/80 text-gray-800 appearance-none cursor-pointer ${className}`}
+        className={`w-full pl-10 pr-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0958d9] focus:border-transparent transition-all duration-300 bg-white/50 backdrop-blur-sm hover:border-[#0958d9]/50 text-gray-800 appearance-none cursor-pointer ${className}`}
       >
         <option value="" disabled>
           {placeholder}
