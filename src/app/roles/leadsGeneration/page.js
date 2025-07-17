@@ -103,11 +103,13 @@ const IndustryForm = () => {
   });
   
   const [isCountryListOpen, setIsCountryListOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.country-selector')) {
         setIsCountryListOpen(false);
+        setHighlightedIndex(-1);
       }
     };
 
@@ -128,8 +130,8 @@ const IndustryForm = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-8 bg-white rounded-xl shadow-2xl transition-all duration-300 hover:shadow-lg">
-      <h2 className="text-3xl font-bold mb-6 text-center text-black">
+    <div className="max-w-2xl mx-auto p-8 bg-white/80 backdrop-blur-sm shadow-xl border-0 rounded-2xl transition-all duration-300 hover:shadow-lg">
+      <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
         Industry Information
       </h2>
       <div className="space-y-6">
@@ -144,7 +146,7 @@ const IndustryForm = () => {
                 name="industryType"
                 value={formData.industryType}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-300 hover:border-blue-400 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiAjsfk0JyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93biI+PHBhdGggZD0ibTYgOSA2IDYgNi02Ii8+PC9zdmc+')] bg-no-repeat bg-[center_right_1rem] pr-10"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 hover:border-[#1a84de]/50 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiAjsfk0JyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93biI+PHBhdGggZD0ibTYgOSA2IDYgNi02Ii8+PC9zdmc+')] bg-no-repeat bg-[center_right_1rem] pr-10"
               >
                 <option value="">Select Industry Type</option>
                 <option value="technology">Technology</option>
@@ -174,7 +176,7 @@ const IndustryForm = () => {
                 name="companySize"
                 value={formData.companySize}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-300 hover:border-blue-400 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiAjsfk0JyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93biI+PHBhdGggZD0ibTYgOSA2IDYgNi02Ii8+PC9zdmc+')] bg-no-repeat bg-[center_right_1rem] pr-10"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 hover:border-[#1a84de]/50 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiAjsfk0JyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93biI+PHBhdGggZD0ibTYgOSA2IDYgNi02Ii8+PC9zdmc+')] bg-no-repeat bg-[center_right_1rem] pr-10"
               >
                 <option value="">Select Company Size</option>
                 <option value="startup">Startup (1-10)</option>
@@ -191,17 +193,57 @@ const IndustryForm = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Country *
             </label>
-            <div className="relative">
+            <div className="relative country-selector">
               <input
                 type="text"
                 name="cityCountry"
                 value={formData.cityCountry}
                 onChange={(e) => {
                   handleChange(e);
+                  setIsCountryListOpen(true);
+                  setHighlightedIndex(-1);
                 }}
-                onFocus={() => setIsCountryListOpen(true)}
+                onFocus={() => {
+                  setIsCountryListOpen(true);
+                  setHighlightedIndex(-1);
+                }}
+                onKeyDown={(e) => {
+                  const filteredCountries = countries.filter(country => 
+                    country.toLowerCase().includes(formData.cityCountry.toLowerCase())
+                  );
+                  
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    setHighlightedIndex(prev => 
+                      prev < filteredCountries.length - 1 ? prev + 1 : prev
+                    );
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    setHighlightedIndex(prev => prev > 0 ? prev - 1 : -1);
+                  } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (highlightedIndex >= 0 && highlightedIndex < filteredCountries.length) {
+                      setFormData({
+                        ...formData,
+                        cityCountry: filteredCountries[highlightedIndex]
+                      });
+                      setIsCountryListOpen(false);
+                      setHighlightedIndex(-1);
+                    } else if (filteredCountries.length === 1) {
+                      setFormData({
+                        ...formData,
+                        cityCountry: filteredCountries[0]
+                      });
+                      setIsCountryListOpen(false);
+                      setHighlightedIndex(-1);
+                    }
+                  } else if (e.key === 'Escape') {
+                    setIsCountryListOpen(false);
+                    setHighlightedIndex(-1);
+                  }
+                }}
                 placeholder="Search and select a country"
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-300 hover:border-blue-400"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 hover:border-[#1a84de]/50"
                 autoComplete="off"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
@@ -215,7 +257,7 @@ const IndustryForm = () => {
                     .filter(country => 
                       country.toLowerCase().includes(formData.cityCountry.toLowerCase())
                     )
-                    .map((country) => (
+                    .map((country, index) => (
                       <div
                         key={country}
                         onClick={() => {
@@ -224,8 +266,14 @@ const IndustryForm = () => {
                             cityCountry: country
                           });
                           setIsCountryListOpen(false);
+                          setHighlightedIndex(-1);
                         }}
-                        className="px-4 py-2 cursor-pointer hover:bg-gray-100 transition-colors duration-200"
+                        onMouseEnter={() => setHighlightedIndex(index)}
+                        className={`px-4 py-2 cursor-pointer transition-colors duration-200 ${
+                          index === highlightedIndex 
+                            ? 'bg-[#1a84de] text-white' 
+                            : 'hover:bg-gray-100'
+                        }`}
                       >
                         {country}
                       </div>
@@ -244,7 +292,7 @@ const IndustryForm = () => {
           <div className="grid grid-cols-3 gap-4">
             {["High", "Medium", "Low"].map((priority) => (
               <label key={priority} className="flex items-center space-x-2 cursor-pointer group">
-                <div className={`w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all duration-300 group-hover:border-blue-500 ${formData.leadPriority === priority.toLowerCase() ? 'border-blue-500 bg-blue-500' : ''}`}>
+                <div className={`w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all duration-300 group-hover:border-[#1a84de] ${formData.leadPriority === priority.toLowerCase() ? 'border-[#1a84de] bg-[#1a84de]' : ''}`}>
                   {formData.leadPriority === priority.toLowerCase() && (
                     <div className="w-2 h-2 bg-white rounded-full"></div>
                   )}
@@ -257,7 +305,7 @@ const IndustryForm = () => {
                   onChange={handleChange}
                   className="hidden"
                 />
-                <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600">{priority}</span>
+                <span className="text-sm font-medium text-gray-700 group-hover:text-[#1a84de]">{priority}</span>
               </label>
             ))}
           </div>
@@ -268,7 +316,7 @@ const IndustryForm = () => {
           <button
             type="button"
             onClick={handleSubmit}
-            className="px-8 py-4 bg-gradient-to-r from-[#0958d9] to-[#0958d9] hover:from-[#24AC4A] hover:to-[#24AC4A] text-white font-bold rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0958d9] focus:ring-offset-2 transition-all duration-500 transform hover:scale-105 shadow-lg shadow-[#0958d9]/20 hover:shadow-[#24AC4A]/30 flex items-center gap-2"
+            className="px-8 py-3 bg-[#1a84de] hover:bg-[#24AC4A] text-white font-semibold rounded-xl focus:outline-none transition-all duration-300 flex items-center gap-2"
           >
             <span>Submit Industry Info</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -297,11 +345,13 @@ const JobsForm = () => {
 
   const [currentSkill, setCurrentSkill] = useState("");
   const [isCountryListOpen, setIsCountryListOpen] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.country-selector')) {
         setIsCountryListOpen(false);
+        setHighlightedIndex(-1);
       }
     };
 
@@ -346,8 +396,8 @@ const JobsForm = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-8 bg-white rounded-xl shadow-2xl transition-all duration-300 hover:shadow-lg">
-      <h2 className="text-3xl font-bold mb-6 text-center text-black">
+    <div className="max-w-2xl mx-auto p-8 bg-white/80 backdrop-blur-sm shadow-xl border-0 rounded-2xl transition-all duration-300 hover:shadow-lg">
+      <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
         Job Information
       </h2>
       <div className="space-y-6">
@@ -362,7 +412,7 @@ const JobsForm = () => {
                 name="industryType"
                 value={formData.industryType}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-300 hover:border-blue-400 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiAjsfk0JyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93biI+PHBhdGggZD0ibTYgOSA2IDYgNi02Ii8+PC9zdmc+')] bg-no-repeat bg-[center_right_1rem] pr-10"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 hover:border-[#1a84de]/50 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiAjsfk0JyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93biI+PHBhdGggZD0ibTYgOSA2IDYgNi02Ii8+PC9zdmc+')] bg-no-repeat bg-[center_right_1rem] pr-10"
               >
                 <option value="">Select Industry Type</option>
                 <option value="technology">Technology</option>
@@ -387,7 +437,7 @@ const JobsForm = () => {
                 name="companySize"
                 value={formData.companySize}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-300 hover:border-blue-400 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAw IDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiAjsfk0JyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93biI+PHBhdGggZD0ibTYgOSA2IDYgNi02Ii8+PC9zdmc+')] bg-no-repeat bg-[center_right_1rem] pr-10"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 hover:border-[#1a84de]/50 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAw IDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiAjsfk0JyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93biI+PHBhdGggZD0ibTYgOSA2IDYgNi02Ii8+PC9zdmc+')] bg-no-repeat bg-[center_right_1rem] pr-10"
               >
                 <option value="">Select Company Size</option>
                 <option value="startup">Startup (1-10)</option>
@@ -409,7 +459,7 @@ const JobsForm = () => {
                 name="workType"
                 value={formData.workType}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-300 hover:border-blue-400 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiAjsfk0JyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93biI+PHBhdGggZD0ibTYgOSA2IDYgNi02Ii8+PC9zdmc+')] bg-no-repeat bg-[center_right_1rem] pr-10"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 hover:border-[#1a84de]/50 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiAjsfk0JyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93biI+PHBhdGggZD0ibTYgOSA2IDYgNi02Ii8+PC9zdmc+')] bg-no-repeat bg-[center_right_1rem] pr-10"
               >
                 <option value="">Select Work Type</option>
                 <option value="onsite">On-site</option>
@@ -424,18 +474,57 @@ const JobsForm = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Location *
             </label>
-            <div className="relative">
+            <div className="relative country-selector">
               <input
                 type="text"
                 name="location"
                 value={formData.location}
                 onChange={(e) => {
                   handleChange(e);
-                  setCountrySearch(e.target.value);
+                  setIsCountryListOpen(true);
+                  setHighlightedIndex(-1);
                 }}
-                onFocus={() => setIsCountryListOpen(true)}
+                onFocus={() => {
+                  setIsCountryListOpen(true);
+                  setHighlightedIndex(-1);
+                }}
+                onKeyDown={(e) => {
+                  const filteredCountries = countries.filter(country => 
+                    country.toLowerCase().includes(formData.location.toLowerCase())
+                  );
+                  
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    setHighlightedIndex(prev => 
+                      prev < filteredCountries.length - 1 ? prev + 1 : prev
+                    );
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    setHighlightedIndex(prev => prev > 0 ? prev - 1 : -1);
+                  } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (highlightedIndex >= 0 && highlightedIndex < filteredCountries.length) {
+                      setFormData({
+                        ...formData,
+                        location: filteredCountries[highlightedIndex]
+                      });
+                      setIsCountryListOpen(false);
+                      setHighlightedIndex(-1);
+                    } else if (filteredCountries.length === 1) {
+                      setFormData({
+                        ...formData,
+                        location: filteredCountries[0]
+                      });
+                      setIsCountryListOpen(false);
+                      setHighlightedIndex(-1);
+                    }
+                  } else if (e.key === 'Escape') {
+                    setIsCountryListOpen(false);
+                    setHighlightedIndex(-1);
+                  }
+                }}
                 placeholder="Search and select a country"
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-300 hover:border-blue-400"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 hover:border-[#1a84de]/50"
                 autoComplete="off"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
@@ -449,7 +538,7 @@ const JobsForm = () => {
                     .filter(country => 
                       country.toLowerCase().includes(formData.location.toLowerCase())
                     )
-                    .map((country) => (
+                    .map((country, index) => (
                       <div
                         key={country}
                         onClick={() => {
@@ -458,8 +547,14 @@ const JobsForm = () => {
                             location: country
                           });
                           setIsCountryListOpen(false);
+                          setHighlightedIndex(-1);
                         }}
-                        className="px-4 py-2 cursor-pointer hover:bg-gray-100 transition-colors duration-200"
+                        onMouseEnter={() => setHighlightedIndex(index)}
+                        className={`px-4 py-2 cursor-pointer transition-colors duration-200 ${
+                          index === highlightedIndex 
+                            ? 'bg-[#1a84de] text-white' 
+                            : 'hover:bg-gray-100'
+                        }`}
                       >
                         {country}
                       </div>
@@ -480,7 +575,7 @@ const JobsForm = () => {
               value={formData.jobTitle}
               onChange={handleChange}
               placeholder="e.g., Senior Frontend Developer"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-300 placeholder-gray-400 hover:border-blue-400"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 placeholder-gray-400 hover:border-[#1a84de]/50"
             />
           </div>
 
@@ -494,7 +589,7 @@ const JobsForm = () => {
                 name="experience"
                 value={formData.experience}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-300 hover:border-blue-400 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiAjsfk0JyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93biI+PHBhdGggZD0ibTYgOSA2IDYgNi02Ii8+PC9zdmc+')] bg-no-repeat bg-[center_right_1rem] pr-10"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 hover:border-[#1a84de]/50 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiAjsfk0JyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93biI+PHBhdGggZD0ibTYgOSA2IDYgNi02Ii8+PC9zdmc+')] bg-no-repeat bg-[center_right_1rem] pr-10"
               >
                 <option value="">Select Experience Level</option>
                 <option value="entry">Entry Level (0-2 years)</option>
@@ -520,12 +615,12 @@ const JobsForm = () => {
               onChange={(e) => setCurrentSkill(e.target.value)}
               onKeyPress={handleSkillKeyPress}
               placeholder="Enter a skill and press Enter or click Add"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-300 placeholder-gray-400 hover:border-blue-400"
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 placeholder-gray-400 hover:border-[#1a84de]/50"
             />
             <button
               type="button"
               onClick={handleAddSkill}
-              className="px-6 py-3 bg-[#0958d9] text-white font-medium rounded-xl hover:bg-[#24AC4A] focus:outline-none focus:ring-2 focus:ring-[#0958d9] focus:ring-offset-2 transition-all duration-300 whitespace-nowrap flex items-center gap-2 justify-center"
+              className="px-6 py-3 bg-[#1a84de] text-white font-medium rounded-xl hover:bg-[#24AC4A] focus:outline-none focus:ring-2 focus:ring-[#1a84de] focus:ring-offset-2 transition-all duration-300 whitespace-nowrap flex items-center gap-2 justify-center"
             >
               <span>Add Skill</span>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -547,7 +642,7 @@ const JobsForm = () => {
                   <button
                     type="button"
                     onClick={() => handleRemoveSkill(skill)}
-                    className="ml-2 text-blue-600 hover:text-blue-800 focus:outline-none transition-colors duration-200 flex items-center"
+                    className="ml-2 text-[#1a84de] hover:text-blue-800 focus:outline-none transition-colors duration-200 flex items-center"
                   >
                     ×
                   </button>
@@ -565,7 +660,7 @@ const JobsForm = () => {
           <div className="grid grid-cols-3 gap-4">
             {["Urgent", "Normal", "Flexible"].map((urgency) => (
               <label key={urgency} className="flex items-center space-x-2 cursor-pointer group">
-                <div className={`w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all duration-300 group-hover:border-blue-500 ${formData.hiringUrgency === urgency.toLowerCase() ? 'border-blue-500 bg-blue-500' : ''}`}>
+                <div className={`w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all duration-300 group-hover:border-[#1a84de] ${formData.hiringUrgency === urgency.toLowerCase() ? 'border-[#1a84de] bg-[#1a84de]' : ''}`}>
                   {formData.hiringUrgency === urgency.toLowerCase() && (
                     <div className="w-2 h-2 bg-white rounded-full"></div>
                   )}
@@ -578,7 +673,7 @@ const JobsForm = () => {
                   onChange={handleChange}
                   className="hidden"
                 />
-                <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600">{urgency}</span>
+                <span className="text-sm font-medium text-gray-700 group-hover:text-[#1a84de]">{urgency}</span>
               </label>
             ))}
           </div>
@@ -589,7 +684,7 @@ const JobsForm = () => {
           <button
             type="button"
             onClick={handleSubmit}
-            className="px-8 py-4 bg-gradient-to-r from-[#0958d9] to-[#0958d9] hover:from-[#24AC4A] hover:to-[#24AC4A] text-white font-bold rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0958d9] focus:ring-offset-2 transition-all duration-500 transform hover:scale-105 shadow-lg shadow-[#0958d9]/20 hover:shadow-[#24AC4A]/30 flex items-center gap-2"
+            className="px-8 py-3 bg-[#1a84de] hover:bg-[#24AC4A] text-white font-semibold rounded-xl focus:outline-none transition-all duration-300 flex items-center gap-2"
           >
             <span>Submit Job Info</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -657,14 +752,14 @@ export default function RolesPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-6 animate-fadeIn">
+    <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50 p-4 sm:p-6 animate-fadeIn">
       {/* Toggle Buttons */}
       <div className="mx-auto mb-8 flex w-full max-w-md overflow-hidden rounded-xl border border-gray-300 shadow-md bg-white animate-slideUpFade hover:shadow-lg transition-all duration-500">
         <button
           onClick={() => setSelected("jobs")}
           className={`w-1/2 px-6 py-4 text-center font-bold transition-all duration-300 ${
             selected === "jobs"
-              ? "bg-gradient-to-r from-[#0958d9] to-[#0958d9] text-white shadow-inner"
+              ? "bg-gradient-to-r from-[#1a84de] to-[#1a84de] text-white shadow-inner"
               : "bg-white text-gray-700"
           }`}
         >
@@ -674,7 +769,7 @@ export default function RolesPage() {
           onClick={() => setSelected("industry")}
           className={`w-1/2 px-6 py-4 text-center font-bold transition-all duration-300 ${
             selected === "industry"
-              ? "bg-gradient-to-r from-[#0958d9] to-[#0958d9] text-white shadow-inner"
+              ? "bg-gradient-to-r from-[#1a84de] to-[#1a84de] text-white shadow-inner"
               : "bg-white text-gray-700"
           }`}
         >

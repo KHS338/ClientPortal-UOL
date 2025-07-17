@@ -132,7 +132,7 @@ export default function SubscriptionPage() {
           {/* Header */}
           <div className="text-center mb-12">
             <div className="mb-4">
-              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#19AF1A] to-[#158A15] text-white px-6 py-2 rounded-full text-sm font-medium shadow-lg">
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#1a84de] to-[#0958d9] text-white px-6 py-2 rounded-full text-sm font-medium shadow-lg">
                 <FiGift className="w-4 h-4" />
                 Welcome! Choose Your Plan
               </div>
@@ -150,9 +150,9 @@ export default function SubscriptionPage() {
             <div className="bg-gray-100 p-1 rounded-xl inline-flex">
               <button
                 onClick={() => setBillingCycle("monthly")}
-                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
                   billingCycle === "monthly"
-                    ? "bg-[#19AF1A] text-white shadow-md"
+                    ? "bg-[#0958d9] text-white shadow-md"
                     : "text-gray-600 hover:text-gray-800"
                 }`}
               >
@@ -160,9 +160,9 @@ export default function SubscriptionPage() {
               </button>
               <button
                 onClick={() => setBillingCycle("annual")}
-                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
                   billingCycle === "annual"
-                    ? "bg-[#19AF1A] text-white shadow-md"
+                    ? "bg-[#0958d9] text-white shadow-md"
                     : "text-gray-600 hover:text-gray-800"
                 }`}
               >
@@ -170,9 +170,9 @@ export default function SubscriptionPage() {
               </button>
               <button
                 onClick={() => setBillingCycle("enterprise")}
-                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
                   billingCycle === "enterprise"
-                    ? "bg-[#19AF1A] text-white shadow-md"
+                    ? "bg-[#0958d9] text-white shadow-md"
                     : "text-gray-600 hover:text-gray-800"
                 }`}
               >
@@ -183,24 +183,24 @@ export default function SubscriptionPage() {
 
           {billingCycle === "enterprise" ? (
             /* Enterprise Solutions Display */
-            <div className="max-w-4xl mx-auto">
-              <div className="relative p-8 rounded-2xl border-2 border-[#19AF1A] bg-white shadow-2xl">
+            <div className="max-w-4xl mx-auto px-4 sm:px-0">
+              <div className="relative p-4 sm:p-8 rounded-2xl border-2 border-[#0958d9] bg-white shadow-2xl group hover:border-[#24AC4A]/50 transition-all duration-300">
                 <div className="text-center">
-                  <h4 className="text-3xl font-bold text-transparent bg-gradient-to-r from-[#19AF1A] to-[#158A15] bg-clip-text mb-4">
+                  <h4 className="text-3xl font-bold text-transparent bg-gradient-to-r from-[#1a84de] to-[#1a84de] group-hover:from-[#24AC4A] group-hover:to-[#24AC4A] bg-clip-text mb-4 transition-all duration-300">
                     Enterprise Plan
                   </h4>
                   <p className="text-lg text-gray-600 mb-6">
                     Fully customizable enterprise solution with dedicated support
                   </p>
                   
-                  <div className="mb-8">
-                    <p className="text-4xl font-bold text-transparent bg-gradient-to-r from-[#19AF1A] to-[#158A15] bg-clip-text mb-4">
+                  <div className="mb-6 sm:mb-8">
+                    <p className="text-3xl sm:text-4xl font-bold text-transparent bg-gradient-to-r from-[#1a84de] to-[#1a84de] group-hover:from-[#24AC4A] group-hover:to-[#24AC4A] bg-clip-text mb-4 transition-all duration-300">
                       Custom Pricing
                     </p>
-                    <p className="text-lg text-gray-500 font-medium">Tailored to your organization&apos;s needs</p>
+                    <p className="text-base sm:text-lg text-gray-500 font-medium">Tailored to your organization&apos;s needs</p>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
                     {[
                       "Unlimited Everything",
                       "White-label Solution", 
@@ -213,24 +213,23 @@ export default function SubscriptionPage() {
                     ].map((feature, index) => (
                       <div 
                         key={index} 
-                        className="flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-3 shadow-sm"
+                        className="flex items-center gap-2 sm:gap-3 bg-white/70 rounded-lg px-3 sm:px-4 py-2 sm:py-3 transition-all duration-300 hover:bg-white/90"
                       >
-                        <FiCheckCircle className="text-[#19AF1A] flex-shrink-0" size={18} />
-                        <span className="font-medium text-gray-700">{feature}</span>
+                        <FiCheckCircle className="text-[#0958d9] group-hover:text-[#24AC4A] flex-shrink-0 transition-colors duration-300" size={16} />
+                        <span className="font-medium text-gray-700 text-sm sm:text-base">{feature}</span>
                       </div>
                     ))}
                   </div>
 
                   <Button
                     onClick={() => handlePlanSelection("Enterprise", billingCycle, "Custom Quote")}
-                    className="w-full md:w-auto px-12 py-4 text-lg bg-gradient-to-r from-[#19AF1A] to-[#158A15] hover:from-[#158A15] hover:to-[#0F6B0F] text-white"
+                    className="w-full px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg bg-[#1a84de] group-hover:bg-[#24AC4A] hover:bg-[#1a84de] group-hover:hover:bg-[#24AC4A] text-white transition-all duration-300"
                   >
-                    <span>Get Custom Quote</span>
-                    <FiArrowRight className="ml-2" />
+                    Get Custom Quote
                   </Button>
 
-                  <div className="mt-6 p-4 bg-gradient-to-r from-[#19AF1A]/10 to-[#158A15]/10 rounded-xl border border-[#19AF1A]/20">
-                    <p className="text-sm text-gray-600">
+                  <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-[#0958d9]/10 to-[#06398e]/10 group-hover:from-[#24AC4A]/10 group-hover:to-[#24AC4A]/10 rounded-xl border border-[#0958d9]/20 group-hover:border-[#24AC4A]/20 transition-all duration-300">
+                    <p className="text-xs sm:text-sm text-gray-600">
                       <strong>Ready to scale?</strong> Our enterprise solutions are designed for organizations with complex requirements. 
                       Contact our sales team for a personalized demo and custom pricing.
                     </p>
@@ -240,9 +239,7 @@ export default function SubscriptionPage() {
             </div>
           ) : (
             /* Regular Plans Display */
-            <div 
-              className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"
-            >
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 grid-rows-2">
               {billingOptions.filter(service => !service.isEnterprise).map((service, index) => {
                 const currentPlan = billingCycle === "monthly" ? service.monthly : service.annual;
                 const isTrialPlan = service.isTrial;
@@ -251,14 +248,14 @@ export default function SubscriptionPage() {
                 return (
                   <div
                     key={service.title}
-                    className={`relative p-6 rounded-2xl border-2 flex flex-col ${
+                    className={`relative p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col group ${
                       isHighlighted
-                        ? "border-[#19AF1A] bg-gradient-to-br from-[#19AF1A]/10 to-[#158A15]/10 shadow-xl scale-105"
-                        : "border-gray-200 bg-white hover:border-[#19AF1A]/50"
+                        ? "border-[#0958d9] bg-gradient-to-br from-[#0958d9]/10 to-[#06398e]/10 shadow-xl"
+                        : "border-gray-200 bg-white hover:border-[#24AC4A]/50 hover:shadow-lg"
                     }`}
                   >
                     {isTrialPlan && (
-                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-[#19AF1A] to-[#158A15] text-white px-4 py-1 rounded-full text-sm font-medium flex items-center gap-1">
+                      <div className="absolute -top-3 right-6 bg-[#0958d9] text-white px-4 py-1 rounded-full text-sm font-medium flex items-center gap-1">
                         <FiZap className="w-3 h-3" />
                         Start Free
                       </div>
@@ -266,21 +263,27 @@ export default function SubscriptionPage() {
 
                     <div className="text-center flex-1 flex flex-col">
                       <div className="flex-1">
-                        <h4 className={`text-xl font-bold mb-2 ${
-                          isTrialPlan ? "text-transparent bg-gradient-to-r from-[#19AF1A] to-[#158A15] bg-clip-text" : "text-gray-800"
-                        }`}>
+                        <h4 className="text-xl font-bold text-gray-800 mb-2">
                           {service.title}
                         </h4>
                         <p className="text-sm text-gray-600 mb-4">{service.description}</p>
                         
                         <div className="mb-4">
-                          <p className={`text-4xl font-bold mb-1 ${
-                            isTrialPlan ? "text-transparent bg-gradient-to-r from-[#19AF1A] to-[#158A15] bg-clip-text" : "text-[#19AF1A]"
+                          <p className={`text-4xl font-bold mb-1 transition-colors duration-300 ${
+                            isTrialPlan 
+                              ? "text-transparent bg-gradient-to-r from-[#0958d9] to-[#0958d9] bg-clip-text" 
+                              : isHighlighted 
+                                ? "text-[#0958d9]" 
+                                : "text-[#0958d9] group-hover:text-[#24AC4A]"
                           }`}>
                             {currentPlan.price}
                           </p>
                           {billingCycle === "annual" && service.annual?.savings && (
-                            <p className="text-sm text-green-600 font-medium">{service.annual.savings}</p>
+                            <p className={`text-sm font-medium transition-colors duration-300 ${
+                              isHighlighted 
+                                ? "text-[#1a84de]" 
+                                : "text-[#1a84de] group-hover:text-[#24AC4A]"
+                            }`}>{service.annual.savings}</p>
                           )}
                           {isTrialPlan && (
                             <p className="text-sm text-gray-500 font-medium">
@@ -289,10 +292,14 @@ export default function SubscriptionPage() {
                           )}
                         </div>
 
-                        <ul className="space-y-3 text-sm text-gray-600 mb-6">
+                        <ul className="text-sm text-gray-600 mb-6 space-y-3">
                           {service.features.map((feature, featureIndex) => (
                             <li key={featureIndex} className="flex items-center gap-2">
-                              <FiCheckCircle className="text-[#19AF1A] flex-shrink-0" size={16} />
+                              <FiCheckCircle className={`flex-shrink-0 transition-colors duration-300 ${
+                                isHighlighted 
+                                  ? "text-[#0958d9]" 
+                                  : "text-[#0958d9] group-hover:text-[#24AC4A]"
+                              }`} size={16} />
                               <span>{feature}</span>
                             </li>
                           ))}
@@ -301,7 +308,11 @@ export default function SubscriptionPage() {
 
                       <Button
                         onClick={() => handlePlanSelection(service.title, billingCycle, currentPlan.price)}
-                        className="w-full mt-auto bg-gradient-to-r from-[#19AF1A] to-[#158A15] hover:from-[#158A15] hover:to-[#0F6B0F] text-white"
+                        className={`w-full transition-all duration-300 mt-auto ${
+                          isHighlighted
+                            ? "bg-[#0958d9] hover:bg-[#24AC4A] text-white"
+                            : "bg-[#1a84de] hover:bg-[#24AC4A] text-white group-hover:bg-[#24AC4A]"
+                        }`}
                       >
                         <span className="flex items-center justify-center gap-2">
                           {isTrialPlan ? "Start Free Trial" : "Choose Plan"}
@@ -323,21 +334,21 @@ export default function SubscriptionPage() {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
                 <div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-[#19AF1A] to-[#158A15] rounded-full flex items-center justify-center mx-auto mb-3">
+                  <div className="w-12 h-12 bg-gradient-to-r from-[#1a84de] to-[#0958d9] rounded-full flex items-center justify-center mx-auto mb-3">
                     <FiCheckCircle className="text-white" size={24} />
                   </div>
                   <h4 className="font-semibold text-gray-800 mb-2">No Setup Fees</h4>
                   <p className="text-sm text-gray-600">Get started instantly with no hidden costs or setup fees</p>
                 </div>
                 <div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-[#19AF1A] to-[#158A15] rounded-full flex items-center justify-center mx-auto mb-3">
+                  <div className="w-12 h-12 bg-gradient-to-r from-[#1a84de] to-[#0958d9] rounded-full flex items-center justify-center mx-auto mb-3">
                     <FiZap className="text-white" size={24} />
                   </div>
                   <h4 className="font-semibold text-gray-800 mb-2">Instant Access</h4>
                   <p className="text-sm text-gray-600">Start using all features immediately after subscription</p>
                 </div>
                 <div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-[#19AF1A] to-[#158A15] rounded-full flex items-center justify-center mx-auto mb-3">
+                  <div className="w-12 h-12 bg-gradient-to-r from-[#1a84de] to-[#0958d9] rounded-full flex items-center justify-center mx-auto mb-3">
                     <FiGift className="text-white" size={24} />
                   </div>
                   <h4 className="font-semibold text-gray-800 mb-2">Cancel Anytime</h4>

@@ -326,7 +326,7 @@ export default function SubscriptionInfoPage() {
                       ].map((feature, index) => (
                         <div
                           key={index}
-                          className="flex items-center gap-2 sm:gap-3 bg-white/70 rounded-lg px-3 sm:px-4 py-2 sm:py-3 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-white/90"
+                          className="flex items-center gap-2 sm:gap-3 bg-white/70 rounded-lg px-3 sm:px-4 py-2 sm:py-3 transition-all duration-300 hover:bg-white/90"
                         >
                           <FiCheckCircle className="text-[#0958d9] group-hover:text-[#24AC4A] flex-shrink-0 transition-colors duration-300" size={16} />
                           <span className="font-medium text-gray-700 text-sm sm:text-base">{feature}</span>
@@ -351,7 +351,7 @@ export default function SubscriptionInfoPage() {
                           }
                         });
                       }}
-                      className="w-full px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg bg-[#1a84de] group-hover:bg-[#24AC4A] hover:bg-[#1a84de] group-hover:hover:bg-[#24AC4A] text-white shadow-xl transition-all duration-300"
+                      className="w-full px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg bg-[#1a84de] group-hover:bg-[#24AC4A] hover:bg-[#1a84de] group-hover:hover:bg-[#24AC4A] text-white transition-all duration-300"
                     >
                       Get Custom Quote
                     </Button>
