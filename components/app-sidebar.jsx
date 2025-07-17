@@ -47,6 +47,10 @@ const items = [
         title: "360/Direct",
         url: "/roles/360Direct",
       },
+      {
+        title: "Leads Generation",
+        url: "/roles/leadsGeneration",
+      },
     ],
   },
   {
