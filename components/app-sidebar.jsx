@@ -59,6 +59,11 @@ const items = [
     url: "/profile",
     icon: UserCircleIcon,
   },
+  {
+    title: "Subscription Info",
+    url: "/subscription-info",
+    icon: Settings,
+  },
 ]
 
 export function AppSidebar() {
