@@ -356,17 +356,10 @@ export default function ClientInvoicePage() {
           </div>
 
           {/* Actions */}
-          <div className="flex flex-wrap gap-3 pt-6 border-t">
-            <Button 
-              onClick={printInvoice}
-              className="flex items-center bg-blue-600 hover:bg-blue-700"
-            >
-              <FiPrinter className="mr-2" />
-              Print
-            </Button>
+          <div className="flex justify-end pt-6">
             <Button 
               onClick={downloadInvoicePDF}
-              className="flex items-center bg-green-600 hover:bg-green-700"
+              className="bg-[#0958d9] hover:bg-[#24AC4A] flex items-center"
             >
               <FiDownload className="mr-2" />
               Download PDF

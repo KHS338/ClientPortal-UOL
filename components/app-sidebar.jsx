@@ -2,6 +2,7 @@
 
 import React from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   UserCircleIcon,
   CircleDollarSign,
@@ -10,6 +11,7 @@ import {
   Users,
   FilePlus,
   Settings,
+  LogOut,
 } from "lucide-react"
 import { useState, useEffect } from "react"
 
@@ -74,6 +76,18 @@ export function AppSidebar() {
   const [openMenu, setOpenMenu] = useState(null)
   const [mounted, setMounted] = useState(false)
   const [userSubscription, setUserSubscription] = useState(null)
+  const router = useRouter()
+
+  // Handle logout
+  const handleLogout = () => {
+    // Clear user data from localStorage
+    localStorage.removeItem('userSubscription')
+    localStorage.removeItem('userData')
+    localStorage.removeItem('userEmail')
+    
+    // Redirect to login page
+    router.push('/login')
+  }
 
   // Load user subscription from localStorage
   useEffect(() => {
@@ -265,6 +279,25 @@ export function AppSidebar() {
                   )}
                 </React.Fragment>
               ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        
+        {/* Logout Section */}
+        <SidebarGroup className="mt-auto">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <button
+                    onClick={handleLogout}
+                    className="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600 hover:text-white text-gray-700 w-full text-left"
+                  >
+                    <LogOut className="h-5 w-5 flex-shrink-0" />
+                    <span className="truncate">Logout</span>
+                  </button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
