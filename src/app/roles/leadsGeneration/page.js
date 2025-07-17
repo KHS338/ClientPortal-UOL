@@ -2,15 +2,118 @@
 "use client";
 import React, { useState, useEffect } from "react";
 
+// Add animation keyframes using style tag
+const styles = `
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUpFade {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+    100% { transform: translateY(0px); }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-slideUpFade {
+    animation: slideUpFade 0.6s ease-out forwards;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .hover-trigger:hover .hover-target {
+    transform: scale(1.02);
+    transition: all 0.3s ease;
+  }
+
+  input, select {
+    transition: all 0.3s ease;
+  }
+
+  input:focus, select:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px -8px rgba(9, 88, 217, 0.2);
+  }
+`;
+
+// Insert style tag
+if (typeof document !== 'undefined') {
+  const styleTag = document.createElement('style');
+  styleTag.textContent = styles;
+  document.head.appendChild(styleTag);
+}
+
+const countries = [
+  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina", "Armenia",
+  "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados",
+  "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina",
+  "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia",
+  "Cameroon", "Canada", "Cape Verde", "Central African Republic", "Chad", "Chile", "China",
+  "Colombia", "Comoros", "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic",
+  "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador",
+  "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland",
+  "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada",
+  "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary",
+  "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica",
+  "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea North", "Korea South",
+  "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya",
+  "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives",
+  "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia",
+  "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia",
+  "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Macedonia",
+  "Norway", "Oman", "Pakistan", "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru",
+  "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis",
+  "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe",
+  "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia",
+  "Slovenia", "Solomon Islands", "Somalia", "South Africa", "Spain", "Sri Lanka", "Sudan",
+  "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand",
+  "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda",
+  "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan",
+  "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+];
+
 // Industry Form Component
 const IndustryForm = () => {
   const [formData, setFormData] = useState({
     industryType: "",
     companySize: "",
     cityCountry: "",
-    companyName: "",
     leadPriority: ""
   });
+  
+  const [isCountryListOpen, setIsCountryListOpen] = useState(false);
+  
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.country-selector')) {
+        setIsCountryListOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -26,7 +129,7 @@ const IndustryForm = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-8 bg-white rounded-xl shadow-2xl transition-all duration-300 hover:shadow-lg">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+      <h2 className="text-3xl font-bold mb-6 text-center text-black">
         Industry Information
       </h2>
       <div className="space-y-6">
@@ -83,34 +186,53 @@ const IndustryForm = () => {
             </div>
           </div>
 
-          {/* City/Country */}
+          {/* Country */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              City/Country *
+              Country *
             </label>
-            <input
-              type="text"
-              name="cityCountry"
-              value={formData.cityCountry}
-              onChange={handleChange}
-              placeholder="e.g., New York, USA"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-300 placeholder-gray-400 hover:border-blue-400"
-            />
-          </div>
-
-          {/* Company Name */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Company Name *
-            </label>
-            <input
-              type="text"
-              name="companyName"
-              value={formData.companyName}
-              onChange={handleChange}
-              placeholder="Enter company name"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-300 placeholder-gray-400 hover:border-blue-400"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                name="cityCountry"
+                value={formData.cityCountry}
+                onChange={(e) => {
+                  handleChange(e);
+                }}
+                onFocus={() => setIsCountryListOpen(true)}
+                placeholder="Search and select a country"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-300 hover:border-blue-400"
+                autoComplete="off"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+              {isCountryListOpen && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto">
+                  {countries
+                    .filter(country => 
+                      country.toLowerCase().includes(formData.cityCountry.toLowerCase())
+                    )
+                    .map((country) => (
+                      <div
+                        key={country}
+                        onClick={() => {
+                          setFormData({
+                            ...formData,
+                            cityCountry: country
+                          });
+                          setIsCountryListOpen(false);
+                        }}
+                        className="px-4 py-2 cursor-pointer hover:bg-gray-100 transition-colors duration-200"
+                      >
+                        {country}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -146,7 +268,7 @@ const IndustryForm = () => {
           <button
             type="button"
             onClick={handleSubmit}
-            className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-[1.02] shadow-lg shadow-blue-500/20 hover:shadow-blue-600/30 flex items-center gap-2"
+            className="px-8 py-4 bg-gradient-to-r from-[#0958d9] to-[#0958d9] hover:from-[#24AC4A] hover:to-[#24AC4A] text-white font-bold rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0958d9] focus:ring-offset-2 transition-all duration-500 transform hover:scale-105 shadow-lg shadow-[#0958d9]/20 hover:shadow-[#24AC4A]/30 flex items-center gap-2"
           >
             <span>Submit Industry Info</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -174,6 +296,18 @@ const JobsForm = () => {
   });
 
   const [currentSkill, setCurrentSkill] = useState("");
+  const [isCountryListOpen, setIsCountryListOpen] = useState(false);
+  
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.country-selector')) {
+        setIsCountryListOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -213,7 +347,7 @@ const JobsForm = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-8 bg-white rounded-xl shadow-2xl transition-all duration-300 hover:shadow-lg">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+      <h2 className="text-3xl font-bold mb-6 text-center text-black">
         Job Information
       </h2>
       <div className="space-y-6">
@@ -290,14 +424,49 @@ const JobsForm = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Location *
             </label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              placeholder="e.g., San Francisco, CA"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-300 placeholder-gray-400 hover:border-blue-400"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                name="location"
+                value={formData.location}
+                onChange={(e) => {
+                  handleChange(e);
+                  setCountrySearch(e.target.value);
+                }}
+                onFocus={() => setIsCountryListOpen(true)}
+                placeholder="Search and select a country"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-300 hover:border-blue-400"
+                autoComplete="off"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+              {isCountryListOpen && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto">
+                  {countries
+                    .filter(country => 
+                      country.toLowerCase().includes(formData.location.toLowerCase())
+                    )
+                    .map((country) => (
+                      <div
+                        key={country}
+                        onClick={() => {
+                          setFormData({
+                            ...formData,
+                            location: country
+                          });
+                          setIsCountryListOpen(false);
+                        }}
+                        className="px-4 py-2 cursor-pointer hover:bg-gray-100 transition-colors duration-200"
+                      >
+                        {country}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Job Title */}
@@ -356,7 +525,7 @@ const JobsForm = () => {
             <button
               type="button"
               onClick={handleAddSkill}
-              className="px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 whitespace-nowrap flex items-center gap-2 justify-center"
+              className="px-6 py-3 bg-[#0958d9] text-white font-medium rounded-xl hover:bg-[#24AC4A] focus:outline-none focus:ring-2 focus:ring-[#0958d9] focus:ring-offset-2 transition-all duration-300 whitespace-nowrap flex items-center gap-2 justify-center"
             >
               <span>Add Skill</span>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -372,7 +541,7 @@ const JobsForm = () => {
               {formData.skills.map((skill, index) => (
                 <span
                   key={index}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200 group transition-all duration-200"
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#0958d9]/10 text-[#0958d9] border border-[#0958d9]/20 group transition-all duration-200"
                 >
                   {skill}
                   <button
@@ -420,7 +589,7 @@ const JobsForm = () => {
           <button
             type="button"
             onClick={handleSubmit}
-            className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-[1.02] shadow-lg shadow-blue-500/20 hover:shadow-blue-600/30 flex items-center gap-2"
+            className="px-8 py-4 bg-gradient-to-r from-[#0958d9] to-[#0958d9] hover:from-[#24AC4A] hover:to-[#24AC4A] text-white font-bold rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0958d9] focus:ring-offset-2 transition-all duration-500 transform hover:scale-105 shadow-lg shadow-[#0958d9]/20 hover:shadow-[#24AC4A]/30 flex items-center gap-2"
           >
             <span>Submit Job Info</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -488,15 +657,15 @@ export default function RolesPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 sm:p-6 animate-fadeIn">
       {/* Toggle Buttons */}
-      <div className="mx-auto mb-8 flex w-full max-w-md overflow-hidden rounded-xl border border-gray-300 shadow-md bg-white">
+      <div className="mx-auto mb-8 flex w-full max-w-md overflow-hidden rounded-xl border border-gray-300 shadow-md bg-white animate-slideUpFade hover:shadow-lg transition-all duration-500">
         <button
           onClick={() => setSelected("jobs")}
           className={`w-1/2 px-6 py-4 text-center font-bold transition-all duration-300 ${
             selected === "jobs"
-              ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-inner"
-              : "bg-white text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+              ? "bg-gradient-to-r from-[#0958d9] to-[#0958d9] text-white shadow-inner"
+              : "bg-white text-gray-700"
           }`}
         >
           Jobs
@@ -505,8 +674,8 @@ export default function RolesPage() {
           onClick={() => setSelected("industry")}
           className={`w-1/2 px-6 py-4 text-center font-bold transition-all duration-300 ${
             selected === "industry"
-              ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-inner"
-              : "bg-white text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+              ? "bg-gradient-to-r from-[#0958d9] to-[#0958d9] text-white shadow-inner"
+              : "bg-white text-gray-700"
           }`}
         >
           Industry
@@ -514,15 +683,19 @@ export default function RolesPage() {
       </div>
 
       {/* Form Container with Transition */}
-      <div className="transition-all duration-500 ease-in-out">
+      <div className="transition-all duration-500 ease-in-out perspective-1000">
         {selected === "jobs" && (
-          <div className="opacity-100 transform translate-y-0 transition-all duration-500">
-            <JobsForm />
+          <div className="opacity-100 transform transition-all duration-500 animate-slideUpFade">
+            <div className="animate-float">
+              <JobsForm />
+            </div>
           </div>
         )}
         {selected === "industry" && (
-          <div className="opacity-100 transform translate-y-0 transition-all duration-500">
-            <IndustryForm />
+          <div className="opacity-100 transform transition-all duration-500 animate-slideUpFade">
+            <div className="animate-float">
+              <IndustryForm />
+            </div>
           </div>
         )}
       </div>
