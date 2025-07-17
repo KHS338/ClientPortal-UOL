@@ -225,9 +225,9 @@ export default function SubscriptionInfoPage() {
             {billingCycle === "enterprise" ? (
               /* Enterprise Solutions Display */
               <div className="max-w-4xl mx-auto">
-                <div className="relative p-8 rounded-2xl border-2 border-[#0958d9] bg-white shadow-2xl">
+                <div className="relative p-8 rounded-2xl border-2 border-[#0958d9] bg-white shadow-2xl group hover:border-[#24AC4A]/50 transition-all duration-300">
                   <div className="text-center">
-                    <h4 className="text-3xl font-bold text-transparent bg-[#1a84de] bg-clip-text mb-4">
+                    <h4 className="text-3xl font-bold text-transparent bg-gradient-to-r from-[#1a84de] to-[#1a84de] group-hover:from-[#24AC4A] group-hover:to-[#24AC4A] bg-clip-text mb-4 transition-all duration-300">
                       Enterprise Plan
                     </h4>
                     <p className="text-lg text-gray-600 mb-6">
@@ -235,7 +235,7 @@ export default function SubscriptionInfoPage() {
                     </p>
 
                     <div className="mb-8">
-                      <p className="text-4xl font-bold text-transparent bg-[#1a84de] bg-clip-text mb-4">
+                      <p className="text-4xl font-bold text-transparent bg-gradient-to-r from-[#1a84de] to-[#1a84de] group-hover:from-[#24AC4A] group-hover:to-[#24AC4A] bg-clip-text mb-4 transition-all duration-300">
                         Custom Pricing
                       </p>
                       <p className="text-lg text-gray-500 font-medium">Tailored to your organization&apos;s needs</p>
@@ -256,7 +256,7 @@ export default function SubscriptionInfoPage() {
                           key={index}
                           className="flex items-center gap-3 bg-white/70 rounded-lg px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-white/90"
                         >
-                          <FiCheckCircle className="text-[#0958d9] flex-shrink-0" size={18} />
+                          <FiCheckCircle className="text-[#0958d9] group-hover:text-[#24AC4A] flex-shrink-0 transition-colors duration-300" size={18} />
                           <span className="font-medium text-gray-700">{feature}</span>
                         </div>
                       ))}
@@ -279,12 +279,12 @@ export default function SubscriptionInfoPage() {
                           }
                         });
                       }}
-                      className="w-full md:w-auto px-12 py-4 text-lg bg-[#1a84de] hover:from-[#06398e] hover:bg-[#24AC4A] text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
+                      className="w-full md:w-auto px-12 py-4 text-lg bg-[#1a84de] group-hover:bg-[#24AC4A] hover:bg-[#1a84de] group-hover:hover:bg-[#24AC4A] text-white shadow-xl transition-all duration-300"
                     >
                       Get Custom Quote
                     </Button>
 
-                    <div className="mt-6 p-4 bg-gradient-to-r from-[#0958d9]/10 to-[#06398e]/10 rounded-xl border border-[#0958d9]/20">
+                    <div className="mt-6 p-4 bg-gradient-to-r from-[#0958d9]/10 to-[#06398e]/10 group-hover:from-[#24AC4A]/10 group-hover:to-[#24AC4A]/10 rounded-xl border border-[#0958d9]/20 group-hover:border-[#24AC4A]/20 transition-all duration-300">
                       <p className="text-sm text-gray-600">
                         <strong>Ready to scale?</strong> Our enterprise solutions are designed for organizations with complex requirements.
                         Contact our sales team for a personalized demo and custom pricing.
