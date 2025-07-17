@@ -193,7 +193,7 @@ export default function SubscriptionInfoPage() {
                   </div>
                   <h3 className="text-2xl font-bold text-gray-700 mb-2">No Active Subscription</h3>
                   <p className="text-gray-600">
-                    You currently don't have an active subscription. Choose a plan below to get started!
+                    You currently don&apos;t have an active subscription. Choose a plan below to get started!
                   </p>
                 </div>
               </Card>
