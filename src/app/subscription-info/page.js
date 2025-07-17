@@ -4,11 +4,27 @@ import { useState } from "react";
 import { FiCheckCircle, FiCalendar, FiCreditCard } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { AlertDialog, Toast } from "@/components/ui/alert-dialog";
 
 export default function SubscriptionInfoPage() {
   const [billingCycle, setBillingCycle] = useState("monthly");
   const [currentPlan, setCurrentPlan] = useState("prequalification-monthly");
   const [currentService, setCurrentService] = useState("Prequalification");
+  const [currentBillingCycle, setCurrentBillingCycle] = useState("monthly"); // User's actual billing cycle
+  
+  // Alert states
+  const [alertConfig, setAlertConfig] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: null,
+    type: "warning"
+  });
+  const [toast, setToast] = useState({
+    isOpen: false,
+    message: "",
+    type: "success"
+  });
 
   const handlePlanChange = (serviceTitle, cycle) => {
     console.log(`Plan switch requested: ${serviceTitle} (${cycle})`);
@@ -16,6 +32,38 @@ export default function SubscriptionInfoPage() {
     const planKey = `${serviceTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${cycle}`;
     setCurrentPlan(planKey);
     setCurrentService(serviceTitle);
+    setCurrentBillingCycle(cycle); // Update the actual billing cycle when plan changes
+    
+    // Show success toast
+    setToast({
+      isOpen: true,
+      message: `Successfully switched to ${serviceTitle} (${cycle})!`,
+      type: "success"
+    });
+  };
+
+  const handleUnsubscribe = (serviceTitle) => {
+    setAlertConfig({
+      isOpen: true,
+      title: "Confirm Unsubscription",
+      message: `Are you sure you want to unsubscribe from ${serviceTitle}? This action cannot be undone and you will lose access to all features after your current billing period ends.`,
+      type: "warning",
+      onConfirm: () => {
+        console.log(`Unsubscribe requested for: ${serviceTitle}`);
+        // Clear the current plan selection
+        setCurrentPlan("");
+        setCurrentService("");
+        setCurrentBillingCycle("");
+        
+        // Show success toast
+        setToast({
+          isOpen: true,
+          message: `Successfully unsubscribed from ${serviceTitle}`,
+          type: "success"
+        });
+        // Here you would typically make an API call to handle the unsubscription
+      }
+    });
   };
 
   const billingOptions = [
@@ -78,39 +126,58 @@ export default function SubscriptionInfoPage() {
             </p>
           </div>
 
-          {/* Current Subscription Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <Card className="p-6 bg-gradient-to-br from-[#1a84de] to-[#06398e] text-white">
-              <div className="flex items-center gap-3 mb-2">
-                <FiCheckCircle size={24} />
-                <h3 className="text-lg font-semibold">Current Plan</h3>
-              </div>
-              <p className="text-2xl font-bold">{currentService}</p>
-              <p className="text-blue-100 text-sm">Active subscription</p>
-            </Card>
+          {/* Current Subscription Overview - Only show if user has an active subscription */}
+          {currentService && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <Card className="p-6 bg-gradient-to-br from-[#1a84de] to-[#06398e] text-white">
+                <div className="flex items-center gap-3 mb-2">
+                  <FiCheckCircle size={24} />
+                  <h3 className="text-lg font-semibold">Current Plan</h3>
+                </div>
+                <p className="text-2xl font-bold">{currentService}</p>
+                <p className="text-blue-100 text-sm">Active subscription</p>
+              </Card>
 
-            <Card className="p-6 bg-white border border-gray-200">
-              <div className="flex items-center gap-3 mb-2">
-                <FiCalendar size={24} className="text-[#1a84de]" />
-                <h3 className="text-lg font-semibold text-gray-800">Billing Cycle</h3>
-              </div>
-              <p className="text-2xl font-bold text-gray-800">
-                {billingCycle === "monthly" ? "Monthly" : billingCycle === "annual" ? "Annual" : "Enterprise"}
-              </p>
-              <p className="text-gray-600 text-sm">
-                {billingCycle === "monthly" ? "Billed monthly" : billingCycle === "annual" ? "Billed annually" : "Custom billing"}
-              </p>
-            </Card>
+              <Card className="p-6 bg-white border border-gray-200">
+                <div className="flex items-center gap-3 mb-2">
+                  <FiCalendar size={24} className="text-[#1a84de]" />
+                  <h3 className="text-lg font-semibold text-gray-800">Billing Cycle</h3>
+                </div>
+                <p className="text-2xl font-bold text-gray-800">
+                  {currentBillingCycle === "monthly" ? "Monthly" : currentBillingCycle === "annual" ? "Annual" : "Enterprise"}
+                </p>
+                <p className="text-gray-600 text-sm">
+                  {currentBillingCycle === "monthly" ? "Billed monthly" : currentBillingCycle === "annual" ? "Billed annually" : "Custom billing"}
+                </p>
+              </Card>
 
-            <Card className="p-6 bg-white border border-gray-200">
-              <div className="flex items-center gap-3 mb-2">
-                <FiCreditCard size={24} className="text-[#1a84de]" />
-                <h3 className="text-lg font-semibold text-gray-800">Next Payment</h3>
-              </div>
-              <p className="text-2xl font-bold text-gray-800">Feb 15, 2025</p>
-              <p className="text-gray-600 text-sm">Auto-renewal enabled</p>
-            </Card>
-          </div>
+              <Card className="p-6 bg-white border border-gray-200">
+                <div className="flex items-center gap-3 mb-2">
+                  <FiCreditCard size={24} className="text-[#1a84de]" />
+                  <h3 className="text-lg font-semibold text-gray-800">Next Payment</h3>
+                </div>
+                <p className="text-2xl font-bold text-gray-800">Feb 15, 2025</p>
+                <p className="text-gray-600 text-sm">Auto-renewal enabled</p>
+              </Card>
+            </div>
+          )}
+
+          {/* No Subscription Message - Only show if user has no active subscription */}
+          {!currentService && (
+            <div className="mb-8">
+              <Card className="p-8 bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-dashed border-gray-300">
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-200 rounded-full mb-4">
+                    <FiCheckCircle className="text-gray-400" size={32} />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-700 mb-2">No Active Subscription</h3>
+                  <p className="text-gray-600">
+                    You currently don't have an active subscription. Choose a plan below to get started!
+                  </p>
+                </div>
+              </Card>
+            </div>
+          )}
 
           {/* Subscription Plans */}
           <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border-0">
@@ -196,10 +263,32 @@ export default function SubscriptionInfoPage() {
                     </div>
 
                     <Button
-                      onClick={() => console.log("Enterprise quotation requested")}
-                      className="w-full md:w-auto px-12 py-4 text-lg bg-[#1a84de] hover:from-[#06398e] hover:bg-[#24AC4A] text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
+                      onClick={() => {
+                        setAlertConfig({
+                          isOpen: true,
+                          title: "Enterprise Consultation",
+                          message: "Thank you for your interest! Our enterprise team will contact you within 24 hours to discuss your custom requirements and provide a personalized quote.",
+                          type: "info",
+                          onConfirm: () => {
+                            console.log("Enterprise quotation requested");
+                            setToast({
+                              isOpen: true,
+                              message: "Enterprise consultation request submitted successfully!",
+                              type: "success"
+                            });
+                          }
+                        });
+                      }}
+                      className="w-full md:w-auto px-12 py-4 text-lg bg-[#1a84de] hover:from-[#06398e] hover:bg-[#24AC4A] text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] mb-4"
                     >
                       Get Custom Quote
+                    </Button>
+
+                    <Button
+                      onClick={() => handleUnsubscribe("Enterprise")}
+                      className="w-full md:w-auto px-12 py-4 text-lg bg-red-500 hover:bg-red-600 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
+                    >
+                      Unsubscribe from Enterprise
                     </Button>
 
                     <div className="mt-6 p-4 bg-gradient-to-r from-[#0958d9]/10 to-[#06398e]/10 rounded-xl border border-[#0958d9]/20">
@@ -273,17 +362,18 @@ export default function SubscriptionInfoPage() {
                         <Button
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (!isCurrentPlan) {
+                            if (isCurrentPlan) {
+                              handleUnsubscribe(service.title);
+                            } else {
                               handlePlanChange(service.title, billingCycle);
                             }
                           }}
                           className={`w-full transition-all duration-300 mt-auto ${isCurrentPlan
-                            ? "bg-gray-100 text-gray-500 cursor-default"
+                            ? "bg-red-500 hover:bg-red-600 text-white"
                             : "bg-[#1a84de] hover:bg-[#24AC4A] text-white group-hover:bg-[#24AC4A]"
                             }`}
-                          disabled={isCurrentPlan}
                         >
-                          {isCurrentPlan ? "Current Plan" : "Switch to This Plan"}
+                          {isCurrentPlan ? "Unsubscribe" : "Switch to This Plan"}
                         </Button>
                       </div>
                     </div>
@@ -292,17 +382,29 @@ export default function SubscriptionInfoPage() {
               </div>
             )}
 
-            {/* Current Plan Summary */}
-            <div className="mt-8 p-6 bg-gradient-to-r from-[#0958d9]/10 to-[#06398e]/10 rounded-xl border border-[#0958d9]/20">
-              <h4 className="font-semibold text-gray-800 mb-2">Current Subscription</h4>
-              <p className="text-gray-600">
-                You are currently subscribed to <span className="font-semibold text-[#0958d9]">{currentService}</span>
-                {" "}({billingCycle === "monthly" ? "Monthly" : "Annual"} billing)
-              </p>
-            </div>
           </Card>
         </div>
       </div>
+      
+      {/* Custom Alert Dialog */}
+      <AlertDialog
+        isOpen={alertConfig.isOpen}
+        onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={alertConfig.onConfirm}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        confirmText={alertConfig.type === "warning" ? "Unsubscribe" : "Confirm"}
+        cancelText="Cancel"
+      />
+      
+      {/* Toast Notification */}
+      <Toast
+        isOpen={toast.isOpen}
+        onClose={() => setToast(prev => ({ ...prev, isOpen: false }))}
+        message={toast.message}
+        type={toast.type}
+      />
     </div>
   );
 }
