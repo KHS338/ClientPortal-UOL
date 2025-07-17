@@ -85,7 +85,7 @@ export default function DashboardPage() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
               <h1 className="text-4xl font-bold text-gray-800 mb-2">
-                Roles & Subscription Dashboard
+                Welcome!
               </h1>
               <p className="text-lg text-gray-600">
                 Manage your recruitment roles and subscription services
