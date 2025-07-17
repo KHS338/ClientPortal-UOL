@@ -37,7 +37,7 @@ export default function ClientProfilePage({ initial = {} }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
@@ -47,7 +47,7 @@ export default function ClientProfilePage({ initial = {} }) {
 
   const handlePlanChange = (serviceTitle, cycle) => {
     console.log(`Plan switch requested: ${serviceTitle} (${cycle})`);
-    
+
     // const planKey = `${serviceTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${cycle}`;
     // setForm(prev => ({
     //   ...prev,
@@ -65,7 +65,7 @@ export default function ClientProfilePage({ initial = {} }) {
       description: "Essential CV sourcing and basic candidate filtering"
     },
     {
-      title: "Prequalification", 
+      title: "Prequalification",
       monthly: { price: "$39/mo", key: "prequalification-monthly" },
       annual: { price: "$390/yr", key: "prequalification-annual", savings: "Save $78" },
       features: ["Advanced CV Sourcing", "Skill Assessment", "Video Interviews", "Priority Support", "Weekly Reports"],
@@ -130,7 +130,7 @@ export default function ClientProfilePage({ initial = {} }) {
                     <div className="mx-auto">
                       <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-white shadow-xl">
                         <img
-                          src={form.avatar ? URL.createObjectURL(form.avatar) : "/default-avatar.png"}
+                          src={form.avatar ? URL.createObjectURL(form.avatar) : "/images/profile.png"}
                           alt="Profile"
                           width={128}
                           height={128}
@@ -314,180 +314,175 @@ export default function ClientProfilePage({ initial = {} }) {
           {/* Subscription & Billing - Full Width */}
           <div>
             <form onSubmit={handleSubmit}>
-                <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border-0">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-                    <FiCheckCircle className="text-[#0958d9]" />
-                    Subscription & Services
-                  </h3>
-                  
-                  {/* Billing Cycle Toggle */}
-                  <div className="flex justify-center mb-8">
-                    <div className="bg-gray-100 p-1 rounded-xl inline-flex">
-                      <button
-                        onClick={() => setBillingCycle("monthly")}
-                        className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
-                          billingCycle === "monthly"
-                            ? "bg-[#0958d9] hover:bg-[#24AC4A] text-white shadow-md"
-                            : "text-gray-600 hover:text-gray-800"
+              <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border-0">
+                <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                  <FiCheckCircle className="text-[#0958d9]" />
+                  Subscription & Services
+                </h3>
+
+                {/* Billing Cycle Toggle */}
+                <div className="flex justify-center mb-8">
+                  <div className="bg-gray-100 p-1 rounded-xl inline-flex">
+                    <button
+                      onClick={() => setBillingCycle("monthly")}
+                      className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${billingCycle === "monthly"
+                        ? "bg-[#0958d9] hover:bg-[#24AC4A] text-white shadow-md"
+                        : "text-gray-600 hover:text-gray-800"
                         }`}
-                      >
-                        Monthly
-                      </button>
-                      <button
-                        onClick={() => setBillingCycle("annual")}
-                        className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
-                          billingCycle === "annual"
-                            ? "bg-[#0958d9] hover:bg-[#24AC4A] text-white shadow-md"
-                            : "text-gray-600 hover:text-gray-800"
+                    >
+                      Monthly
+                    </button>
+                    <button
+                      onClick={() => setBillingCycle("annual")}
+                      className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${billingCycle === "annual"
+                        ? "bg-[#0958d9] hover:bg-[#24AC4A] text-white shadow-md"
+                        : "text-gray-600 hover:text-gray-800"
                         }`}
-                      >
-                        Annual
-                      </button>
-                      <button
-                        onClick={() => setBillingCycle("enterprise")}
-                        className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${
-                          billingCycle === "enterprise"
-                            ? "bg-[#0958d9] hover:bg-[#24AC4A] text-white shadow-md"
-                            : "text-gray-600 hover:text-gray-800"
+                    >
+                      Annual
+                    </button>
+                    <button
+                      onClick={() => setBillingCycle("enterprise")}
+                      className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${billingCycle === "enterprise"
+                        ? "bg-[#0958d9] hover:bg-[#24AC4A] text-white shadow-md"
+                        : "text-gray-600 hover:text-gray-800"
                         }`}
-                      >
-                        Enterprise
-                      </button>
-                    </div>
+                    >
+                      Enterprise
+                    </button>
                   </div>
+                </div>
 
-                  {billingCycle === "enterprise" ? (
-                    /* Enterprise Solutions Display */
-                    <div className="max-w-4xl mx-auto">
-                      <div className="relative p-8 rounded-2xl border-2 border-[#0958d9] bg-white shadow-2xl">
-                        <div className="text-center">
-                          <h4 className="text-3xl font-bold text-transparent bg-[#1a84de] bg-clip-text mb-4">
-                            Enterprise Plan
-                          </h4>
-                          <p className="text-lg text-gray-600 mb-6">
-                            Fully customizable enterprise solution with dedicated support
+                {billingCycle === "enterprise" ? (
+                  /* Enterprise Solutions Display */
+                  <div className="max-w-4xl mx-auto">
+                    <div className="relative p-8 rounded-2xl border-2 border-[#0958d9] bg-white shadow-2xl">
+                      <div className="text-center">
+                        <h4 className="text-3xl font-bold text-transparent bg-[#1a84de] bg-clip-text mb-4">
+                          Enterprise Plan
+                        </h4>
+                        <p className="text-lg text-gray-600 mb-6">
+                          Fully customizable enterprise solution with dedicated support
+                        </p>
+
+                        <div className="mb-8">
+                          <p className="text-4xl font-bold text-transparent bg-[#1a84de] bg-clip-text mb-4">
+                            Custom Pricing
                           </p>
-                          
-                          <div className="mb-8">
-                            <p className="text-4xl font-bold text-transparent bg-[#1a84de] bg-clip-text mb-4">
-                              Custom Pricing
-                            </p>
-                            <p className="text-lg text-gray-500 font-medium">Tailored to your organization&apos;s needs</p>
-                          </div>
+                          <p className="text-lg text-gray-500 font-medium">Tailored to your organization&apos;s needs</p>
+                        </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                            {[
-                              "Unlimited Everything",
-                              "White-label Solution", 
-                              "Custom Development",
-                              "24/7 Priority Support",
-                              "Dedicated Account Manager",
-                              "SLA Guarantee",
-                              "Custom Integrations",
-                              "On-premise Deployment"
-                            ].map((feature, index) => (
-                              <div 
-                                key={index} 
-                                className="flex items-center gap-3 bg-white/70 rounded-lg px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-white/90"
-                              >
-                                <FiCheckCircle className="text-[#0958d9] flex-shrink-0" size={18} />
-                                <span className="font-medium text-gray-700">{feature}</span>
-                              </div>
-                            ))}
-                          </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                          {[
+                            "Unlimited Everything",
+                            "White-label Solution",
+                            "Custom Development",
+                            "24/7 Priority Support",
+                            "Dedicated Account Manager",
+                            "SLA Guarantee",
+                            "Custom Integrations",
+                            "On-premise Deployment"
+                          ].map((feature, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-3 bg-white/70 rounded-lg px-4 py-3 shadow-sm hover:shadow-md transition-all duration-300 hover:bg-white/90"
+                            >
+                              <FiCheckCircle className="text-[#0958d9] flex-shrink-0" size={18} />
+                              <span className="font-medium text-gray-700">{feature}</span>
+                            </div>
+                          ))}
+                        </div>
 
-                          <Button
-                            onClick={() => console.log("Enterprise quotation requested")}
-                            className="w-full md:w-auto px-12 py-4 text-lg bg-[#1a84de] hover:from-[#06398e] hover:bg-[#24AC4A] text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
-                          >
-                            Get Custom Quote
-                          </Button>
+                        <Button
+                          onClick={() => console.log("Enterprise quotation requested")}
+                          className="w-full md:w-auto px-12 py-4 text-lg bg-[#1a84de] hover:from-[#06398e] hover:bg-[#24AC4A] text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
+                        >
+                          Get Custom Quote
+                        </Button>
 
-                          <div className="mt-6 p-4 bg-gradient-to-r from-[#0958d9]/10 to-[#06398e]/10 rounded-xl border border-[#0958d9]/20">
-                            <p className="text-sm text-gray-600">
-                              <strong>Ready to scale?</strong> Our enterprise solutions are designed for organizations with complex requirements. 
-                              Contact our sales team for a personalized demo and custom pricing.
-                            </p>
-                          </div>
+                        <div className="mt-6 p-4 bg-gradient-to-r from-[#0958d9]/10 to-[#06398e]/10 rounded-xl border border-[#0958d9]/20">
+                          <p className="text-sm text-gray-600">
+                            <strong>Ready to scale?</strong> Our enterprise solutions are designed for organizations with complex requirements.
+                            Contact our sales team for a personalized demo and custom pricing.
+                          </p>
                         </div>
                       </div>
                     </div>
-                  ) : (
-                    /* Regular Plans Display */
-                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                      {billingOptions.filter(service => !service.isEnterprise).map((service, index) => {
-                        const currentPlan = billingCycle === "monthly" ? service.monthly : service.annual;
-                        const isCurrentPlan = form.currentPlan === currentPlan.key;
-                        
-                        return (
-                          <div
-                            key={service.title}
-                            className={`relative p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col ${
-                              isCurrentPlan
-                                ? "border-[#0958d9] bg-gradient-to-br from-[#0958d9]/10 to-[#06398e]/10 shadow-xl"
-                                : "border-gray-200 bg-white hover:border-[#0958d9]/50 hover:shadow-lg"
-                            }`}
-                          >
-                            {isCurrentPlan && (
-                              <div className="absolute -top-3 right-6 bg-[#0958d9] text-white px-4 py-1 rounded-full text-sm font-medium">
-                                Current Plan
-                              </div>
-                            )}
-
-                            <div className="text-center flex-1 flex flex-col">
-                              <div className="flex-1">
-                                <h4 className="text-xl font-bold text-gray-800 mb-2">{service.title}</h4>
-                                <p className="text-sm text-gray-600 mb-4">{service.description}</p>
-                                
-                                <div className="mb-4">
-                                  <p className="text-4xl font-bold text-[#0958d9] mb-1">{currentPlan.price}</p>
-                                  {billingCycle === "annual" && service.annual.savings && (
-                                    <p className="text-sm text-[#1a84de] font-medium">{service.annual.savings}</p>
-                                  )}
-                                </div>
-
-                                <ul className="space-y-3 text-sm text-gray-600 mb-6">
-                                  {service.features.map((feature, featureIndex) => (
-                                    <li key={featureIndex} className="flex items-center gap-2">
-                                      <FiCheckCircle className="text-[#0958d9] flex-shrink-0" size={16} />
-                                      <span>{feature}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-
-                              <Button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (!isCurrentPlan) {
-                                    handlePlanChange(service.title, billingCycle);
-                                  }
-                                }}
-                                className={`w-full transition-all duration-300 mt-auto ${
-                                  isCurrentPlan
-                                    ? "bg-gray-100 text-gray-500 cursor-default"
-                                    : "bg-[#1a84de] hover:from-[#06398e] hover:bg-[#24AC4A] text-white"
-                                }`}
-                                disabled={isCurrentPlan}
-                              >
-                                {isCurrentPlan ? "Current Plan" : "Switch to This Plan"}
-                              </Button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Current Plan Summary */}
-                  <div className="mt-8 p-6 bg-gradient-to-r from-[#0958d9]/10 to-[#06398e]/10 rounded-xl border border-[#0958d9]/20">
-                    <h4 className="font-semibold text-gray-800 mb-2">Current Subscription</h4>
-                    <p className="text-gray-600">
-                      You are currently subscribed to <span className="font-semibold text-[#0958d9]">{form.currentService}</span> 
-                      {" "}({billingCycle === "monthly" ? "Monthly" : "Annual"} billing)
-                    </p>
                   </div>
-            </Card>
+                ) : (
+                  /* Regular Plans Display */
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {billingOptions.filter(service => !service.isEnterprise).map((service, index) => {
+                      const currentPlan = billingCycle === "monthly" ? service.monthly : service.annual;
+                      const isCurrentPlan = form.currentPlan === currentPlan.key;
+
+                      return (
+                        <div
+                          key={service.title}
+                          className={`relative p-6 rounded-2xl border-2 transition-all duration-300 flex flex-col ${isCurrentPlan
+                            ? "border-[#0958d9] bg-gradient-to-br from-[#0958d9]/10 to-[#06398e]/10 shadow-xl"
+                            : "border-gray-200 bg-white hover:border-[#0958d9]/50 hover:shadow-lg"
+                            }`}
+                        >
+                          {isCurrentPlan && (
+                            <div className="absolute -top-3 right-6 bg-[#0958d9] text-white px-4 py-1 rounded-full text-sm font-medium">
+                              Current Plan
+                            </div>
+                          )}
+
+                          <div className="text-center flex-1 flex flex-col">
+                            <div className="flex-1">
+                              <h4 className="text-xl font-bold text-gray-800 mb-2">{service.title}</h4>
+                              <p className="text-sm text-gray-600 mb-4">{service.description}</p>
+
+                              <div className="mb-4">
+                                <p className="text-4xl font-bold text-[#0958d9] mb-1">{currentPlan.price}</p>
+                                {billingCycle === "annual" && service.annual.savings && (
+                                  <p className="text-sm text-[#1a84de] font-medium">{service.annual.savings}</p>
+                                )}
+                              </div>
+
+                              <ul className="space-y-3 text-sm text-gray-600 mb-6">
+                                {service.features.map((feature, featureIndex) => (
+                                  <li key={featureIndex} className="flex items-center gap-2">
+                                    <FiCheckCircle className="text-[#0958d9] flex-shrink-0" size={16} />
+                                    <span>{feature}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+
+                            <Button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isCurrentPlan) {
+                                  handlePlanChange(service.title, billingCycle);
+                                }
+                              }}
+                              className={`w-full transition-all duration-300 mt-auto ${isCurrentPlan
+                                ? "bg-gray-100 text-gray-500 cursor-default"
+                                : "bg-[#1a84de] hover:from-[#06398e] hover:bg-[#24AC4A] text-white"
+                                }`}
+                              disabled={isCurrentPlan}
+                            >
+                              {isCurrentPlan ? "Current Plan" : "Switch to This Plan"}
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Current Plan Summary */}
+                <div className="mt-8 p-6 bg-gradient-to-r from-[#0958d9]/10 to-[#06398e]/10 rounded-xl border border-[#0958d9]/20">
+                  <h4 className="font-semibold text-gray-800 mb-2">Current Subscription</h4>
+                  <p className="text-gray-600">
+                    You are currently subscribed to <span className="font-semibold text-[#0958d9]">{form.currentService}</span>
+                    {" "}({billingCycle === "monthly" ? "Monthly" : "Annual"} billing)
+                  </p>
+                </div>
+              </Card>
             </form>
           </div>
         </div>
@@ -515,11 +510,10 @@ function InputField({ label, name, type = "text", value, onChange, icon, disable
           onChange={onChange}
           disabled={disabled}
           placeholder={placeholder}
-          className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0958d9] focus:border-transparent transition-all duration-300 ${
-            disabled 
-              ? "bg-gray-50 text-gray-500 cursor-not-allowed" 
-              : "bg-white hover:border-[#0958d9]/50"
-          } ${className}`}
+          className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0958d9] focus:border-transparent transition-all duration-300 ${disabled
+            ? "bg-gray-50 text-gray-500 cursor-not-allowed"
+            : "bg-white hover:border-[#0958d9]/50"
+            } ${className}`}
         />
       </div>
     </div>
@@ -542,11 +536,10 @@ function SelectField({ label, name, value, onChange, options, icon, disabled = f
           value={value}
           onChange={onChange}
           disabled={disabled}
-          className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0958d9] focus:border-transparent transition-all duration-300 appearance-none cursor-pointer ${
-            disabled 
-              ? "bg-gray-50 text-gray-500 cursor-not-allowed" 
-              : "bg-white hover:border-[#0958d9]/50"
-          } ${className}`}
+          className={`w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0958d9] focus:border-transparent transition-all duration-300 appearance-none cursor-pointer ${disabled
+            ? "bg-gray-50 text-gray-500 cursor-not-allowed"
+            : "bg-white hover:border-[#0958d9]/50"
+            } ${className}`}
         >
           <option value="" disabled>
             Select {label}
