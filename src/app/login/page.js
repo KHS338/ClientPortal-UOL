@@ -3,12 +3,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { FiMail, FiLock, FiEye, FiEyeOff, FiUser, FiArrowRight } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
  
 export default function LoginPage() {
+  const router = useRouter();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -16,6 +18,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,13 +28,23 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      alert("Login successful!");
-      // TODO: Redirect to dashboard
-    }, 1500);
+    // Check credentials
+    if (form.email === "user@gmail.com" && form.password === "1234") {
+      // Simulate API call
+      setTimeout(() => {
+        setIsLoading(false);
+        // Redirect to dashboard on successful login
+        router.push('/dashboard');
+      }, 1500);
+    } else {
+      // Invalid credentials
+      setTimeout(() => {
+        setIsLoading(false);
+        setError("Invalid email or password. Please use: user@gmail.com / 1234");
+      }, 1500);
+    }
   };
  
   return (
@@ -135,6 +148,18 @@ export default function LoginPage() {
                   Forgot password?
                 </Link>
               </motion.div>
+
+              {/* Error Message */}
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="p-3 bg-red-50 border border-red-200 rounded-lg"
+                >
+                  <p className="text-red-700 text-sm text-center">{error}</p>
+                </motion.div>
+              )}
 
               {/* Submit Button */}
               <motion.div

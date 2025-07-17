@@ -2,12 +2,14 @@
  
 import { useState, useRef } from "react";
 import Image from "next/image";
-import { FiCamera, FiEye, FiEyeOff, FiUser, FiBriefcase, FiMail, FiPhone, FiLock } from "react-icons/fi";
+import { useRouter } from "next/navigation";
+import { FiCamera, FiEye, FiEyeOff, FiUser, FiBriefcase, FiMail, FiPhone, FiLock, FiArrowLeft } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export default function ClientRegistrationPage() {
+  const router = useRouter();
   const [form, setForm] = useState({
     companymail: "",
     password: "",
@@ -24,6 +26,7 @@ export default function ClientRegistrationPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const fileRef = useRef();
  
   const handleChange = (e) => {
@@ -51,7 +54,12 @@ export default function ClientRegistrationPage() {
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
-      alert("Registration successful!");
+      setShowSuccess(true);
+      
+      // Redirect to login page after showing success message
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
     }, 2000);
   };
  
@@ -95,6 +103,28 @@ export default function ClientRegistrationPage() {
                 Create your account and start managing your business with ease
               </motion.p>
             </div>
+
+            {/* Success Message */}
+            {showSuccess && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="mb-8 p-6 bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-xl"
+              >
+                <div className="flex items-center justify-center space-x-3">
+                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold text-green-800 mb-1">Account Created Successfully!</h3>
+                    <p className="text-green-700">Welcome to our platform. Redirecting you to login page...</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* Avatar Upload */}
@@ -282,6 +312,24 @@ export default function ClientRegistrationPage() {
                   Privacy Policy
                 </a>
               </motion.p>
+
+              {/* Go back to login button */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 1.6 }}
+                className="text-center mt-6"
+              >
+                <Button
+                  type="button"
+                  onClick={() => router.push('/login')}
+                  variant="outline"
+                  className="inline-flex items-center space-x-2 px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300"
+                >
+                  <FiArrowLeft size={16} />
+                  <span>Go back to login</span>
+                </Button>
+              </motion.div>
             </form>
           </div>
         </Card>
