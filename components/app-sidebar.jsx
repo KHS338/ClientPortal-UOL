@@ -151,21 +151,21 @@ export function AppSidebar() {
   // If not mounted yet, render minimal content
   if (!mounted) {
     return (
-      <Sidebar className="border-r border-gray-200 bg-white xl:w-72">
+      <Sidebar className="border-r border-gray-200 bg-white">
         <SidebarContent className="bg-white">
           <SidebarGroup>
-            <SidebarGroupLabel className="px-4 xl:px-6 py-3 xl:py-4 text-xs xl:text-sm font-semibold text-gray-500 uppercase tracking-wider bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
+            <SidebarGroupLabel className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
               Client Portal
             </SidebarGroupLabel>
-            <SidebarGroupContent className="px-2 xl:px-4 py-2 xl:py-3">
-              <SidebarMenu className="space-y-1 xl:space-y-2">
+            <SidebarGroupContent className="px-2 py-2">
+              <SidebarMenu className="space-y-1">
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
                     <Link
                       href="/dashboard"
-                      className="group relative flex items-center gap-3 xl:gap-4 rounded-lg px-3 xl:px-4 py-2.5 xl:py-3 text-sm xl:text-base font-medium hover:bg-gradient-to-r hover:from-[#1a84de] hover:to-[#1a84de] hover:text-white text-gray-700"
+                      className="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-gradient-to-r hover:from-[#1a84de] hover:to-[#1a84de] hover:text-white text-gray-700"
                     >
-                      <Home className="h-5 w-5 xl:h-6 xl:w-6 flex-shrink-0" />
+                      <Home className="h-5 w-5 flex-shrink-0" />
                       <span className="truncate">Dashboard</span>
                     </Link>
                   </SidebarMenuButton>
@@ -173,8 +173,8 @@ export function AppSidebar() {
                 {/* Loading placeholder for other items */}
                 <SidebarMenuItem>
                   <SidebarMenuButton disabled>
-                    <div className="group relative flex items-center gap-3 xl:gap-4 rounded-lg px-3 xl:px-4 py-2.5 xl:py-3 text-sm xl:text-base font-medium text-gray-400">
-                      <LaptopMinimalCheck className="h-5 w-5 xl:h-6 xl:w-6 flex-shrink-0" />
+                    <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-gray-400">
+                      <LaptopMinimalCheck className="h-5 w-5 flex-shrink-0" />
                       <span className="truncate">Loading...</span>
                     </div>
                   </SidebarMenuButton>
@@ -188,14 +188,14 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar className="border-r border-gray-200 bg-white xl:w-72">
+    <Sidebar className="border-r border-gray-200 bg-white">
       <SidebarContent className="bg-white">
         <SidebarGroup>
-          <SidebarGroupLabel className="px-4 xl:px-6 py-3 xl:py-4 text-xs xl:text-sm font-semibold text-gray-500 uppercase tracking-wider bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
+          <SidebarGroupLabel className="px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
             Client Portal
           </SidebarGroupLabel>
-          <SidebarGroupContent className="px-2 xl:px-4 py-2 xl:py-3">
-            <SidebarMenu className="space-y-1 xl:space-y-2">
+          <SidebarGroupContent className="px-2 py-2">
+            <SidebarMenu className="space-y-1">
               {items.map((item) => (
                 <React.Fragment key={item.title}>
                   <SidebarMenuItem>
@@ -205,14 +205,14 @@ export function AppSidebar() {
                         onClick={() =>
                           setOpenMenu(openMenu === item.title ? null : item.title)
                         }
-                        className="group relative w-full rounded-lg px-3 xl:px-4 py-2.5 xl:py-3 text-sm xl:text-base font-medium hover:bg-gradient-to-r hover:from-[#1a84de] hover:to-[#1a84de] hover:text-white text-gray-700"
+                        className="group relative w-full rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-gradient-to-r hover:from-[#1a84de] hover:to-[#1a84de] hover:text-white text-gray-700"
                       >
                         <div className="flex items-center justify-between w-full">
-                          <div className="flex items-center gap-3 xl:gap-4">
-                            <item.icon className="h-5 w-5 xl:h-6 xl:w-6 flex-shrink-0" />
+                          <div className="flex items-center gap-3">
+                            <item.icon className="h-5 w-5 flex-shrink-0" />
                             <span>{item.title}</span>
                           </div>
-                          <span className={`min-w-[16px] xl:min-w-[20px] text-right transition-transform `}>
+                          <span className={`min-w-[16px] text-right transition-transform `}>
                             =
                           </span>
                         </div>
@@ -222,9 +222,9 @@ export function AppSidebar() {
                       <SidebarMenuButton asChild>
                         <Link
                           href={item.url}
-                          className="group relative flex items-center gap-3 xl:gap-4 rounded-lg px-3 xl:px-4 py-2.5 xl:py-3 text-sm xl:text-base font-medium hover:bg-gradient-to-r hover:from-[#1a84de] hover:to-[#1a84de] hover:text-white text-gray-700"
+                          className="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-gradient-to-r hover:from-[#1a84de] hover:to-[#1a84de] hover:text-white text-gray-700"
                         >
-                          <item.icon className="h-5 w-5 xl:h-6 xl:w-6 flex-shrink-0" />
+                          <item.icon className="h-5 w-5 flex-shrink-0" />
                           <span className="truncate">{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
@@ -237,21 +237,21 @@ export function AppSidebar() {
                       {item.submenu.map((sub) => {
                         const isAccessible = isRoleAccessible(sub.title);
                         return (
-                          <SidebarMenuItem key={`${item.title}-${sub.title}`} className="ml-4 xl:ml-6 mt-1 xl:mt-2">
+                          <SidebarMenuItem key={`${item.title}-${sub.title}`} className="ml-4 mt-1">
                             <SidebarMenuButton asChild={isAccessible}>
                               {isAccessible ? (
                                 <Link
                                   href={sub.url}
-                                  className="group relative flex items-center gap-3 xl:gap-4 rounded-lg px-3 xl:px-4 py-2 xl:py-2.5 text-sm xl:text-base font-medium hover:bg-gradient-to-r hover:from-[#1a84de] hover:to-[#1a84de] hover:text-white text-gray-600"
+                                  className="group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-gradient-to-r hover:from-[#1a84de] hover:to-[#1a84de] hover:text-white text-gray-600"
                                 >
-                                  <span className="w-6 xl:w-7 text-center text-gray-400 group-hover:text-white">
+                                  <span className="w-6 text-center text-gray-400 group-hover:text-white">
                                     •
                                   </span>
                                   <span className="truncate">{sub.title}</span>
                                 </Link>
                               ) : (
-                                <div className="group relative flex items-center gap-3 xl:gap-4 rounded-lg px-3 xl:px-4 py-2 xl:py-2.5 text-sm xl:text-base font-medium text-gray-400 cursor-not-allowed">
-                                  <span className="w-6 xl:w-7 text-center text-gray-400">
+                                <div className="group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed">
+                                  <span className="w-6 text-center text-gray-400">
                                     •
                                   </span>
                                   <span className="truncate">{sub.title}</span>
