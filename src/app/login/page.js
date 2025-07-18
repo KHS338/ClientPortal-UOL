@@ -17,11 +17,14 @@ export default function LoginPage() {
   const [form, setForm] = useState({
     email: "",
     password: "",
+    twoFactorToken: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [localError, setLocalError] = useState("");
+  const [requiresTwoFactor, setRequiresTwoFactor] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -34,7 +37,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (authError) clearError();
     if (localError) setLocalError("");
-  }, [form.email, form.password]);
+  }, [form.email, form.password, form.twoFactorToken]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,11 +50,31 @@ export default function LoginPage() {
     setLocalError("");
     
     try {
-      const result = await login(form.email, form.password, rememberMe);
+      const loginData = {
+        email: form.email,
+        password: form.password,
+        ...(form.twoFactorToken && { twoFactorToken: form.twoFactorToken })
+      };
+
+      const response = await fetch('http://localhost:3001/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(loginData)
+      });
+
+      const result = await response.json();
       
       if (result.success) {
-        // Redirect to dashboard on successful login
+        // Store user data and redirect
+        localStorage.setItem('user', JSON.stringify(result.user));
         router.push('/dashboard');
+      } else if (result.requiresTwoFactor) {
+        // Show 2FA input
+        setRequiresTwoFactor(true);
+        setUserId(result.userId);
+        setLocalError("Please enter your two-factor authentication code");
       } else {
         setLocalError(result.message || 'Login failed. Please check your credentials.');
       }
@@ -140,6 +163,33 @@ export default function LoginPage() {
                   </button>
                 </div>
               </motion.div>
+
+              {/* Two-Factor Authentication */}
+              {requiresTwoFactor && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="space-y-2"
+                >
+                  <label className="block text-sm font-medium text-gray-700">
+                    Two-Factor Authentication Code
+                  </label>
+                  <input
+                    type="text"
+                    name="twoFactorToken"
+                    placeholder="Enter 6-digit code"
+                    value={form.twoFactorToken}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#0958d9] focus:border-transparent text-center text-lg font-mono tracking-wider"
+                    maxLength="6"
+                    required
+                  />
+                  <p className="text-sm text-gray-500 text-center">
+                    Enter the code from your authenticator app or use a backup code
+                  </p>
+                </motion.div>
+              )}
 
               {/* Remember Me & Forgot Password */}
               <motion.div

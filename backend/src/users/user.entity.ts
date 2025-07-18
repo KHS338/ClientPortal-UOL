@@ -46,6 +46,16 @@ export class User {
   @Column({ name: 'email_verified', default: false })
   emailVerified: boolean;
 
+  // Two-Factor Authentication
+  @Column({ name: 'two_factor_secret', nullable: true, length: 255 })
+  twoFactorSecret: string;
+
+  @Column({ name: 'two_factor_enabled', default: false })
+  twoFactorEnabled: boolean;
+
+  @Column({ name: 'two_factor_backup_codes', nullable: true, type: 'text' })
+  twoFactorBackupCodes: string;
+
   // Subscription Information
   @Column({ name: 'subscription_status', default: 'inactive', length: 50 })
   subscriptionStatus: string;

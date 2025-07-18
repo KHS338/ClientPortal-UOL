@@ -63,8 +63,17 @@ const items = [
   },
   {
     title: "Profile",
-    url: "/profile",
     icon: UserCircleIcon,
+    submenu: [
+      {
+        title: "Account Settings",
+        url: "/profile",
+      },
+      {
+        title: "Two-Factor Authentication",
+        url: "/profile/2fa",
+      },
+    ],
   },
   {
     title: "Subscription Info",
@@ -145,6 +154,11 @@ export function AppSidebar() {
 
   // Function to check if a role is accessible based on subscription
   const isRoleAccessible = (roleTitle) => {
+    // Profile menu items should always be accessible
+    if (roleTitle === "Account Settings" || roleTitle === "Two-Factor Authentication") {
+      return true;
+    }
+    
     if (!userSubscription) {
       console.log(`Sidebar - No subscription, ${roleTitle} not accessible`);
       return false;

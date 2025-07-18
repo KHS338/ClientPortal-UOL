@@ -94,9 +94,9 @@ export default function ClientRegistrationPage() {
         // Store user data in localStorage for later use
         localStorage.setItem('registeredUser', JSON.stringify(result.user));
         
-        // Redirect to subscription page after showing success message
+        // Redirect to login page after showing success message
         setTimeout(() => {
-          router.push('/subscription');
+          router.push('/login');
         }, 2000);
       } else {
         // Handle backend errors

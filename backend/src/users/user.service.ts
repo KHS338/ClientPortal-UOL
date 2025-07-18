@@ -5,12 +5,14 @@ import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
+import { TwoFactorService } from './two-factor.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    private readonly twoFactorService: TwoFactorService,
   ) {}
 
   async findAll(): Promise<User[]> {
@@ -117,5 +119,146 @@ export class UsersService {
       message: 'Dummy user created successfully', 
       user: userWithoutPassword
     };
+  }
+
+  // Two-Factor Authentication methods
+  async setup2FA(userId: number): Promise<{
+    secret: string;
+    qrCodeUrl: string;
+    backupCodes: string[];
+  }> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Generate 2FA secret and backup codes
+    const twoFactorSetup = this.twoFactorService.generateSecret(user.companymail);
+    const backupCodes = this.twoFactorService.generateBackupCodes();
+    const qrCodeUrl = await this.twoFactorService.generateQRCode(twoFactorSetup.otpAuthUrl);
+
+    // Store the secret but don't enable 2FA yet
+    await this.userRepo.update(userId, {
+      twoFactorSecret: twoFactorSetup.secret,
+      twoFactorBackupCodes: JSON.stringify(backupCodes),
+      twoFactorEnabled: false // Will be enabled after verification
+    });
+
+    return {
+      secret: twoFactorSetup.secret,
+      qrCodeUrl: qrCodeUrl,
+      backupCodes: backupCodes
+    };
+  }
+
+  async enable2FA(userId: number, token: string): Promise<{ success: boolean; message: string }> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (!user.twoFactorSecret) {
+      throw new BadRequestException('Two-factor authentication not set up. Please set it up first.');
+    }
+
+    const isValid = this.twoFactorService.verifyToken(token, user.twoFactorSecret);
+    
+    if (!isValid) {
+      return { success: false, message: 'Invalid verification code' };
+    }
+
+    // Enable 2FA for the user
+    await this.userRepo.update(userId, { twoFactorEnabled: true });
+    
+    return { success: true, message: 'Two-factor authentication enabled successfully' };
+  }
+
+  async disable2FA(userId: number, token: string): Promise<{ success: boolean; message: string }> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (!user.twoFactorEnabled) {
+      return { success: false, message: 'Two-factor authentication is not enabled' };
+    }
+
+    const isValid = this.twoFactorService.verifyToken(token, user.twoFactorSecret);
+    
+    if (!isValid) {
+      return { success: false, message: 'Invalid verification code' };
+    }
+
+    // Disable 2FA and clear secrets
+    await this.userRepo.update(userId, { 
+      twoFactorEnabled: false,
+      twoFactorSecret: null,
+      twoFactorBackupCodes: null
+    });
+    
+    return { success: true, message: 'Two-factor authentication disabled successfully' };
+  }
+
+  async verify2FAToken(userId: number, token: string): Promise<boolean> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    
+    if (!user || !user.twoFactorEnabled || !user.twoFactorSecret) {
+      return false;
+    }
+
+    // Check if it's a regular TOTP token
+    const isValidToken = this.twoFactorService.verifyToken(token, user.twoFactorSecret);
+    if (isValidToken) {
+      return true;
+    }
+
+    // Check if it's a backup code
+    const isValidBackupCode = this.twoFactorService.verifyBackupCode(token, user);
+    if (isValidBackupCode) {
+      // Remove the used backup code
+      const updatedCodes = this.twoFactorService.removeUsedBackupCode(token, user);
+      await this.userRepo.update(userId, { 
+        twoFactorBackupCodes: JSON.stringify(updatedCodes)
+      });
+      return true;
+    }
+
+    return false;
+  }
+
+  async regenerateBackupCodes(userId: number, token: string): Promise<{ success: boolean; backupCodes?: string[]; message: string }> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (!user.twoFactorEnabled) {
+      return { success: false, message: 'Two-factor authentication is not enabled' };
+    }
+
+    const isValid = this.twoFactorService.verifyToken(token, user.twoFactorSecret);
+    
+    if (!isValid) {
+      return { success: false, message: 'Invalid verification code' };
+    }
+
+    // Generate new backup codes
+    const backupCodes = this.twoFactorService.generateBackupCodes();
+    await this.userRepo.update(userId, { 
+      twoFactorBackupCodes: JSON.stringify(backupCodes)
+    });
+    
+    return { 
+      success: true, 
+      backupCodes: backupCodes,
+      message: 'Backup codes regenerated successfully' 
+    };
+  }
+
+  async verifyPassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
+    return await bcrypt.compare(plainPassword, hashedPassword);
   }
 }

@@ -2,11 +2,14 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { FiCamera, FiEdit3, FiSave, FiUser, FiBriefcase, FiMail, FiPhone, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiCalendar } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export default function ClientProfilePage({ initial = {} }) {
+  const router = useRouter();
   const [form, setForm] = useState({
     companymail: initial.companymail || "john.doe@company.com",
     password: initial.password || "",
@@ -246,6 +249,53 @@ export default function ClientProfilePage({ initial = {} }) {
                       </Button>
                     </div>
                   )}
+                </Card>
+
+                {/* Security Settings */}
+                <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border-0">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                      <FiLock className="text-black" />
+                      Security Settings
+                    </h3>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <FiLock className="text-gray-600" />
+                        <div>
+                          <h4 className="font-semibold text-gray-800">Two-Factor Authentication</h4>
+                          <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => router.push('/profile/2fa')}
+                        className="bg-[#0958d9] hover:bg-[#24AC4A] text-white px-4 py-2 rounded-lg transition-all duration-300 cursor-pointer"
+                      >
+                        Manage 2FA
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <FiLock className="text-gray-600" />
+                        <div>
+                          <h4 className="font-semibold text-gray-800">Password</h4>
+                          <p className="text-sm text-gray-600">Last changed 30 days ago</p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => alert('Password change functionality coming soon!')}
+                        variant="outline"
+                        className="border-[#0958d9] text-[#0958d9] hover:border-[#24AC4A] hover:bg-[#24AC4A] hover:text-white transition-all duration-300 cursor-pointer"
+                      >
+                        Change Password
+                      </Button>
+                    </div>
+                  </div>
                 </Card>
               </div>
             </div>
