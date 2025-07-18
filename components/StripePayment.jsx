@@ -6,10 +6,9 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FiCreditCard, FiLock, FiCheckCircle } from 'react-icons/fi';
 
-// Demo Stripe publishable key (use environment variable in production)
+// Hardcoded Stripe publishable key
 const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 
-  'pk_test_51234567890abcdef' // Fallback demo key
+  'pk_test_51Rls0QDCvkzdfzJ7zkvZTqNM7Uw2Xi298NR6laFa5ey4rDgGaUoVqzG4JMEIopyyxlLi3tRhrYoik1jJmXPd44MM00TypMkMkv'
 );
 
 export default function StripePayment({ 

@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-// Initialize Stripe with secret key (Updated)
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_demo_key', {
+// Initialize Stripe with hardcoded secret key
+const stripe = new Stripe('sk_test_51Rls0QDCvkzdfzJ77LjRAYxvoPORkgVFcqgPCiHZtJzg7NTzKmTFJ4EjenuFgAAIIhgYhrjCgGEf3hUj10O8Nh8h00FQDCarD4', {
   apiVersion: '2023-10-16',
 });
 

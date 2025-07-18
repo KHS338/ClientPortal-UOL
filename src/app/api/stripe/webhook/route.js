@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_demo_key', {
+const stripe = new Stripe('sk_test_51Rls0QDCvkzdfzJ77LjRAYxvoPORkgVFcqgPCiHZtJzg7NTzKmTFJ4EjenuFgAAIIhgYhrjCgGEf3hUj10O8Nh8h00FQDCarD4', {
   apiVersion: '2023-10-16',
 });
 
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const endpointSecret = 'whsec_1234567890abcdef1234567890abcdef';
 
 export async function POST(request) {
   const body = await request.text();
