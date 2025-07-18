@@ -101,12 +101,13 @@ const IndustryForm = ({ onSubmit, editingData, onCancel }) => {
   const [formData, setFormData] = useState({
     industryType: "",
     companySize: "",
-    cityCountry: "",
+    cityCountry: [],
     leadPriority: ""
   });
   
   const [isCountryListOpen, setIsCountryListOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [currentCountryInput, setCurrentCountryInput] = useState("");
   
   // Load editing data if provided
   useEffect(() => {
@@ -114,7 +115,7 @@ const IndustryForm = ({ onSubmit, editingData, onCancel }) => {
       setFormData({
         industryType: editingData.industryType || "",
         companySize: editingData.companySize || "",
-        cityCountry: editingData.cityCountry || "",
+        cityCountry: editingData.cityCountry || [],
         leadPriority: editingData.leadPriority || ""
       });
     }
@@ -139,9 +140,28 @@ const IndustryForm = ({ onSubmit, editingData, onCancel }) => {
     });
   };
 
+  const handleAddCountry = (country) => {
+    if (country && !formData.cityCountry.includes(country)) {
+      setFormData({
+        ...formData,
+        cityCountry: [...formData.cityCountry, country]
+      });
+      setCurrentCountryInput("");
+      setIsCountryListOpen(false);
+      setHighlightedIndex(-1);
+    }
+  };
+
+  const handleRemoveCountry = (countryToRemove) => {
+    setFormData({
+      ...formData,
+      cityCountry: formData.cityCountry.filter(country => country !== countryToRemove)
+    });
+  };
+
   const handleSubmit = () => {
-    if (!formData.industryType || !formData.companySize || !formData.cityCountry || !formData.leadPriority) {
-      alert('Please fill in all required fields');
+    if (!formData.industryType || !formData.companySize || formData.cityCountry.length === 0 || !formData.leadPriority) {
+      alert('Please fill in all required fields and select at least one country');
       return;
     }
     onSubmit(formData);
@@ -149,9 +169,10 @@ const IndustryForm = ({ onSubmit, editingData, onCancel }) => {
     setFormData({
       industryType: "",
       companySize: "",
-      cityCountry: "",
+      cityCountry: [],
       leadPriority: ""
     });
+    setCurrentCountryInput("");
   };
 
   return (
@@ -216,15 +237,14 @@ const IndustryForm = ({ onSubmit, editingData, onCancel }) => {
           {/* Country */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Country *
+              Location(s) 
             </label>
             <div className="relative country-selector">
               <input
                 type="text"
-                name="cityCountry"
-                value={formData.cityCountry}
+                value={currentCountryInput}
                 onChange={(e) => {
-                  handleChange(e);
+                  setCurrentCountryInput(e.target.value);
                   setIsCountryListOpen(true);
                   setHighlightedIndex(-1);
                 }}
@@ -234,7 +254,8 @@ const IndustryForm = ({ onSubmit, editingData, onCancel }) => {
                 }}
                 onKeyDown={(e) => {
                   const filteredCountries = countries.filter(country => 
-                    country.toLowerCase().includes(formData.cityCountry.toLowerCase())
+                    country.toLowerCase().includes(currentCountryInput.toLowerCase()) &&
+                    !formData.cityCountry.includes(country)
                   );
                   
                   if (e.key === 'ArrowDown') {
@@ -248,26 +269,16 @@ const IndustryForm = ({ onSubmit, editingData, onCancel }) => {
                   } else if (e.key === 'Enter') {
                     e.preventDefault();
                     if (highlightedIndex >= 0 && highlightedIndex < filteredCountries.length) {
-                      setFormData({
-                        ...formData,
-                        cityCountry: filteredCountries[highlightedIndex]
-                      });
-                      setIsCountryListOpen(false);
-                      setHighlightedIndex(-1);
+                      handleAddCountry(filteredCountries[highlightedIndex]);
                     } else if (filteredCountries.length === 1) {
-                      setFormData({
-                        ...formData,
-                        cityCountry: filteredCountries[0]
-                      });
-                      setIsCountryListOpen(false);
-                      setHighlightedIndex(-1);
+                      handleAddCountry(filteredCountries[0]);
                     }
                   } else if (e.key === 'Escape') {
                     setIsCountryListOpen(false);
                     setHighlightedIndex(-1);
                   }
                 }}
-                placeholder="Search and select a country"
+                placeholder="Search and select countries"
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 hover:border-[#1a84de]/50"
                 autoComplete="off"
               />
@@ -280,19 +291,13 @@ const IndustryForm = ({ onSubmit, editingData, onCancel }) => {
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto">
                   {countries
                     .filter(country => 
-                      country.toLowerCase().includes(formData.cityCountry.toLowerCase())
+                      country.toLowerCase().includes(currentCountryInput.toLowerCase()) &&
+                      !formData.cityCountry.includes(country)
                     )
                     .map((country, index) => (
                       <div
                         key={country}
-                        onClick={() => {
-                          setFormData({
-                            ...formData,
-                            cityCountry: country
-                          });
-                          setIsCountryListOpen(false);
-                          setHighlightedIndex(-1);
-                        }}
+                        onClick={() => handleAddCountry(country)}
                         onMouseEnter={() => setHighlightedIndex(index)}
                         className={`px-4 py-2 cursor-pointer transition-colors duration-200 ${
                           index === highlightedIndex 
@@ -306,6 +311,27 @@ const IndustryForm = ({ onSubmit, editingData, onCancel }) => {
                 </div>
               )}
             </div>
+            
+            {/* Selected Countries Tags */}
+            {formData.cityCountry.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {formData.cityCountry.map((country, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#0958d9]/10 text-[#0958d9] border border-[#0958d9]/20 group transition-all duration-200"
+                  >
+                    {country}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveCountry(country)}
+                      className="ml-2 text-[#1a84de] hover:text-blue-800 focus:outline-none transition-colors duration-200 flex items-center"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -368,7 +394,7 @@ const JobsForm = ({ onSubmit, editingData, onCancel }) => {
     industryType: "",
     companySize: "",
     workType: "",
-    location: "",
+    location: [],
     hiringUrgency: "",
     skills: [],
     experience: "",
@@ -378,6 +404,7 @@ const JobsForm = ({ onSubmit, editingData, onCancel }) => {
   const [currentSkill, setCurrentSkill] = useState("");
   const [isCountryListOpen, setIsCountryListOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [currentLocationInput, setCurrentLocationInput] = useState("");
   
   // Load editing data if provided
   useEffect(() => {
@@ -386,7 +413,7 @@ const JobsForm = ({ onSubmit, editingData, onCancel }) => {
         industryType: editingData.industryType || "",
         companySize: editingData.companySize || "",
         workType: editingData.workType || "",
-        location: editingData.location || "",
+        location: editingData.location || [],
         hiringUrgency: editingData.hiringUrgency || "",
         skills: editingData.skills || [],
         experience: editingData.experience || "",
@@ -411,6 +438,25 @@ const JobsForm = ({ onSubmit, editingData, onCancel }) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
+    });
+  };
+
+  const handleAddLocation = (location) => {
+    if (location && !formData.location.includes(location)) {
+      setFormData({
+        ...formData,
+        location: [...formData.location, location]
+      });
+      setCurrentLocationInput("");
+      setIsCountryListOpen(false);
+      setHighlightedIndex(-1);
+    }
+  };
+
+  const handleRemoveLocation = (locationToRemove) => {
+    setFormData({
+      ...formData,
+      location: formData.location.filter(location => location !== locationToRemove)
     });
   };
 
@@ -439,8 +485,8 @@ const JobsForm = ({ onSubmit, editingData, onCancel }) => {
   };
 
   const handleSubmit = () => {
-    if (!formData.jobTitle || !formData.industryType || !formData.companySize || !formData.location || !formData.experience) {
-      alert('Please fill in all required fields');
+    if (!formData.jobTitle || !formData.industryType || !formData.companySize || formData.location.length === 0 || !formData.experience) {
+      alert('Please fill in all required fields and select at least one location');
       return;
     }
     onSubmit(formData);
@@ -449,13 +495,14 @@ const JobsForm = ({ onSubmit, editingData, onCancel }) => {
       industryType: "",
       companySize: "",
       workType: "",
-      location: "",
+      location: [],
       hiringUrgency: "",
       skills: [],
       experience: "",
       jobTitle: ""
     });
     setCurrentSkill("");
+    setCurrentLocationInput("");
   };
 
   return (
@@ -535,15 +582,14 @@ const JobsForm = ({ onSubmit, editingData, onCancel }) => {
           {/* Location */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Location *
+              Location(s)
             </label>
             <div className="relative country-selector">
               <input
                 type="text"
-                name="location"
-                value={formData.location}
+                value={currentLocationInput}
                 onChange={(e) => {
-                  handleChange(e);
+                  setCurrentLocationInput(e.target.value);
                   setIsCountryListOpen(true);
                   setHighlightedIndex(-1);
                 }}
@@ -553,7 +599,8 @@ const JobsForm = ({ onSubmit, editingData, onCancel }) => {
                 }}
                 onKeyDown={(e) => {
                   const filteredCountries = countries.filter(country => 
-                    country.toLowerCase().includes(formData.location.toLowerCase())
+                    country.toLowerCase().includes(currentLocationInput.toLowerCase()) &&
+                    !formData.location.includes(country)
                   );
                   
                   if (e.key === 'ArrowDown') {
@@ -567,26 +614,16 @@ const JobsForm = ({ onSubmit, editingData, onCancel }) => {
                   } else if (e.key === 'Enter') {
                     e.preventDefault();
                     if (highlightedIndex >= 0 && highlightedIndex < filteredCountries.length) {
-                      setFormData({
-                        ...formData,
-                        location: filteredCountries[highlightedIndex]
-                      });
-                      setIsCountryListOpen(false);
-                      setHighlightedIndex(-1);
+                      handleAddLocation(filteredCountries[highlightedIndex]);
                     } else if (filteredCountries.length === 1) {
-                      setFormData({
-                        ...formData,
-                        location: filteredCountries[0]
-                      });
-                      setIsCountryListOpen(false);
-                      setHighlightedIndex(-1);
+                      handleAddLocation(filteredCountries[0]);
                     }
                   } else if (e.key === 'Escape') {
                     setIsCountryListOpen(false);
                     setHighlightedIndex(-1);
                   }
                 }}
-                placeholder="Search and select a country"
+                placeholder="Search and select locations"
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 hover:border-[#1a84de]/50"
                 autoComplete="off"
               />
@@ -599,19 +636,13 @@ const JobsForm = ({ onSubmit, editingData, onCancel }) => {
                 <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto">
                   {countries
                     .filter(country => 
-                      country.toLowerCase().includes(formData.location.toLowerCase())
+                      country.toLowerCase().includes(currentLocationInput.toLowerCase()) &&
+                      !formData.location.includes(country)
                     )
                     .map((country, index) => (
                       <div
                         key={country}
-                        onClick={() => {
-                          setFormData({
-                            ...formData,
-                            location: country
-                          });
-                          setIsCountryListOpen(false);
-                          setHighlightedIndex(-1);
-                        }}
+                        onClick={() => handleAddLocation(country)}
                         onMouseEnter={() => setHighlightedIndex(index)}
                         className={`px-4 py-2 cursor-pointer transition-colors duration-200 ${
                           index === highlightedIndex 
@@ -625,6 +656,27 @@ const JobsForm = ({ onSubmit, editingData, onCancel }) => {
                 </div>
               )}
             </div>
+            
+            {/* Selected Locations Tags */}
+            {formData.location.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {formData.location.map((location, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#0958d9]/10 text-[#0958d9] border border-[#0958d9]/20 group transition-all duration-200"
+                  >
+                    {location}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveLocation(location)}
+                      className="ml-2 text-[#1a84de] hover:text-blue-800 focus:outline-none transition-colors duration-200 flex items-center"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Job Title */}
