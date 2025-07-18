@@ -51,7 +51,8 @@ export class AuthService {
         companySize: user.companySize,
         phone: user.phone,
         subscriptionStatus: user.subscriptionStatus,
-        isActive: user.isActive
+        isActive: user.isActive,
+        twoFactorEnabled: user.twoFactorEnabled
       },
       access_token: this.jwtService.sign(payload),
     };
@@ -70,7 +71,8 @@ export class AuthService {
         companySize: user.companySize,
         phone: user.phone,
         subscriptionStatus: user.subscriptionStatus,
-        isActive: user.isActive
+        isActive: user.isActive,
+        twoFactorEnabled: user.twoFactorEnabled
       }
     };
   }

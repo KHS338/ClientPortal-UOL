@@ -84,15 +84,34 @@ export const AuthProvider = ({ children }) => {
 
   // Initialize auth state on mount
   useEffect(() => {
-    const initializeAuth = () => {
+    const initializeAuth = async () => {
       const token = authUtils.getToken();
       const user = authUtils.getUserData();
       
       if (token && user) {
+        // First set the user from storage
         dispatch({
           type: AUTH_ACTIONS.LOGIN_SUCCESS,
           payload: { token, user }
         });
+        
+        // Then fetch fresh user data to get updated 2FA status
+        try {
+          const response = await authUtils.fetchWithAuth('http://localhost:3001/auth/profile');
+          const result = await response.json();
+          
+          if (result.success) {
+            // Update user data with fresh info from server
+            authUtils.setAuth(token, result.user, true); // Update storage
+            dispatch({
+              type: AUTH_ACTIONS.UPDATE_USER,
+              payload: result.user
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching fresh user data:', error);
+          // Continue with cached user data if API call fails
+        }
       } else {
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
       }
@@ -169,6 +188,10 @@ export const AuthProvider = ({ children }) => {
       const result = await response.json();
       
       if (result.success) {
+        // Update storage with fresh user data
+        const token = authUtils.getToken();
+        authUtils.setAuth(token, result.user, false); // Will preserve existing storage location
+        
         dispatch({
           type: AUTH_ACTIONS.UPDATE_USER,
           payload: result.user

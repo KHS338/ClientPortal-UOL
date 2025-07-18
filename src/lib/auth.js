@@ -20,12 +20,22 @@ export const authUtils = {
   // Set authentication data
   setAuth: (token, user, remember = false) => {
     if (typeof window !== 'undefined') {
-      if (remember) {
+      // Check if data is already in localStorage or sessionStorage
+      const existingToken = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+      const useLocalStorage = remember || !!localStorage.getItem('authToken');
+      
+      if (useLocalStorage) {
         localStorage.setItem('authToken', token);
         localStorage.setItem('userData', JSON.stringify(user));
+        // Clear sessionStorage if we're using localStorage
+        sessionStorage.removeItem('authToken');
+        sessionStorage.removeItem('userData');
       } else {
         sessionStorage.setItem('authToken', token);
         sessionStorage.setItem('userData', JSON.stringify(user));
+        // Clear localStorage if we're using sessionStorage
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userData');
       }
     }
   },
