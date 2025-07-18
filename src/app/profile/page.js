@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -10,24 +10,89 @@ import { Button } from "@/components/ui/button";
 
 export default function ClientProfilePage({ initial = {} }) {
   const router = useRouter();
+  const [user, setUser] = useState(null);
   const [form, setForm] = useState({
-    companymail: initial.companymail || "john.doe@company.com",
-    password: initial.password || "",
-    firstName: initial.firstName || "John",
-    lastName: initial.lastName || "Doe",
-    companyName: initial.companyName || "Tech Solutions Inc.",
-    companySize: initial.companySize || "11-50",
-    email: initial.email || "john.personal@gmail.com",
-    phone: initial.phone || "+1 (555) 123-4567",
-    avatar: initial.avatar || null,
-    joinDate: initial.joinDate || "January 2025",
-    lastLogin: initial.lastLogin || "2 hours ago",
+    companymail: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    companyName: "",
+    companySize: "",
+    email: "",
+    phone: "",
+    avatar: null,
+    joinDate: "",
+    lastLogin: "",
+    twoFactorEnabled: false,
   });
 
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingUser, setIsLoadingUser] = useState(true);
   const fileRef = useRef();
+
+  // Load user data from localStorage
+  useEffect(() => {
+    const loadUserData = () => {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+          
+          // Format dates
+          const joinDate = parsedUser.createdAt ? new Date(parsedUser.createdAt).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long'
+          }) : "N/A";
+          
+          const lastLogin = parsedUser.lastLogin ? new Date(parsedUser.lastLogin).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }) : "Never";
+
+          setForm({
+            companymail: parsedUser.companymail || "",
+            password: "", // Never populate password field
+            firstName: parsedUser.firstName || "",
+            lastName: parsedUser.lastName || "",
+            companyName: parsedUser.companyName || "",
+            companySize: parsedUser.companySize || "",
+            email: parsedUser.email || "",
+            phone: parsedUser.phone || "",
+            avatar: parsedUser.avatar || null,
+            joinDate: joinDate,
+            lastLogin: lastLogin,
+            twoFactorEnabled: parsedUser.twoFactorEnabled || false,
+          });
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          router.push('/login');
+        }
+      } else {
+        router.push('/login');
+      }
+      setIsLoadingUser(false);
+    };
+
+    loadUserData();
+  }, [router]);
+
+  // Show loading state
+  if (isLoadingUser) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#1a84de] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleChange = (e) => {
     const { name, value, files, type } = e.target;
@@ -38,11 +103,43 @@ export default function ClientProfilePage({ initial = {} }) {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Call the backend API to update user profile
+      const response = await fetch('http://localhost:3001/users/update-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          firstName: form.firstName,
+          lastName: form.lastName,
+          companyName: form.companyName,
+          companySize: form.companySize,
+          email: form.email,
+          phone: form.phone,
+          companymail: form.companymail,
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Update localStorage with new user data
+        const updatedUser = { ...user, ...result.user };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+        setIsEditing(false);
+        alert('Profile updated successfully!');
+      } else {
+        throw new Error(result.message || 'Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Failed to update profile. Please try again.');
+    } finally {
       setIsLoading(false);
-      setIsEditing(false);
-    }, 1500);
+    }
   };
 
   const primary = "#1a84de";
@@ -73,7 +170,12 @@ export default function ClientProfilePage({ initial = {} }) {
                     <div className="mx-auto">
                       <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-white shadow-xl">
                         <img
-                          src={form.avatar ? URL.createObjectURL(form.avatar) : "/images/profile.png"}
+                          src={form.avatar && form.avatar instanceof File 
+                            ? URL.createObjectURL(form.avatar) 
+                            : form.avatar 
+                            ? form.avatar 
+                            : "/images/profile.png"
+                          }
                           alt="Profile"
                           width={128}
                           height={128}
@@ -266,16 +368,29 @@ export default function ClientProfilePage({ initial = {} }) {
                         <FiLock className="text-gray-600" />
                         <div>
                           <h4 className="font-semibold text-gray-800">Two-Factor Authentication</h4>
-                          <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
+                          <p className="text-sm text-gray-600">
+                            {form.twoFactorEnabled 
+                              ? "Enabled - Your account is protected with 2FA" 
+                              : "Disabled - Add an extra layer of security to your account"
+                            }
+                          </p>
                         </div>
                       </div>
-                      <Button
-                        type="button"
-                        onClick={() => router.push('/profile/2fa')}
-                        className="bg-[#0958d9] hover:bg-[#24AC4A] text-white px-4 py-2 rounded-lg transition-all duration-300 cursor-pointer"
-                      >
-                        Manage 2FA
-                      </Button>
+                      <div className="flex items-center gap-3">
+                        {form.twoFactorEnabled && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <FiCheckCircle className="w-3 h-3 mr-1" />
+                            Enabled
+                          </span>
+                        )}
+                        <Button
+                          type="button"
+                          onClick={() => router.push('/profile/2fa')}
+                          className="bg-[#0958d9] hover:bg-[#24AC4A] text-white px-4 py-2 rounded-lg transition-all duration-300 cursor-pointer"
+                        >
+                          Manage 2FA
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">

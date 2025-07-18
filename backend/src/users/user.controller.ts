@@ -194,4 +194,37 @@ export class UsersController {
       };
     }
   }
+
+  @Post('update-profile') // 👈 Full route: POST /users/update-profile
+  @HttpCode(HttpStatus.OK)
+  async updateProfile(@Body() updateData: { 
+    userId: number; 
+    firstName?: string;
+    lastName?: string;
+    companyName?: string;
+    companySize?: string;
+    email?: string;
+    phone?: string;
+    companymail?: string;
+  }) {
+    try {
+      const { userId, ...profileData } = updateData;
+      const updatedUser = await this.usersService.updateUserProfile(userId, profileData);
+      
+      // Return user data (excluding password and sensitive info)
+      const { password: _, twoFactorSecret: __, twoFactorBackupCodes: ___, ...userWithoutPassword } = updatedUser;
+      
+      return {
+        success: true,
+        message: 'Profile updated successfully',
+        user: userWithoutPassword
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message,
+        error: error.name
+      };
+    }
+  }
 }

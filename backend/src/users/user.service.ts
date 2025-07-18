@@ -261,4 +261,44 @@ export class UsersService {
   async verifyPassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
     return await bcrypt.compare(plainPassword, hashedPassword);
   }
+
+  async updateUserProfile(userId: number, updateData: Partial<User>): Promise<User> {
+    // Remove sensitive fields that shouldn't be updated through this method
+    const { password, twoFactorSecret, twoFactorBackupCodes, ...safeUpdateData } = updateData;
+    
+    // Check if email is being updated and if it's already taken
+    if (updateData.email || updateData.companymail) {
+      const conditions = [];
+      if (updateData.email) {
+        conditions.push({ email: updateData.email });
+      }
+      if (updateData.companymail) {
+        conditions.push({ companymail: updateData.companymail });
+      }
+      
+      const existingUser = await this.userRepo.createQueryBuilder('user')
+        .where('user.id != :userId', { userId })
+        .andWhere(conditions.length > 0 ? 
+          conditions.map((condition, index) => 
+            Object.keys(condition).map(key => `user.${key} = :${key}${index}`).join(' OR ')
+          ).join(' OR ') : '1=0'
+        )
+        .setParameters(
+          conditions.reduce((params, condition, index) => {
+            Object.keys(condition).forEach(key => {
+              params[`${key}${index}`] = condition[key];
+            });
+            return params;
+          }, {})
+        )
+        .getOne();
+      
+      if (existingUser) {
+        throw new ConflictException('Email already exists');
+      }
+    }
+
+    await this.userRepo.update(userId, safeUpdateData);
+    return this.findById(userId);
+  }
 }
