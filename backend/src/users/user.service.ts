@@ -124,6 +124,7 @@ export class UsersService {
   // Two-Factor Authentication methods
   async setup2FA(userId: number): Promise<{
     secret: string;
+    otpAuthUrl: string;
     qrCodeUrl: string;
     backupCodes: string[];
   }> {
@@ -146,7 +147,8 @@ export class UsersService {
 
     return {
       secret: twoFactorSetup.secret,
-      qrCodeUrl: qrCodeUrl,
+      otpAuthUrl: twoFactorSetup.otpAuthUrl, // Raw OTP Auth URL for react-qr-code
+      qrCodeUrl: qrCodeUrl, // Base64 image for alternative display
       backupCodes: backupCodes
     };
   }

@@ -8,9 +8,9 @@ import { User } from './user.entity';
 export class TwoFactorService {
   generateSecret(userEmail: string): { secret: string; otpAuthUrl: string } {
     const secret = speakeasy.generateSecret({
-      name: userEmail,
+      name: `ClientPortal-UOL:${userEmail}`,
       issuer: 'ClientPortal-UOL',
-      length: 20
+      length: 32
     });
 
     return {

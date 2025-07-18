@@ -227,7 +227,7 @@ export default function TwoFactorAuthSettings() {
                   <QRCode
                     size={200}
                     style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                    value={setupData.qrCodeUrl}
+                    value={setupData.otpAuthUrl}
                     viewBox={`0 0 200 200`}
                   />
                 </div>
