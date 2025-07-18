@@ -4,7 +4,11 @@
     "baseUrl": ".",
     "paths": {
       "@/components/*": ["components/*"],
-      "@/app/*":        ["app/*"]
+      "@/app/*": ["app/*"],
+      "@/src/*": ["src/*"],
+      "@/contexts/*": ["src/contexts/*"],
+      "@/lib/*": ["src/lib/*"],
+      "@/hooks/*": ["src/hooks/*"]
     }
   }
 }

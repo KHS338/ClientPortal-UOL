@@ -14,6 +14,7 @@ import {
   LogOut,
 } from "lucide-react"
 import { useState, useEffect } from "react"
+import { useAuth } from "@/contexts/AuthContext"
 
 import {
   Sidebar,
@@ -77,16 +78,24 @@ export function AppSidebar() {
   const [mounted, setMounted] = useState(false)
   const [userSubscription, setUserSubscription] = useState(null)
   const router = useRouter()
+  const { logout } = useAuth()
 
   // Handle logout
-  const handleLogout = () => {
-    // Clear user data from localStorage
-    localStorage.removeItem('userSubscription')
-    localStorage.removeItem('userData')
-    localStorage.removeItem('userEmail')
-    
-    // Redirect to login page
-    router.push('/login')
+  const handleLogout = async () => {
+    try {
+      await logout()
+      // Clear subscription data as well
+      localStorage.removeItem('userSubscription')
+      localStorage.removeItem('userData')
+      localStorage.removeItem('userEmail')
+      
+      // Redirect to login page
+      router.push('/login')
+    } catch (error) {
+      console.error('Logout error:', error)
+      // Still redirect to login even if logout fails
+      router.push('/login')
+    }
   }
 
   // Load user subscription from localStorage

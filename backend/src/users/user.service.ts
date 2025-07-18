@@ -56,6 +56,13 @@ export class UsersService {
     }
   }
 
+  async findById(id: number): Promise<User | null> {
+    return this.userRepo.findOne({
+      where: { id },
+      select: ['id', 'firstName', 'lastName', 'companymail', 'email', 'companyName', 'companySize', 'phone', 'isActive', 'subscriptionStatus', 'createdAt']
+    });
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepo.findOne({
       where: [

@@ -2,15 +2,18 @@
  
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FiMail, FiLock, FiEye, FiEyeOff, FiUser, FiArrowRight } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
  
 export default function LoginPage() {
   const router = useRouter();
+  const { login, isAuthenticated, isLoading: authLoading, error: authError, clearError } = useAuth();
+  
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -18,7 +21,20 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState("");
+  const [localError, setLocalError] = useState("");
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, authLoading, router]);
+
+  // Clear errors when form changes
+  useEffect(() => {
+    if (authError) clearError();
+    if (localError) setLocalError("");
+  }, [form.email, form.password]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,22 +44,22 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
+    setLocalError("");
     
-    // Check credentials
-    if (form.email === "user@gmail.com" && form.password === "1234") {
-      // Simulate API call
-      setTimeout(() => {
-        setIsLoading(false);
+    try {
+      const result = await login(form.email, form.password, rememberMe);
+      
+      if (result.success) {
         // Redirect to dashboard on successful login
         router.push('/dashboard');
-      }, 1500);
-    } else {
-      // Invalid credentials
-      setTimeout(() => {
-        setIsLoading(false);
-        setError("Invalid email or password. Please use: user@gmail.com / 1234");
-      }, 1500);
+      } else {
+        setLocalError(result.message || 'Login failed. Please check your credentials.');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setLocalError('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
  
@@ -150,14 +166,14 @@ export default function LoginPage() {
               </motion.div>
 
               {/* Error Message */}
-              {error && (
+              {(localError || authError) && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                   className="p-3 bg-red-50 border border-red-200 rounded-lg"
                 >
-                  <p className="text-red-700 text-sm text-center">{error}</p>
+                  <p className="text-red-700 text-sm text-center">{localError || authError}</p>
                 </motion.div>
               )}
 
