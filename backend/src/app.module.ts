@@ -11,7 +11,8 @@ import { UsersModule } from './users/user.module';
       type: 'postgres',
       url: process.env.DATABASE_URL,
       autoLoadEntities: true,
-      synchronize: false, // set to false in production
+      synchronize: true, // set to false in production
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     }),
     UsersModule, // Added UsersModule import
   ],
