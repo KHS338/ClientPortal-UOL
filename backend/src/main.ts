@@ -1,8 +1,25 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3000);
+  
+  // Enable CORS for frontend communication
+  app.enableCors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
+  
+  // Enable global validation
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true, // Strip properties that are not in the DTO
+    forbidNonWhitelisted: true, // Throw error if non-whitelisted properties are present
+    transform: true, // Transform payloads to DTO instances
+  }));
+  
+  await app.listen(process.env.PORT ?? 3001);
+  console.log(`🚀 Server is running on port ${process.env.PORT ?? 3001}`);
 }
 bootstrap();

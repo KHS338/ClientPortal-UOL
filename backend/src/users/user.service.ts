@@ -1,8 +1,10 @@
 // backend/src/users/user.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
+import { CreateUserDto } from './dto/create-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -13,7 +15,64 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     return this.userRepo.find({
-      select: ['id', 'email', 'isActive'], // Don't return password
+      select: ['id', 'firstName', 'lastName', 'companymail', 'email', 'companyName', 'companySize', 'phone', 'isActive', 'subscriptionStatus', 'createdAt'], // Don't return password
+    });
+  }
+
+  async createUser(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
+    // Check if user already exists with either email
+    const existingUser = await this.userRepo.findOne({
+      where: [
+        { companymail: createUserDto.companymail },
+        { email: createUserDto.email }
+      ]
+    });
+    
+    if (existingUser) {
+      throw new ConflictException('User with this email already exists');
+    }
+
+    // Hash password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(createUserDto.password, saltRounds);
+
+    // Create user entity
+    const user = this.userRepo.create({
+      ...createUserDto,
+      password: hashedPassword,
+      isActive: true,
+      emailVerified: false,
+      subscriptionStatus: 'inactive'
+    });
+
+    try {
+      const savedUser = await this.userRepo.save(user);
+      
+      // Return user without password
+      const { password, ...userWithoutPassword } = savedUser;
+      return userWithoutPassword;
+    } catch (error) {
+      throw new BadRequestException('Failed to create user');
+    }
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userRepo.findOne({
+      where: [
+        { companymail: email },
+        { email: email }
+      ]
+    });
+  }
+
+  async updateLastLogin(userId: number): Promise<void> {
+    await this.userRepo.update(userId, { lastLogin: new Date() });
+  }
+
+  async updateSubscription(userId: number, subscriptionPlan: string, subscriptionStatus: string): Promise<void> {
+    await this.userRepo.update(userId, { 
+      subscriptionPlan, 
+      subscriptionStatus 
     });
   }
 
@@ -27,15 +86,29 @@ export class UsersService {
       return { message: 'Dummy user already exists', user: existingUser };
     }
 
+    const hashedPassword = await bcrypt.hash('test1234', 10);
+
     const user = this.userRepo.create({
-      email: 'seed@example.com',
-      password: 'test1234',
+      firstName: 'John',
+      lastName: 'Doe',
+      companymail: 'seed@example.com',
+      email: 'john.doe@personal.com',
+      password: hashedPassword,
+      companyName: 'Test Company',
+      companySize: '11-50',
+      phone: '+1234567890',
+      avatar: null,
+      isActive: true,
+      emailVerified: true,
+      subscriptionStatus: 'active'
     });
+    
     const savedUser = await this.userRepo.save(user);
+    const { password, ...userWithoutPassword } = savedUser;
     
     return { 
       message: 'Dummy user created successfully', 
-      user: { id: savedUser.id, email: savedUser.email, isActive: savedUser.isActive }
+      user: userWithoutPassword
     };
   }
 }
