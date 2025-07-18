@@ -27,10 +27,17 @@ export default function ClientRegistrationPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [error, setError] = useState(null);
   const fileRef = useRef();
  
   const handleChange = (e) => {
     const { name, value, files, type } = e.target;
+    
+    // Clear error when user starts typing
+    if (error) {
+      setError(null);
+    }
+    
     setForm((f) => ({
       ...f,
       [name]: type === "file" ? files[0] : value,
@@ -43,24 +50,66 @@ export default function ClientRegistrationPage() {
     
     // Basic validation
     if (form.password !== form.confirmPassword) {
-      alert("Passwords don't match!");
+      setError("Passwords don't match!");
       setIsLoading(false);
       return;
     }
     
-    console.log("Submitting:", form);
-    // TODO: call your API here
+    // Clear any previous errors
+    setError(null);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      setShowSuccess(true);
+    try {
+      console.log("Submitting to backend:", form);
       
-      // Redirect to subscription page after showing success message
-      setTimeout(() => {
-        router.push('/subscription');
-      }, 2000);
-    }, 2000);
+      // Prepare data for backend (exclude confirmPassword and avatar file)
+      const userData = {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        companymail: form.companymail,
+        email: form.email,
+        password: form.password,
+        companyName: form.companyName,
+        companySize: form.companySize,
+        phone: form.phone,
+        avatar: form.avatar ? 'uploaded-avatar.jpg' : null // For now, just a placeholder
+      };
+
+      // Call backend API
+      const response = await fetch('http://localhost:3001/users/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData)
+      });
+
+      const result = await response.json();
+      console.log("Backend response:", result);
+
+      if (result.success) {
+        // Success - show success message
+        setIsLoading(false);
+        setShowSuccess(true);
+        
+        // Store user data in localStorage for later use
+        localStorage.setItem('registeredUser', JSON.stringify(result.user));
+        
+        // Redirect to subscription page after showing success message
+        setTimeout(() => {
+          router.push('/subscription');
+        }, 2000);
+      } else {
+        // Handle backend errors
+        setIsLoading(false);
+        setError(result.message || 'Registration failed. Please try again.');
+      }
+      
+    } catch (error) {
+      // Handle network errors
+      console.error('Registration error:', error);
+      setIsLoading(false);
+      setError('Network error. Please check your connection and try again.');
+    }
   };
  
   const primary = "#19AF1A";
@@ -121,6 +170,28 @@ export default function ClientRegistrationPage() {
                   <div className="text-center">
                     <h3 className="text-lg font-semibold text-green-800 mb-1">Account Created Successfully!</h3>
                     <p className="text-green-700">Welcome to our platform. Redirecting you to choose your subscription...</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Error Message */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="mb-8 p-6 bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-xl"
+              >
+                <div className="flex items-center justify-center space-x-3">
+                  <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold text-red-800 mb-1">Registration Failed</h3>
+                    <p className="text-red-700">{error}</p>
                   </div>
                 </div>
               </motion.div>
