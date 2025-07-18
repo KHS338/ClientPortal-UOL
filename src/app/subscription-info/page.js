@@ -5,6 +5,7 @@ import { FiCheckCircle, FiCalendar, FiCreditCard } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, Toast } from "@/components/ui/alert-dialog";
+import StripePayment from "@/components/StripePayment";
 
 export default function SubscriptionInfoPage() {
   const [billingCycle, setBillingCycle] = useState("monthly");
@@ -12,6 +13,11 @@ export default function SubscriptionInfoPage() {
   const [currentService, setCurrentService] = useState("");
   const [currentBillingCycle, setCurrentBillingCycle] = useState("monthly");
   const [subscriptionData, setSubscriptionData] = useState(null);
+  
+  // Payment modal states
+  const [showPayment, setShowPayment] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   
   // Load subscription data from localStorage on component mount
   useEffect(() => {
@@ -53,6 +59,41 @@ export default function SubscriptionInfoPage() {
     const planDetails = service[cycle];
     const price = planDetails?.price || "N/A";
 
+    // Check if it's a free plan or if switching to the same plan
+    if (price === "Free" || serviceTitle === currentService) {
+      // For free plans or same plan, proceed directly without payment
+      completePlanChange(serviceTitle, cycle, price, null);
+    } else {
+      // For paid plans, show Stripe payment modal
+      setIsProcessing(true);
+      setTimeout(() => {
+        setIsProcessing(false);
+        setSelectedPlan({
+          title: serviceTitle,
+          billingCycle: cycle,
+          price: price
+        });
+        setShowPayment(true);
+      }, 1000);
+    }
+  };
+
+  const handlePaymentSuccess = (paymentResult) => {
+    console.log('Payment successful:', paymentResult);
+    completePlanChange(
+      selectedPlan.title, 
+      selectedPlan.billingCycle, 
+      selectedPlan.price, 
+      paymentResult
+    );
+  };
+
+  const handlePaymentCancel = () => {
+    setShowPayment(false);
+    setSelectedPlan(null);
+  };
+
+  const completePlanChange = (serviceTitle, cycle, price, paymentResult) => {
     // Calculate next payment date based on new billing cycle
     const getNextPaymentDate = (billingCycle) => {
       const now = new Date();
@@ -84,7 +125,14 @@ export default function SubscriptionInfoPage() {
       price: price,
       subscribedDate: subscriptionData?.subscribedDate || new Date().toISOString(),
       nextPayment: getNextPaymentDate(cycle),
-      planKey: planKey
+      planKey: planKey,
+      paymentInfo: paymentResult ? {
+        paymentIntentId: paymentResult.paymentIntentId,
+        paymentMethod: paymentResult.paymentMethod,
+        status: 'paid'
+      } : subscriptionData?.paymentInfo || {
+        status: 'trial'
+      }
     };
     
     localStorage.setItem('userSubscription', JSON.stringify(updatedSubscriptionData));
@@ -94,6 +142,10 @@ export default function SubscriptionInfoPage() {
     window.dispatchEvent(new CustomEvent('subscriptionUpdated', { 
       detail: updatedSubscriptionData 
     }));
+    
+    // Clear payment modal states
+    setShowPayment(false);
+    setSelectedPlan(null);
     
     // Show success toast
     setToast({
@@ -427,18 +479,31 @@ export default function SubscriptionInfoPage() {
                         <Button
                           onClick={(e) => {
                             e.stopPropagation();
+                            console.log('Button clicked for:', service.title, billingCycle);
                             if (isCurrentPlan) {
                               handleUnsubscribe(service.title);
                             } else {
                               handlePlanChange(service.title, billingCycle);
                             }
                           }}
-                          className={`w-full transition-all duration-300 mt-auto ${isCurrentPlan
-                            ? "bg-red-500 hover:bg-red-600 text-white"
-                            : "bg-[#1a84de] hover:bg-[#24AC4A] text-white group-hover:bg-[#24AC4A]"
+                          className={`w-full transition-all duration-300 mt-auto py-3 text-lg font-semibold ${isCurrentPlan
+                            ? "bg-red-500 hover:bg-red-600 text-white shadow-lg"
+                            : "bg-[#1a84de] hover:bg-[#24AC4A] text-white group-hover:bg-[#24AC4A] shadow-md"
                             }`}
+                          disabled={isProcessing}
                         >
-                          {isCurrentPlan ? "Unsubscribe" : "Switch to This Plan"}
+                          {isProcessing ? (
+                            <div className="flex items-center justify-center gap-2">
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              Processing...
+                            </div>
+                          ) : isCurrentPlan ? (
+                            "❌ Unsubscribe"
+                          ) : (
+                            <span className="flex items-center justify-center gap-2">
+                              Pay {service[billingCycle]?.price}
+                            </span>
+                          )}
                         </Button>
                       </div>
                     </div>
@@ -470,6 +535,26 @@ export default function SubscriptionInfoPage() {
         message={toast.message}
         type={toast.type}
       />
+
+      {/* Processing Overlay */}
+      {isProcessing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 text-center shadow-2xl">
+            <div className="w-8 h-8 border-4 border-[#19AF1A] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-lg font-semibold text-gray-800">Processing plan change...</p>
+            <p className="text-sm text-gray-600 mt-2">Please wait</p>
+          </div>
+        </div>
+      )}
+
+      {/* Stripe Payment Modal */}
+      {showPayment && selectedPlan && (
+        <StripePayment
+          planDetails={selectedPlan}
+          onPaymentSuccess={handlePaymentSuccess}
+          onCancel={handlePaymentCancel}
+        />
+      )}
     </div>
   );
 }

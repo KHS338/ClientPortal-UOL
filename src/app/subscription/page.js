@@ -5,15 +5,57 @@ import { useRouter } from "next/navigation";
 import { FiCheckCircle, FiStar, FiArrowRight, FiGift, FiZap } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import StripePayment from "@/components/StripePayment";
 
 export default function SubscriptionPage() {
   const router = useRouter();
   const [billingCycle, setBillingCycle] = useState("monthly");
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
 
   const handlePlanSelection = (serviceTitle, cycle, price) => {
     console.log(`Plan selected: ${serviceTitle} (${cycle}) - ${price}`);
     
+    // Add visual feedback
+    setIsRedirecting(true);
+    
+    // Check if it's a trial or free plan
+    if (serviceTitle === "Free Trial" || serviceTitle === "Trial" || price === "Free") {
+      // For trial/free plans, proceed directly without payment
+      setTimeout(() => {
+        completeSubscription(serviceTitle, cycle, price, null);
+      }, 1000);
+    } else {
+      // For paid plans, show Stripe payment modal
+      setTimeout(() => {
+        setIsRedirecting(false);
+        setSelectedPlan({
+          title: serviceTitle,
+          billingCycle: cycle,
+          price: price
+        });
+        setShowPayment(true);
+      }, 1000);
+    }
+  };
+
+  const handlePaymentSuccess = (paymentResult) => {
+    console.log('Payment successful:', paymentResult);
+    completeSubscription(
+      selectedPlan.title, 
+      selectedPlan.billingCycle, 
+      selectedPlan.price, 
+      paymentResult
+    );
+  };
+
+  const handlePaymentCancel = () => {
+    setShowPayment(false);
+    setSelectedPlan(null);
+  };
+
+  const completeSubscription = (serviceTitle, cycle, price, paymentResult) => {
     // Store subscription information in localStorage
     const subscriptionData = {
       service: serviceTitle,
@@ -21,7 +63,14 @@ export default function SubscriptionPage() {
       price: price,
       subscribedDate: new Date().toISOString(),
       nextPayment: getNextPaymentDate(cycle),
-      planKey: `${serviceTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${cycle}`
+      planKey: `${serviceTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${cycle}`,
+      paymentInfo: paymentResult ? {
+        paymentIntentId: paymentResult.paymentIntentId,
+        paymentMethod: paymentResult.paymentMethod,
+        status: 'paid'
+      } : {
+        status: 'trial'
+      }
     };
     
     console.log('Subscription - Storing data:', subscriptionData);
@@ -32,6 +81,8 @@ export default function SubscriptionPage() {
       detail: subscriptionData 
     }));
     
+    setShowPayment(false);
+    setSelectedPlan(null);
     setIsRedirecting(true);
     
     // Show a brief loading state before redirecting
@@ -222,10 +273,13 @@ export default function SubscriptionPage() {
                   </div>
 
                   <Button
-                    onClick={() => handlePlanSelection("Enterprise", billingCycle, "Custom Quote")}
-                    className="w-full px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg bg-[#1a84de] group-hover:bg-[#24AC4A] hover:bg-[#1a84de] group-hover:hover:bg-[#24AC4A] text-white transition-all duration-300"
+                    onClick={() => {
+                      console.log('Enterprise button clicked');
+                      handlePlanSelection("Enterprise", billingCycle, "Custom Quote");
+                    }}
+                    className="w-full px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg font-semibold bg-[#1a84de] group-hover:bg-[#24AC4A] hover:bg-[#1a84de] group-hover:hover:bg-[#24AC4A] text-white transition-all duration-300 shadow-lg"
                   >
-                    Get Custom Quote
+                    🏢 Get Custom Quote
                   </Button>
 
                   <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-[#0958d9]/10 to-[#06398e]/10 group-hover:from-[#24AC4A]/10 group-hover:to-[#24AC4A]/10 rounded-xl border border-[#0958d9]/20 group-hover:border-[#24AC4A]/20 transition-all duration-300">
@@ -307,15 +361,18 @@ export default function SubscriptionPage() {
                       </div>
 
                       <Button
-                        onClick={() => handlePlanSelection(service.title, billingCycle, currentPlan.price)}
-                        className={`w-full transition-all duration-300 mt-auto ${
+                        onClick={() => {
+                          console.log('Button clicked for:', service.title, billingCycle, currentPlan.price);
+                          handlePlanSelection(service.title, billingCycle, currentPlan.price);
+                        }}
+                        className={`w-full transition-all duration-300 mt-auto py-3 text-lg font-semibold ${
                           isHighlighted
-                            ? "bg-[#0958d9] hover:bg-[#24AC4A] text-white"
-                            : "bg-[#1a84de] hover:bg-[#24AC4A] text-white group-hover:bg-[#24AC4A]"
+                            ? "bg-[#0958d9] hover:bg-[#24AC4A] text-white shadow-lg"
+                            : "bg-[#1a84de] hover:bg-[#24AC4A] text-white group-hover:bg-[#24AC4A] shadow-md"
                         }`}
                       >
                         <span className="flex items-center justify-center gap-2">
-                          {isTrialPlan ? "Start Free Trial" : "Choose Plan"}
+                          {isTrialPlan ? "🚀 Start Free Trial" : "💳 Choose Plan"}
                           <FiArrowRight className="w-4 h-4" />
                         </span>
                       </Button>
@@ -359,6 +416,15 @@ export default function SubscriptionPage() {
           </div>
         </div>
       </div>
+
+      {/* Stripe Payment Modal */}
+      {showPayment && selectedPlan && (
+        <StripePayment
+          planDetails={selectedPlan}
+          onPaymentSuccess={handlePaymentSuccess}
+          onCancel={handlePaymentCancel}
+        />
+      )}
     </div>
   );
 }
