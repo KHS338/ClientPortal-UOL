@@ -1,4 +1,4 @@
-// app/roles/page.js
+// app/roles/360Direct/page.js
 "use client"
 
 import React, { useState, useEffect } from "react"
@@ -16,138 +16,137 @@ import {
 
 import AddRoleForm from "./AddRoleForm"
 
-async function getData() {
-  return [
-    {
-      no: 1,
-      role: "Frontend Dev",
-      focusPoint: "React UI",
-      stages: "Interview",
-      status: "pending",
-      resourcers: "Alice",
-      months: 3,
-      salary: 75000,
-      miles: 120,
-      industry: "Tech",
-      cvs: 5,
-      lis: 2,
-      zi: 0,
-      tCandidates: 4,
-      rejectedCvs: 1,
-      rejectedLis: 0,
-      rCandidates: NaN,
-    },
-    {
-      no: 2,
-      role: "Frontend Dev",
-      focusPoint: "React UI",
-      stages: "Interview",
-      status: "pending",
-      resourcers: "Alice",
-      months: 3,
-      salary: 75000,
-      miles: 120,
-      industry: "Tech",
-      cvs: 5,
-      lis: 2,
-      zi: 0,
-      tCandidates: 4,
-      rejectedCvs: 1,
-      rejectedLis: 0,
-      rCandidates: NaN,
-    },
-  ]
-}
-
-export default function RolesPage() {
+export default function DirectPage() {
   const [data, setData] = useState([])
+  const [loading, setLoading] = useState(true)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
-  const [successMessage, setSuccessMessage] = useState('')
-  const [messageType, setMessageType] = useState('success')
   const [editingRole, setEditingRole] = useState(null)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [roleToDelete, setRoleToDelete] = useState(null)
+  const [message, setMessage] = useState('')
+  const [messageType, setMessageType] = useState('success')
+
+  // Fetch 360 direct data from API
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      
+      // Get user data from localStorage
+      const userData = localStorage.getItem('user')
+      if (!userData) {
+        throw new Error('User not authenticated')
+      }
+      
+      const user = JSON.parse(userData)
+      
+      // Fetch direct roles for this user
+      const response = await fetch(`http://localhost:3001/direct?userId=${user.id}`)
+      const result = await response.json()
+      
+      if (result.success) {
+        setData(result.data || [])
+      } else {
+        console.error('Failed to fetch 360 direct roles:', result.message)
+        setData([])
+      }
+    } catch (error) {
+      console.error('Error fetching 360 direct data:', error)
+      setData([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    getData().then(setData)
+    fetchData()
   }, [])
 
+  // Handle role creation/editing success
+  const handleSuccess = (successMsg, msgType = 'success') => {
+    setMessage(successMsg)
+    setMessageType(msgType)
+    setIsSheetOpen(false)
+    setEditingRole(null)
+    
+    // Refresh data after successful operation
+    fetchData()
+    
+    // Clear message after 5 seconds
+    setTimeout(() => {
+      setMessage('')
+    }, 5000)
+  }
+
+  // Handle editing a role
   const handleEdit = (role) => {
-    console.log('Edit clicked:', role) // Debug log
     setEditingRole(role)
     setIsSheetOpen(true)
   }
 
-  const handleDelete = (role) => {
-    console.log('Delete clicked:', role) // Debug log
-    setRoleToDelete(role)
-    setIsDeleteDialogOpen(true)
-  }
+  // Handle deleting a role
+  const handleDeleteRole = async (role) => {
+    if (!confirm('Are you sure you want to delete this 360 direct role?')) {
+      return
+    }
 
-  const confirmDelete = () => {
-    if (roleToDelete) {
-      // Remove role from data
-      setData(prevData => prevData.filter(item => item.no !== roleToDelete.no))
-
-      // Show success message
-      handleRoleSuccess(`Role "${roleToDelete.role}" deleted successfully!`, 'success')
-
-      // Reset delete state
-      setRoleToDelete(null)
-      setIsDeleteDialogOpen(false)
+    try {
+      const response = await fetch(`http://localhost:3001/direct/${role.id}`, {
+        method: 'DELETE'
+      })
+      
+      const result = await response.json()
+      
+      if (result.success) {
+        setMessage('360 Direct role deleted successfully! 🗑️')
+        setMessageType('success')
+        fetchData() // Refresh data
+        
+        // Clear message after 5 seconds
+        setTimeout(() => {
+          setMessage('')
+        }, 5000)
+      } else {
+        setMessage('Error deleting 360 direct role: ' + result.message)
+        setMessageType('error')
+      }
+    } catch (error) {
+      console.error('Error deleting 360 direct role:', error)
+      setMessage('Error deleting 360 direct role')
+      setMessageType('error')
     }
   }
 
-  const cancelDelete = () => {
-    setRoleToDelete(null)
-    setIsDeleteDialogOpen(false)
-  }
-
-  const handleRoleSuccess = (message, type = 'success') => {
-    setSuccessMessage(message)
-    setMessageType(type)
-    setIsSheetOpen(false)
-    setEditingRole(null)
-
-    // Clear message after 5 seconds
-    setTimeout(() => {
-      setSuccessMessage('')
-    }, 5000)
-  }
-
-  const closeSuccessMessage = () => {
-    setSuccessMessage('')
+  const closeMessage = () => {
+    setMessage('')
   }
 
   // Make handlers available globally for columns
   React.useEffect(() => {
-    console.log('Setting up global handlers') // Debug log
     window.handleEditRole = handleEdit
-    window.handleDeleteRole = handleDelete
+    window.handleDeleteRole = handleDeleteRole
 
     return () => {
       delete window.handleEditRole
       delete window.handleDeleteRole
     }
-  }, [handleEdit, handleDelete])
+  }, [handleEdit, handleDeleteRole])
 
   return (
     <>
-      {/* Success Message */}
-      {successMessage && (
-        <div className={`fixed top-4 right-4 z-50 max-w-md rounded-lg border p-4 shadow-lg transition-all duration-300 ${messageType === 'success'
+      {/* Success/Error Message */}
+      {message && (
+        <div className={`fixed top-4 right-4 z-50 max-w-md rounded-lg border p-4 shadow-lg transition-all duration-300 ${
+          messageType === 'success'
             ? 'border-green-200 bg-green-50 text-green-800'
             : 'border-red-200 bg-red-50 text-red-800'
-          }`}>
+        }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-lg">
                 {messageType === 'success' ? '✅' : '❌'}
               </span>
-              <span className="font-medium">{successMessage}</span>
+              <span className="font-medium">{message}</span>
             </div>
             <button
-              onClick={closeSuccessMessage}
+              onClick={closeMessage}
               className="ml-4 text-gray-400 hover:text-gray-600"
             >
               ✕
@@ -156,43 +155,15 @@ export default function RolesPage() {
         </div>
       )}
 
-      {/* Delete Confirmation Dialog */}
-      {isDeleteDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-lg">
-          <div className="mx-4 max-w-md rounded-xl bg-white/95 backdrop-blur-sm p-6 shadow-2xl border border-gray-200/50">
-            <h3 className="mb-4 text-lg font-semibold text-gray-900">
-              Delete Role
-            </h3>
-            <p className="mb-6 text-gray-600">
-              Are you sure you want to delete the role &quot;{roleToDelete?.role}&quot;? This action cannot be undone.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={confirmDelete}
-                className="flex-1 rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition-colors hover:bg-red-700"
-              >
-                Delete
-              </button>
-              <button
-                onClick={cancelDelete}
-                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="container mx-auto px-4 py-8 flex flex-col items-center">
         <h1 className="mb-4 text-center text-4xl font-bold text-gray-900">
-          Manage Your Roles
+          Manage Your 360 Direct Roles
         </h1>
 
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
             <button className="rounded-lg bg-[#0958d9] px-6 py-2 font-semibold text-white transition-colors hover:bg-[#24AC4A]">
-              Add Roles
+              Add 360 Direct Role
             </button>
           </SheetTrigger>
 
@@ -202,18 +173,25 @@ export default function RolesPage() {
             className="sm:max-w-[480px] sm:rounded-l-lg"
           >
             <SheetHeader className="sr-only">
-              <SheetTitle>Add New Role</SheetTitle>
+              <SheetTitle>Add New 360 Direct Role</SheetTitle>
             </SheetHeader>
-            <AddRoleForm onSuccess={handleRoleSuccess} editingRole={editingRole} />
+            <AddRoleForm onSuccess={handleSuccess} editingRole={editingRole} />
             <SheetClose className="absolute top-4 right-4" />
           </SheetContent>
         </Sheet>
       </div>
+      
       <section className="container mx-auto px-4 py-10">
         <div className="mb-6 rounded-lg bg-gray-100 px-6 py-4">
-          <h2 className="text-3xl font-bold text-gray-900">360/Direct</h2>
+          <h2 className="text-3xl font-bold text-gray-900">360 Direct Roles</h2>
         </div>
-        <DataTable columns={columns} data={data} />
+        {loading ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="text-lg text-gray-600">Loading 360 direct roles...</div>
+          </div>
+        ) : (
+          <DataTable columns={columns} data={data} />
+        )}
       </section>
     </>
   )

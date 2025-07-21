@@ -25,6 +25,14 @@ export class UpdateRoleDto {
   cvSourcingRoleId?: number;
 
   @IsOptional()
+  @IsNumber()
+  prequalificationRoleId?: number;
+
+  @IsOptional()
+  @IsNumber()
+  directRoleId?: number;
+
+  @IsOptional()
   @IsBoolean()
   isDeleted?: boolean;
 }

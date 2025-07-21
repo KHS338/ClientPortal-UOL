@@ -21,6 +21,14 @@ export class CreateRoleDto {
   cvSourcingRoleId?: number;
 
   @IsOptional()
+  @IsNumber()
+  prequalificationRoleId?: number;
+
+  @IsOptional()
+  @IsNumber()
+  directRoleId?: number;
+
+  @IsOptional()
   @IsBoolean()
   isDeleted?: boolean;
 }

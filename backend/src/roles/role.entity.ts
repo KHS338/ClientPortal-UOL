@@ -33,6 +33,14 @@ export class Role {
   @JoinColumn({ name: 'cv_sourcing_role_id' })
   cvSourcingRole: CvSourcingRole;
 
+  // Foreign key to Prequalification Role (nullable for other service types)
+  @Column({ name: 'prequalification_role_id', nullable: true })
+  prequalificationRoleId: number;
+
+  // Foreign key to 360 Direct Role (nullable for other service types)
+  @Column({ name: 'direct_role_id', nullable: true })
+  directRoleId: number;
+
   @Column({ name: 'is_deleted', default: false })
   isDeleted: boolean;
 

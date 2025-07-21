@@ -6,6 +6,8 @@ import { UsersModule } from './users/user.module';
 import { AuthModule } from './auth/auth.module';
 import { CvSourcingModule } from './cv-sourcing/cv-sourcing.module';
 import { RoleModule } from './roles/role.module';
+import { PrequalificationModule } from './prequalification/prequalification.module';
+import { DirectModule } from './direct/direct.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { RoleModule } from './roles/role.module';
     AuthModule, // Added AuthModule import
     CvSourcingModule, // Added CvSourcingModule import
     RoleModule, // Added RoleModule import
+    PrequalificationModule, // Added PrequalificationModule import
+    DirectModule, // Added DirectModule import
   ],
 })
 export class AppModule {}

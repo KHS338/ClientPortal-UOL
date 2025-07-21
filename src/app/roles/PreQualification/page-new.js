@@ -82,13 +82,9 @@ export default function PreQualificationPage() {
   }
 
   // Handle deleting a role
-  const handleDeleteRole = async (role) => {
-    if (!confirm('Are you sure you want to delete this prequalification role?')) {
-      return
-    }
-
+  const handleDelete = async (id) => {
     try {
-      const response = await fetch(`http://localhost:3001/prequalification/${role.id}`, {
+      const response = await fetch(`http://localhost:3001/prequalification/${id}`, {
         method: 'DELETE'
       })
       
@@ -121,13 +117,13 @@ export default function PreQualificationPage() {
   // Make handlers available globally for columns
   React.useEffect(() => {
     window.handleEditRole = handleEdit
-    window.handleDeleteRole = handleDeleteRole
+    window.handleDeleteRole = handleDelete
 
     return () => {
       delete window.handleEditRole
       delete window.handleDeleteRole
     }
-  }, [handleEdit, handleDeleteRole])
+  }, [handleEdit, handleDelete])
 
   return (
     <>
