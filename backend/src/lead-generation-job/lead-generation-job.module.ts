@@ -1,0 +1,18 @@
+// backend/src/lead-generation-job/lead-generation-job.module.ts
+import { Module, forwardRef } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { LeadGenerationJobController } from './lead-generation-job.controller';
+import { LeadGenerationJobService } from './lead-generation-job.service';
+import { LeadGenerationJob } from './lead-generation-job.entity';
+import { RoleModule } from '../roles/role.module';
+
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([LeadGenerationJob]),
+    forwardRef(() => RoleModule)
+  ],
+  controllers: [LeadGenerationJobController],
+  providers: [LeadGenerationJobService],
+  exports: [LeadGenerationJobService]
+})
+export class LeadGenerationJobModule {}

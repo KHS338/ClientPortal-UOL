@@ -97,7 +97,7 @@ const countries = [
 ];
 
 // Industry Form Component
-const IndustryForm = ({ onSubmit, editingData, onCancel }) => {
+const IndustryForm = ({ onSubmit, editingData, onCancel, onError }) => {
   const [formData, setFormData] = useState({
     industryType: "",
     companySize: "",
@@ -115,7 +115,7 @@ const IndustryForm = ({ onSubmit, editingData, onCancel }) => {
       setFormData({
         industryType: editingData.industryType || "",
         companySize: editingData.companySize || "",
-        cityCountry: editingData.cityCountry || [],
+        cityCountry: Array.isArray(editingData.cityCountry) ? editingData.cityCountry : (editingData.cityCountry ? editingData.cityCountry.split(',') : []),
         leadPriority: editingData.leadPriority || ""
       });
     }
@@ -161,7 +161,7 @@ const IndustryForm = ({ onSubmit, editingData, onCancel }) => {
 
   const handleSubmit = () => {
     if (!formData.industryType || !formData.companySize || formData.cityCountry.length === 0 || !formData.leadPriority) {
-      alert('Please fill in all required fields and select at least one country');
+      onError('Please fill in all required fields and select at least one country');
       return;
     }
     onSubmit(formData);
@@ -389,7 +389,7 @@ const IndustryForm = ({ onSubmit, editingData, onCancel }) => {
 };
 
 // Jobs Form Component
-const JobsForm = ({ onSubmit, editingData, onCancel }) => {
+const JobsForm = ({ onSubmit, editingData, onCancel, onError }) => {
   const [formData, setFormData] = useState({
     industryType: "",
     companySize: "",
@@ -413,9 +413,9 @@ const JobsForm = ({ onSubmit, editingData, onCancel }) => {
         industryType: editingData.industryType || "",
         companySize: editingData.companySize || "",
         workType: editingData.workType || "",
-        location: editingData.location || [],
+        location: Array.isArray(editingData.location) ? editingData.location : (editingData.location ? editingData.location.split(',') : []),
         hiringUrgency: editingData.hiringUrgency || "",
-        skills: editingData.skills || [],
+        skills: Array.isArray(editingData.skills) ? editingData.skills : (editingData.skills ? editingData.skills.split(',') : []),
         experience: editingData.experience || "",
         jobTitle: editingData.jobTitle || ""
       });
@@ -486,7 +486,7 @@ const JobsForm = ({ onSubmit, editingData, onCancel }) => {
 
   const handleSubmit = () => {
     if (!formData.jobTitle || !formData.industryType || !formData.companySize || formData.location.length === 0 || !formData.experience) {
-      alert('Please fill in all required fields and select at least one location');
+      onError('Please fill in all required fields and select at least one location');
       return;
     }
     onSubmit(formData);
@@ -829,35 +829,164 @@ export default function RolesPage() {
   const [editingEntry, setEditingEntry] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // Get user info from context or localStorage
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+
+  // Load data on component mount
+  useEffect(() => {
+    if (user) {
+      loadData();
+    }
+  }, [user]);
+
+  // Helper function to show success message
+  const showSuccessMessage = (message) => {
+    setSuccessMessage(message);
+    setErrorMessage("");
+    setTimeout(() => setSuccessMessage(""), 4000);
+  };
+
+  // Helper function to show error message
+  const showErrorMessage = (message) => {
+    setErrorMessage(message);
+    setSuccessMessage("");
+    setTimeout(() => setErrorMessage(""), 4000);
+  };
+
+  // Function to load data from backend
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      
+      // Load both jobs and industry data
+      const [jobsResponse, industryResponse] = await Promise.all([
+        fetch(`/api/lead-generation-job?userId=${user.id}`),
+        fetch(`/api/lead-generation-industry?userId=${user.id}`)
+      ]);
+      
+      const jobsData = await jobsResponse.json();
+      const industryData = await industryResponse.json();
+      
+      if (jobsData.success && industryData.success) {
+        // Transform backend data to match frontend format
+        const transformedJobs = jobsData.data.map((job, index) => ({
+          id: job.id,
+          no: index + 1,
+          type: 'jobs',
+          jobTitle: job.jobTitle,
+          industryType: job.industryType,
+          companySize: job.companySize,
+          workType: job.workType,
+          location: typeof job.location === 'string' ? job.location.split(',') : job.location || [],
+          experience: job.experience,
+          skills: job.skills || [],
+          hiringUrgency: job.hiringUrgency,
+          submittedAt: new Date(job.createdAt).toLocaleDateString(),
+          ...job
+        }));
+        
+        const transformedIndustry = industryData.data.map((industry, index) => ({
+          id: industry.id,
+          no: index + 1,
+          type: 'industry',
+          industryType: industry.industryType,
+          companySize: industry.companySize,
+          cityCountry: typeof industry.cityCountry === 'string' ? industry.cityCountry.split(',') : industry.cityCountry || [],
+          leadPriority: industry.leadPriority,
+          submittedAt: new Date(industry.createdAt).toLocaleDateString(),
+          ...industry
+        }));
+        
+        setSubmittedData([...transformedJobs, ...transformedIndustry]);
+      }
+    } catch (error) {
+      console.error('Error loading data:', error);
+      showErrorMessage('Failed to load data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Function to handle form submissions
-  const handleFormSubmit = (formData, formType) => {
-    if (editingEntry) {
-      // Update existing entry
-      const updatedEntry = {
-        ...editingEntry,
-        ...formData,
-        submittedAt: editingEntry.submittedAt // Keep original submission date
-      };
-
-      setSubmittedData(submittedData.map(item => 
-        item.id === editingEntry.id ? updatedEntry : item
-      ));
-    } else {
-      // Create new entry
-      const newEntry = {
-        id: Date.now(),
-        no: submittedData.length + 1,
-        type: formType,
-        submittedAt: new Date().toLocaleDateString(),
-        ...formData
-      };
-
-      setSubmittedData([...submittedData, newEntry]);
+  const handleFormSubmit = async (formData, formType) => {
+    if (!user) {
+      showErrorMessage('Please log in to continue');
+      return;
     }
-    
-    setShowForm(false);
-    setEditingEntry(null);
+
+    try {
+      setLoading(true);
+      
+      const dataToSubmit = {
+        ...formData,
+        userId: user.id
+      };
+
+      // Convert arrays to strings for backend storage
+      if (formType === 'jobs') {
+        dataToSubmit.location = Array.isArray(formData.location) ? formData.location.join(',') : formData.location;
+      } else if (formType === 'industry') {
+        dataToSubmit.cityCountry = Array.isArray(formData.cityCountry) ? formData.cityCountry.join(',') : formData.cityCountry;
+      }
+
+      let response;
+      if (editingEntry) {
+        // Update existing entry
+        const endpoint = formType === 'jobs' ? 
+          `/api/lead-generation-job/${editingEntry.id}` : 
+          `/api/lead-generation-industry/${editingEntry.id}`;
+          
+        response = await fetch(endpoint, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(dataToSubmit),
+        });
+      } else {
+        // Create new entry
+        const endpoint = formType === 'jobs' ? 
+          '/api/lead-generation-job' : 
+          '/api/lead-generation-industry';
+          
+        response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(dataToSubmit),
+        });
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        const message = editingEntry ? 
+          `${formType === 'jobs' ? 'Job' : 'Industry'} entry updated successfully!` : 
+          `${formType === 'jobs' ? 'Job' : 'Industry'} entry created successfully!`;
+        showSuccessMessage(message);
+        setShowForm(false);
+        setEditingEntry(null);
+        await loadData(); // Reload data from backend
+      } else {
+        showErrorMessage(result.message || 'Failed to save entry');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      showErrorMessage('Failed to save entry. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Function to handle edit
@@ -868,15 +997,39 @@ export default function RolesPage() {
   };
 
   // Function to handle delete
-  const handleDelete = (entry) => {
+  const handleDelete = async (entry) => {
     setEntryToDelete(entry);
     setIsDeleteDialogOpen(true);
   };
 
   // Function to confirm delete
-  const confirmDelete = () => {
-    if (entryToDelete) {
-      setSubmittedData(submittedData.filter(item => item.id !== entryToDelete.id));
+  const confirmDelete = async () => {
+    if (!entryToDelete) return;
+
+    try {
+      setLoading(true);
+      
+      const endpoint = entryToDelete.type === 'jobs' ? 
+        `/api/lead-generation-job/${entryToDelete.id}` : 
+        `/api/lead-generation-industry/${entryToDelete.id}`;
+        
+      const response = await fetch(endpoint, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        showSuccessMessage(`${entryToDelete.type === 'jobs' ? 'Job' : 'Industry'} entry deleted successfully!`);
+        await loadData(); // Reload data from backend
+      } else {
+        showErrorMessage(result.message || 'Failed to delete entry');
+      }
+    } catch (error) {
+      console.error('Error deleting entry:', error);
+      showErrorMessage('Failed to delete entry. Please try again.');
+    } finally {
+      setLoading(false);
       setEntryToDelete(null);
       setIsDeleteDialogOpen(false);
     }
@@ -904,13 +1057,20 @@ export default function RolesPage() {
   const industryData = submittedData.filter(entry => entry.type === 'industry');
 
   useEffect(() => {
-    // Simulate data loading
-    const getData = async () => {
-      return [];
-    };
-
-    getData().then(setData);
+    // Remove the simulated data loading since we now load from backend
   }, []);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50 p-4 sm:p-6 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1a84de] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50 p-4 sm:p-6 animate-fadeIn">
@@ -945,22 +1105,54 @@ export default function RolesPage() {
       {/* Header with Add Button */}
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
         <h1 className="text-3xl font-bold text-gray-800">Lead Generation</h1>
-        <button
-          onClick={() => {
-            setShowForm(true);
-            setEditingEntry(null);
-          }}
-          className="px-6 py-3 bg-[#1a84de] hover:bg-[#24AC4A] text-white font-semibold rounded-xl focus:outline-none transition-all duration-300 flex items-center gap-2"
-        >
-          <span>Add New Lead</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 12h14"></path>
-            <path d="M12 5v14"></path>
-          </svg>
-        </button>
+        {user && (
+          <button
+            onClick={() => {
+              setShowForm(true);
+              setEditingEntry(null);
+            }}
+            className="px-6 py-3 bg-[#1a84de] hover:bg-[#24AC4A] text-white font-semibold rounded-xl focus:outline-none transition-all duration-300 flex items-center gap-2"
+          >
+            <span>Add New Lead</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14"></path>
+              <path d="M12 5v14"></path>
+            </svg>
+          </button>
+        )}
       </div>
 
-      {showForm && (
+      {/* Success Message */}
+      {successMessage && (
+        <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl animate-slideUpFade">
+          <div className="flex items-center justify-between">
+            <span>{successMessage}</span>
+            <button 
+              onClick={() => setSuccessMessage("")}
+              className="text-green-700 hover:text-green-900 text-xl font-bold"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Error Message */}
+      {errorMessage && (
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl animate-slideUpFade">
+          <div className="flex items-center justify-between">
+            <span>{errorMessage}</span>
+            <button 
+              onClick={() => setErrorMessage("")}
+              className="text-red-700 hover:text-red-900 text-xl font-bold"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showForm && user && (
         <div className="mb-8">
           {/* Toggle Buttons */}
           <div className="mx-auto mb-8 flex w-full max-w-md overflow-hidden rounded-xl border border-gray-300 shadow-md bg-white animate-slideUpFade hover:shadow-lg transition-all duration-500">
@@ -998,6 +1190,7 @@ export default function RolesPage() {
                       setShowForm(false);
                       setEditingEntry(null);
                     }}
+                    onError={showErrorMessage}
                   />
                 </div>
               </div>
@@ -1012,6 +1205,7 @@ export default function RolesPage() {
                       setShowForm(false);
                       setEditingEntry(null);
                     }}
+                    onError={showErrorMessage}
                   />
                 </div>
               </div>
@@ -1041,7 +1235,7 @@ export default function RolesPage() {
         </div>
       )}
 
-      {submittedData.length === 0 && !showForm && (
+      {submittedData.length === 0 && !showForm && user && (
         <div className="text-center py-12">
           <div className="text-gray-500 text-lg mb-4">No submissions yet</div>
           <button
@@ -1050,6 +1244,18 @@ export default function RolesPage() {
           >
             Create Your First Lead
           </button>
+        </div>
+      )}
+
+      {!user && (
+        <div className="text-center py-12">
+          <div className="text-gray-500 text-lg mb-4">Please log in to access Lead Generation</div>
+          <a 
+            href="/login"
+            className="px-6 py-3 bg-[#1a84de] hover:bg-[#24AC4A] text-white font-semibold rounded-xl focus:outline-none transition-all duration-300 inline-block"
+          >
+            Login
+          </a>
         </div>
       )}
     </div>

@@ -2,6 +2,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../users/user.entity';
 import { CvSourcingRole } from '../cv-sourcing/cv-sourcing.entity';
+import { LeadGenerationIndustry } from '../lead-generation-industry/lead-generation-industry.entity';
+import { LeadGenerationJob } from '../lead-generation-job/lead-generation-job.entity';
 
 @Entity('roles')
 export class Role {
@@ -40,6 +42,22 @@ export class Role {
   // Foreign key to 360 Direct Role (nullable for other service types)
   @Column({ name: 'direct_role_id', nullable: true })
   directRoleId: number;
+
+  // Foreign key to Lead Generation Industry Role (nullable for other service types)
+  @Column({ name: 'lead_generation_industry_id', nullable: true })
+  leadGenerationIndustryId: number;
+
+  @ManyToOne(() => LeadGenerationIndustry)
+  @JoinColumn({ name: 'lead_generation_industry_id' })
+  leadGenerationIndustry: LeadGenerationIndustry;
+
+  // Foreign key to Lead Generation Job Role (nullable for other service types)
+  @Column({ name: 'lead_generation_job_id', nullable: true })
+  leadGenerationJobId: number;
+
+  @ManyToOne(() => LeadGenerationJob)
+  @JoinColumn({ name: 'lead_generation_job_id' })
+  leadGenerationJob: LeadGenerationJob;
 
   @Column({ name: 'is_deleted', default: false })
   isDeleted: boolean;
