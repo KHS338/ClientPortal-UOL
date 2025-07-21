@@ -5,7 +5,9 @@ import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { TwoFactorService } from './two-factor.service';
+import { EmailService } from './email.service';
 
 @Injectable()
 export class UsersService {
@@ -13,6 +15,7 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly twoFactorService: TwoFactorService,
+    private readonly emailService: EmailService,
   ) {}
 
   async findAll(): Promise<User[]> {
@@ -302,5 +305,103 @@ export class UsersService {
 
     await this.userRepo.update(userId, safeUpdateData);
     return this.findById(userId);
+  }
+
+  // Password Reset methods
+  async requestPasswordReset(email: string): Promise<{ success: boolean; message: string }> {
+    const user = await this.userRepo.findOne({ 
+      where: [
+        { email: email },
+        { companymail: email }
+      ]
+    });
+
+    if (!user) {
+      // Don't reveal if email exists or not for security
+      return {
+        success: true,
+        message: 'If an account with that email exists, we have sent a password reset link.'
+      };
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
+
+    // Save reset token to database
+    await this.userRepo.update(user.id, {
+      resetPasswordToken: resetToken,
+      resetPasswordExpires: resetTokenExpiry
+    });
+
+    // Send email
+    const emailSent = await this.emailService.sendPasswordResetEmail(
+      user.email, 
+      resetToken, 
+      user.firstName
+    );
+
+    if (!emailSent) {
+      return {
+        success: false,
+        message: 'Failed to send password reset email. Please try again.'
+      };
+    }
+
+    return {
+      success: true,
+      message: 'If an account with that email exists, we have sent a password reset link.'
+    };
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    const user = await this.userRepo.findOne({
+      where: {
+        resetPasswordToken: token
+      }
+    });
+
+    if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+      return {
+        success: false,
+        message: 'Password reset token is invalid or has expired.'
+      };
+    }
+
+    // Hash new password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update password and clear reset tokens
+    await this.userRepo.update(user.id, {
+      password: hashedPassword,
+      resetPasswordToken: null,
+      resetPasswordExpires: null
+    });
+
+    // Send confirmation email
+    await this.emailService.sendPasswordResetConfirmation(user.email, user.firstName);
+
+    return {
+      success: true,
+      message: 'Your password has been successfully reset. You can now log in with your new password.'
+    };
+  }
+
+  async validateResetToken(token: string): Promise<{ valid: boolean; email?: string }> {
+    const user = await this.userRepo.findOne({
+      where: {
+        resetPasswordToken: token
+      }
+    });
+
+    if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+      return { valid: false };
+    }
+
+    return { 
+      valid: true, 
+      email: user.email 
+    };
   }
 }

@@ -255,12 +255,27 @@ export default function LoginPage() {
               </motion.div>
             </form>
 
+            {/* Forgot Password Link */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 1.3 }}
+              className="mt-4 text-center"
+            >
+              <Link
+                href="/forgot-password"
+                className="text-sm text-[#0958d9] hover:text-[#24AC4A] font-medium transition-colors duration-300 hover:underline"
+              >
+                Forgot your password?
+              </Link>
+            </motion.div>
+
             {/* Sign Up Link */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 1.4 }}
-              className="mt-8 text-center"
+              className="mt-6 text-center"
             >
               <p className="text-gray-600">
                 Don&apos;t have an account?{" "}

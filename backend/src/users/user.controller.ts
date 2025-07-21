@@ -227,4 +227,53 @@ export class UsersController {
       };
     }
   }
+
+  @Post('forgot-password') // 👈 Full route: POST /users/forgot-password
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body() body: { email: string }) {
+    try {
+      const result = await this.usersService.requestPasswordReset(body.email);
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message,
+        error: error.name
+      };
+    }
+  }
+
+  @Post('reset-password') // 👈 Full route: POST /users/reset-password
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() body: { token: string; newPassword: string }) {
+    try {
+      const result = await this.usersService.resetPassword(body.token, body.newPassword);
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message,
+        error: error.name
+      };
+    }
+  }
+
+  @Post('validate-reset-token') // 👈 Full route: POST /users/validate-reset-token
+  @HttpCode(HttpStatus.OK)
+  async validateResetToken(@Body() body: { token: string }) {
+    try {
+      const result = await this.usersService.validateResetToken(body.token);
+      return {
+        success: result.valid,
+        email: result.email,
+        message: result.valid ? 'Token is valid' : 'Token is invalid or expired'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message,
+        error: error.name
+      };
+    }
+  }
 }

@@ -73,4 +73,11 @@ export class User {
   // Last login tracking
   @Column({ name: 'last_login', nullable: true })
   lastLogin: Date;
+
+  // Password Reset
+  @Column({ name: 'reset_password_token', nullable: true, length: 255 })
+  resetPasswordToken: string;
+
+  @Column({ name: 'reset_password_expires', nullable: true })
+  resetPasswordExpires: Date;
 }
