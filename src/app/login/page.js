@@ -1,5 +1,5 @@
 "use client";
- 
+
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
@@ -9,11 +9,11 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
- 
+
 export default function LoginPage() {
   const router = useRouter();
   const { login, isAuthenticated, isLoading: authLoading, error: authError, clearError } = useAuth();
-  
+
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -48,7 +48,7 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     setLocalError("");
-    
+
     try {
       const loginData = {
         email: form.email,
@@ -65,7 +65,7 @@ export default function LoginPage() {
       });
 
       const result = await response.json();
-      
+
       if (result.success) {
         // Store user data and redirect
         localStorage.setItem('user', JSON.stringify(result.user));
@@ -85,7 +85,7 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
- 
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <motion.div
@@ -104,7 +104,7 @@ export default function LoginPage() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="flex justify-center mb-0"
               >
-              <Image src="/images/Logoname.jpg" alt="Company Logo" width={450} height={250} className="h-40 md:h-48 object-contain" />
+                <Image src="/images/Logoname.jpg" alt="Company Logo" width={450} height={250} className="h-40 md:h-48 object-contain" />
               </motion.div>
               <motion.h1
                 initial={{ opacity: 0 }}
@@ -142,7 +142,7 @@ export default function LoginPage() {
                   icon={<FiMail />}
                   required
                 />
-                
+
                 <div className="relative">
                   <InputField
                     label="Password"
@@ -208,8 +208,8 @@ export default function LoginPage() {
                   <span className="ml-2 text-sm text-gray-600">Remember me</span>
                 </label>
                 <Link
-                  href="#"
-                  className="text-sm text-[#0958d9]  hover:text-[#24AC4A] font-medium transition"
+                  href="/forgot-password"
+                  className="text-sm text-[#0958d9] hover:text-[#24AC4A] font-medium transition-colors duration-300 hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -262,12 +262,6 @@ export default function LoginPage() {
               transition={{ duration: 0.5, delay: 1.3 }}
               className="mt-4 text-center"
             >
-              <Link
-                href="/forgot-password"
-                className="text-sm text-[#0958d9] hover:text-[#24AC4A] font-medium transition-colors duration-300 hover:underline"
-              >
-                Forgot your password?
-              </Link>
             </motion.div>
 
             {/* Sign Up Link */}
