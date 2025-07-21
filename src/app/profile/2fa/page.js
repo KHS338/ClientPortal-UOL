@@ -79,6 +79,11 @@ export default function TwoFactorAuthSettings() {
       const result = await response.json();
       
       if (result.success) {
+        // Update user state and localStorage
+        const updatedUser = { ...user, twoFactorEnabled: true };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
         setIsEnabled(true);
         setSuccess('Two-factor authentication enabled successfully!');
         setSetupData(null);
@@ -116,6 +121,11 @@ export default function TwoFactorAuthSettings() {
       const result = await response.json();
       
       if (result.success) {
+        // Update user state and localStorage
+        const updatedUser = { ...user, twoFactorEnabled: false };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
         setIsEnabled(false);
         setSuccess('Two-factor authentication disabled successfully!');
         setVerificationCode('');

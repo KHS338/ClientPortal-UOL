@@ -404,4 +404,38 @@ export class UsersService {
       email: user.email 
     };
   }
+
+  async changePassword(userId: number, currentPassword: string, newPassword: string, twoFactorCode: string): Promise<void> {
+    // Find user by ID
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+
+    // Verify 2FA code if 2FA is enabled
+    if (user.twoFactorEnabled) {
+      const is2FAValid = this.twoFactorService.verifyToken(twoFactorCode, user.twoFactorSecret);
+      if (!is2FAValid) {
+        throw new BadRequestException('Invalid two-factor authentication code');
+      }
+    }
+
+    // Validate new password (minimum 6 characters)
+    if (newPassword.length < 6) {
+      throw new BadRequestException('New password must be at least 6 characters long');
+    }
+
+    // Hash new password
+    const saltRounds = 10;
+    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update password in database
+    await this.userRepo.update(userId, { password: hashedNewPassword });
+  }
 }

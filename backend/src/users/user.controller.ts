@@ -276,4 +276,30 @@ export class UsersController {
       };
     }
   }
+
+  @Post('change-password') // 👈 Full route: POST /users/change-password
+  @HttpCode(HttpStatus.OK)
+  async changePassword(@Body() changePasswordData: { 
+    userId: number; 
+    currentPassword: string;
+    newPassword: string;
+    twoFactorCode: string;
+  }) {
+    try {
+      const { userId, currentPassword, newPassword, twoFactorCode } = changePasswordData;
+      
+      await this.usersService.changePassword(userId, currentPassword, newPassword, twoFactorCode);
+      
+      return {
+        success: true,
+        message: 'Password changed successfully'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Failed to change password',
+        error: error.name
+      };
+    }
+  }
 }

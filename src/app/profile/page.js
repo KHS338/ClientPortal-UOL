@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FiCamera, FiEdit3, FiSave, FiUser, FiBriefcase, FiMail, FiPhone, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiCalendar } from "react-icons/fi";
+import { FiCamera, FiEdit3, FiSave, FiUser, FiBriefcase, FiMail, FiPhone, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiCalendar, FiX } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -13,7 +13,6 @@ export default function ClientProfilePage({ initial = {} }) {
   const [user, setUser] = useState(null);
   const [form, setForm] = useState({
     companymail: "",
-    password: "",
     firstName: "",
     lastName: "",
     companyName: "",
@@ -27,9 +26,17 @@ export default function ClientProfilePage({ initial = {} }) {
   });
 
   const [isEditing, setIsEditing] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingUser, setIsLoadingUser] = useState(true);
+  const [message, setMessage] = useState({ type: '', text: '' });
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+    twoFactorCode: ''
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
   const fileRef = useRef();
 
   // Load user data from localStorage
@@ -57,7 +64,6 @@ export default function ClientProfilePage({ initial = {} }) {
 
           setForm({
             companymail: parsedUser.companymail || "",
-            password: "", // Never populate password field
             firstName: parsedUser.firstName || "",
             lastName: parsedUser.lastName || "",
             companyName: parsedUser.companyName || "",
@@ -102,24 +108,33 @@ export default function ClientProfilePage({ initial = {} }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setMessage({ type: '', text: '' });
 
     try {
+      // Prepare update data - only include fields that have actually changed
+      const updateData = {
+        userId: user.id,
+      };
+
+      // Only include fields that have changed from the original user data
+      if (form.firstName !== user.firstName) updateData.firstName = form.firstName;
+      if (form.lastName !== user.lastName) updateData.lastName = form.lastName;
+      if (form.companyName !== user.companyName) updateData.companyName = form.companyName;
+      if (form.companySize !== user.companySize) updateData.companySize = form.companySize;
+      if (form.email !== user.email) updateData.email = form.email;
+      if (form.phone !== user.phone) updateData.phone = form.phone;
+      if (form.companymail !== user.companymail) updateData.companymail = form.companymail;
+
+      // Don't include password in regular profile update
+      // Password changes will be handled separately
+
       // Call the backend API to update user profile
       const response = await fetch('http://localhost:3001/users/update-profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          userId: user.id,
-          firstName: form.firstName,
-          lastName: form.lastName,
-          companyName: form.companyName,
-          companySize: form.companySize,
-          email: form.email,
-          phone: form.phone,
-          companymail: form.companymail,
-        }),
+        body: JSON.stringify(updateData),
       });
 
       const result = await response.json();
@@ -129,16 +144,96 @@ export default function ClientProfilePage({ initial = {} }) {
         const updatedUser = { ...user, ...result.user };
         localStorage.setItem('user', JSON.stringify(updatedUser));
         setUser(updatedUser);
+        
+        // Update form state with the updated user data
+        setForm(prev => ({
+          ...prev,
+          firstName: updatedUser.firstName || "",
+          lastName: updatedUser.lastName || "",
+          companyName: updatedUser.companyName || "",
+          companySize: updatedUser.companySize || "",
+          email: updatedUser.email || "",
+          phone: updatedUser.phone || "",
+          companymail: updatedUser.companymail || "",
+        }));
+        
         setIsEditing(false);
-        alert('Profile updated successfully!');
+        setMessage({ type: 'success', text: 'Profile updated successfully!' });
+        
+        // Clear message after 5 seconds
+        setTimeout(() => setMessage({ type: '', text: '' }), 5000);
       } else {
         throw new Error(result.message || 'Failed to update profile');
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('Failed to update profile. Please try again.');
+      setMessage({ type: 'error', text: error.message || 'Failed to update profile. Please try again.' });
+      
+      // Clear error message after 5 seconds
+      setTimeout(() => setMessage({ type: '', text: '' }), 5000);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    
+    // Validate password form
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setMessage({ type: 'error', text: 'New passwords do not match!' });
+      return;
+    }
+    
+    if (passwordForm.newPassword.length < 6) {
+      setMessage({ type: 'error', text: 'New password must be at least 6 characters long!' });
+      return;
+    }
+    
+    if (form.twoFactorEnabled && !passwordForm.twoFactorCode) {
+      setMessage({ type: 'error', text: 'Two-factor authentication code is required!' });
+      return;
+    }
+
+    setPasswordLoading(true);
+    setMessage({ type: '', text: '' });
+
+    try {
+      const response = await fetch('http://localhost:3001/users/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword,
+          twoFactorCode: passwordForm.twoFactorCode || null
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setMessage({ type: 'success', text: 'Password changed successfully!' });
+        setShowPasswordModal(false);
+        setPasswordForm({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+          twoFactorCode: ''
+        });
+        
+        // Clear message after 5 seconds
+        setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+      } else {
+        throw new Error(result.message || 'Failed to change password');
+      }
+    } catch (error) {
+      console.error('Error changing password:', error);
+      setMessage({ type: 'error', text: error.message || 'Failed to change password. Please try again.' });
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -158,6 +253,17 @@ export default function ClientProfilePage({ initial = {} }) {
               Manage your account settings and preferences
             </p>
           </div>
+
+          {/* Message Display */}
+          {message.text && (
+            <div className={`p-4 rounded-lg border ${
+              message.type === 'success' 
+                ? 'bg-green-50 border-green-200 text-green-700' 
+                : 'bg-red-50 border-red-200 text-red-700'
+            }`}>
+              <p className="text-center font-medium">{message.text}</p>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
             {/* Left Column - Profile Card */}
@@ -225,21 +331,22 @@ export default function ClientProfilePage({ initial = {} }) {
               <div className="space-y-8">
                 {/* Profile Information */}
                 <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-xl border-0">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-                      <FiUser className="text-black" />
-                      Profile Information
-                    </h3>
-                    <Button
-                      type="button"
-                      onClick={() => setIsEditing(!isEditing)}
-                      variant="outline"
-                      className="flex items-center gap-2 border-[#0958d9] text-[#0958d9] hover:border-[#24AC4A] hover:bg-[#24AC4A] hover:text-white transition-all duration-300"
-                    >
-                      {isEditing ? <FiSave size={16} /> : <FiEdit3 size={16} />}
-                      {isEditing ? "Cancel" : "Edit"}
-                    </Button>
-                  </div>
+                  <form onSubmit={handleSubmit}>
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                        <FiUser className="text-black" />
+                        Profile Information
+                      </h3>
+                      <Button
+                        type="button"
+                        onClick={() => setIsEditing(!isEditing)}
+                        variant="outline"
+                        className="flex items-center gap-2 border-[#0958d9] text-[#0958d9] hover:border-[#24AC4A] hover:bg-[#24AC4A] hover:text-white transition-all duration-300"
+                      >
+                        {isEditing ? <FiSave size={16} /> : <FiEdit3 size={16} />}
+                        {isEditing ? "Cancel" : "Edit"}
+                      </Button>
+                    </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <InputField
@@ -302,27 +409,6 @@ export default function ClientProfilePage({ initial = {} }) {
                       icon={<FiPhone />}
                       disabled={!isEditing}
                     />
-                    <div className="relative">
-                      <InputField
-                        label="Password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        value={form.password}
-                        onChange={handleChange}
-                        icon={<FiLock />}
-                        disabled={!isEditing}
-                        placeholder="••••••••"
-                      />
-                      {isEditing && (
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-10 text-gray-500 contnent-center hover:text-gray-700 transition"
-                        >
-                          {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-                        </button>
-                      )}
-                    </div>
                   </div>
 
                   {isEditing && (
@@ -351,6 +437,7 @@ export default function ClientProfilePage({ initial = {} }) {
                       </Button>
                     </div>
                   )}
+                  </form>
                 </Card>
 
                 {/* Security Settings */}
@@ -403,7 +490,7 @@ export default function ClientProfilePage({ initial = {} }) {
                       </div>
                       <Button
                         type="button"
-                        onClick={() => alert('Password change functionality coming soon!')}
+                        onClick={() => setShowPasswordModal(true)}
                         variant="outline"
                         className="border-[#0958d9] text-[#0958d9] hover:border-[#24AC4A] hover:bg-[#24AC4A] hover:text-white transition-all duration-300 cursor-pointer"
                       >
@@ -415,6 +502,120 @@ export default function ClientProfilePage({ initial = {} }) {
               </div>
             </div>
           </div>
+
+          {/* Password Change Modal */}
+          {showPasswordModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                    <FiLock className="text-black" />
+                    Change Password
+                  </h2>
+                  <button
+                    onClick={() => {
+                      setShowPasswordModal(false);
+                      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '', twoFactorCode: '' });
+                      setMessage({ type: '', text: '' });
+                    }}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <FiX size={24} />
+                  </button>
+                </div>
+
+                <form onSubmit={handlePasswordChange}>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Current Password
+                      </label>
+                      <input
+                        type="password"
+                        value={passwordForm.currentPassword}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0958d9] focus:border-transparent"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        New Password
+                      </label>
+                      <input
+                        type="password"
+                        value={passwordForm.newPassword}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0958d9] focus:border-transparent"
+                        required
+                        minLength="6"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Confirm New Password
+                      </label>
+                      <input
+                        type="password"
+                        value={passwordForm.confirmPassword}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0958d9] focus:border-transparent"
+                        required
+                      />
+                    </div>
+
+                    {form.twoFactorEnabled && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          2FA Code
+                        </label>
+                        <input
+                          type="text"
+                          value={passwordForm.twoFactorCode}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, twoFactorCode: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0958d9] focus:border-transparent"
+                          placeholder="Enter 6-digit code"
+                          maxLength="6"
+                          required
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-4 mt-6">
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        setShowPasswordModal(false);
+                        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '', twoFactorCode: '' });
+                        setMessage({ type: '', text: '' });
+                      }}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={passwordLoading}
+                      className="flex-1 bg-[#24AC4A] hover:bg-[#1e8b3a] text-white"
+                    >
+                      {passwordLoading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Changing...
+                        </div>
+                      ) : (
+                        'Change Password'
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
 
         </div>
       </div>
