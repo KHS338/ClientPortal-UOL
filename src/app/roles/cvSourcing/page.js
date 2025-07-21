@@ -1,4 +1,4 @@
-// app/roles/page.js
+// app/roles/cvSourcing/page.js
 "use client"
 
 import React, { useState, useEffect } from "react"
@@ -16,205 +16,213 @@ import {
 
 import AddRoleForm from "./AddRoleForm"
 
-async function getData() {
-  return [
-    {
-      no: 1,
-      role: "Frontend Dev",
-      focusPoint: "React UI",
-      stages: "Interview",
-      status: "pending",
-      resourcers: "Alice",
-      months: 3,
-      salary: 75000,
-      miles: 120,
-      industry: "Tech",
-      cvs: 5,
-      lis: 2,
-      zi: 0,
-      tCandidates: 4,
-      rejectedCvs: 1,
-      rejectedLis: 0,
-      rCandidates: NaN,
-    },
-    {
-      no: 2,
-      role: "Frontend Dev",
-      focusPoint: "React UI",
-      stages: "Interview",
-      status: "pending",
-      resourcers: "Alice",
-      months: 3,
-      salary: 75000,
-      miles: 120,
-      industry: "Tech",
-      cvs: 5,
-      lis: 2,
-      zi: 0,
-      tCandidates: 4,
-      rejectedCvs: 1,
-      rejectedLis: 0,
-      rCandidates: NaN,
-    },
-  ]
-}
-
-export default function RolesPage() {
+export default function CVSourcingPage() {
   const [data, setData] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
-  const [successMessage, setSuccessMessage] = useState('')
-  const [messageType, setMessageType] = useState('success')
   const [editingRole, setEditingRole] = useState(null)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [roleToDelete, setRoleToDelete] = useState(null)
+  const [successMessage, setSuccessMessage] = useState("")
 
+  // Get user data from localStorage
+  const getUserData = () => {
+    if (typeof window !== 'undefined') {
+      const userData = localStorage.getItem('user')
+      return userData ? JSON.parse(userData) : null
+    }
+    return null
+  }
+
+  // Fetch CV sourcing roles from backend
+  const fetchCvSourcingRoles = async () => {
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const user = getUserData()
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const response = await fetch(`http://localhost:3001/cv-sourcing?userId=${user.id}`)
+      const result = await response.json()
+      
+      if (result.success) {
+        // Transform data to match the table columns
+        const transformedData = result.data.map((role, index) => ({
+          id: role.id,
+          no: index + 1,
+          roleTitle: role.roleTitle,
+          rolePriority: role.rolePriority,
+          location: role.location,
+          postalCode: role.postalCode || '',
+          country: role.country || '',
+          salaryFrom: role.salaryFrom || '',
+          salaryTo: role.salaryTo || '',
+          salaryCurrency: role.salaryCurrency || 'USD',
+          salaryType: role.salaryType || '',
+          industry: role.industry,
+          experienceRequired: role.experienceRequired || '',
+          searchRadius: role.searchRadius || '',
+          acmCategory: role.acmCategory || '',
+          status: role.status,
+          cvsCount: role.cvsCount || 0,
+          lisCount: role.lisCount || 0,
+          ziCount: role.ziCount || 0,
+          totalCandidates: role.totalCandidates || 0,
+          rejectedCvs: role.rejectedCvs || 0,
+          rejectedLis: role.rejectedLis || 0,
+          qualifiedCandidates: role.qualifiedCandidates || 0,
+          createdAt: role.createdAt,
+          updatedAt: role.updatedAt
+        }))
+        
+        setData(transformedData)
+      } else {
+        throw new Error(result.message || 'Failed to fetch CV sourcing roles')
+      }
+    } catch (error) {
+      console.error('Error fetching CV sourcing roles:', error)
+      setError(error.message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Load data on component mount
   useEffect(() => {
-    getData().then(setData)
+    fetchCvSourcingRoles()
   }, [])
 
-  const handleEdit = (role) => {
-    console.log('Edit clicked:', role) // Debug log
+  // Handle form success (create/update)
+  const handleFormSuccess = (message) => {
+    setSuccessMessage(message)
+    setIsSheetOpen(false)
+    setEditingRole(null)
+    
+    // Refresh data
+    fetchCvSourcingRoles()
+    
+    // Clear success message after 3 seconds
+    setTimeout(() => setSuccessMessage(""), 3000)
+  }
+
+  // Handle edit role
+  const handleEditRole = (role) => {
     setEditingRole(role)
     setIsSheetOpen(true)
   }
 
-  const handleDelete = (role) => {
-    console.log('Delete clicked:', role) // Debug log
-    setRoleToDelete(role)
-    setIsDeleteDialogOpen(true)
-  }
+  // Handle delete role
+  const handleDeleteRole = async (role) => {
+    if (!confirm('Are you sure you want to delete this role?')) {
+      return
+    }
 
-  const confirmDelete = () => {
-    if (roleToDelete) {
-      // Remove role from data
-      setData(prevData => prevData.filter(item => item.no !== roleToDelete.no))
-
-      // Show success message
-      handleRoleSuccess(`Role "${roleToDelete.role}" deleted successfully!`, 'success')
-
-      // Reset delete state
-      setRoleToDelete(null)
-      setIsDeleteDialogOpen(false)
+    try {
+      const response = await fetch(`http://localhost:3001/cv-sourcing/${role.id}`, {
+        method: 'DELETE'
+      })
+      
+      const result = await response.json()
+      
+      if (result.success) {
+        setSuccessMessage('Role deleted successfully!')
+        fetchCvSourcingRoles()
+        setTimeout(() => setSuccessMessage(""), 3000)
+      } else {
+        throw new Error(result.message || 'Failed to delete role')
+      }
+    } catch (error) {
+      console.error('Error deleting role:', error)
+      alert('Error deleting role: ' + error.message)
     }
   }
 
-  const cancelDelete = () => {
-    setRoleToDelete(null)
-    setIsDeleteDialogOpen(false)
-  }
-
-  const handleRoleSuccess = (message, type = 'success') => {
-    setSuccessMessage(message)
-    setMessageType(type)
-    setIsSheetOpen(false)
-    setEditingRole(null)
-
-    // Clear message after 5 seconds
-    setTimeout(() => {
-      setSuccessMessage('')
-    }, 5000)
-  }
-
-  const closeSuccessMessage = () => {
-    setSuccessMessage('')
-  }
-
-  // Make handlers available globally for columns
-  React.useEffect(() => {
-    console.log('Setting up global handlers') // Debug log
-    window.handleEditRole = handleEdit
-    window.handleDeleteRole = handleDelete
-
+  // Make edit and delete functions available globally for the columns
+  useEffect(() => {
+    window.handleEditRole = handleEditRole
+    window.handleDeleteRole = handleDeleteRole
+    
     return () => {
       delete window.handleEditRole
       delete window.handleDeleteRole
     }
-  }, [handleEdit, handleDelete])
+  }, [])
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <span className="ml-3 text-lg">Loading CV sourcing roles...</span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <div className="text-red-600 text-lg mb-4">Error: {error}</div>
+        <button 
+          onClick={fetchCvSourcingRoles}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Retry
+        </button>
+      </div>
+    )
+  }
 
   return (
-    <>
-      {/* Success Message */}
-      {successMessage && (
-        <div className={`fixed top-4 right-4 z-50 max-w-md rounded-lg border p-4 shadow-lg transition-all duration-300 ${messageType === 'success'
-            ? 'border-green-200 bg-green-50 text-green-800'
-            : 'border-red-200 bg-red-50 text-red-800'
-          }`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">
-                {messageType === 'success' ? '✅' : '❌'}
-              </span>
-              <span className="font-medium">{successMessage}</span>
-            </div>
-            <button
-              onClick={closeSuccessMessage}
-              className="ml-4 text-gray-400 hover:text-gray-600"
-            >
-              ✕
-            </button>
-          </div>
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">CV Sourcing Roles</h1>
+          <p className="text-gray-600">Manage your CV sourcing roles and track candidates</p>
         </div>
-      )}
-
-      {/* Delete Confirmation Dialog */}
-      {isDeleteDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-lg">
-          <div className="mx-4 max-w-md rounded-xl bg-white/95 backdrop-blur-sm p-6 shadow-2xl border border-gray-200/50">
-            <h3 className="mb-4 text-lg font-semibold text-gray-900">
-              Delete Role
-            </h3>
-            <p className="mb-6 text-gray-600">
-              Are you sure you want to delete the role &quot;{roleToDelete?.role}&quot;? This action cannot be undone.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={confirmDelete}
-                className="flex-1 rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition-colors hover:bg-red-700"
-              >
-                Delete
-              </button>
-              <button
-                onClick={cancelDelete}
-                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="container mx-auto px-4 py-8 flex flex-col items-center">
-        <h1 className="mb-4 text-center text-4xl font-bold text-gray-900">
-          Manage Your Roles
-        </h1>
 
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
-            <button className="rounded-lg bg-[#0958d9] px-6 py-2 font-semibold text-white transition-colors hover:bg-[#24AC4A]">
-              Add Roles
+            <button 
+              className="rounded bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
+              onClick={() => {
+                setEditingRole(null)
+                setIsSheetOpen(true)
+              }}
+            >
+              Add New Role
             </button>
           </SheetTrigger>
-
-          <SheetContent
-            side="right"
-            size="full"
-            className="sm:max-w-[480px] sm:rounded-l-lg"
-          >
-            <SheetHeader className="sr-only">
-              <SheetTitle>Add New Role</SheetTitle>
+          <SheetContent className="w-[600px] max-h-screen overflow-y-auto">
+            <SheetHeader>
+              <SheetTitle>
+                {editingRole ? 'Edit Role' : 'Add New Role'}
+              </SheetTitle>
             </SheetHeader>
-            <AddRoleForm onSuccess={handleRoleSuccess} editingRole={editingRole} />
-            <SheetClose className="absolute top-4 right-4" />
+            <AddRoleForm 
+              onSuccess={handleFormSuccess} 
+              editingRole={editingRole}
+            />
           </SheetContent>
         </Sheet>
       </div>
-      <section className="container mx-auto px-4 py-10">
-        <div className="mb-6 rounded-lg bg-gray-100 px-6 py-4">
-          <h2 className="text-3xl font-bold text-gray-900">CV Sourcing</h2>
+
+      {/* Success Message */}
+      {successMessage && (
+        <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+          <div className="flex items-center justify-between">
+            <span>{successMessage}</span>
+            <button 
+              onClick={() => setSuccessMessage("")}
+              className="text-green-700 hover:text-green-900"
+            >
+              ×
+            </button>
+          </div>
         </div>
-        <DataTable columns={columns} data={data} />
-      </section>
-    </>
+      )}
+
+      <DataTable columns={columns} data={data} />
+    </div>
   )
 }

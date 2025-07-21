@@ -26,36 +26,24 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
   // Populate form when editing
   useEffect(() => {
     if (editingRole) {
-      // Handle salary - could be number or string
-      let salaryFrom = ''
-      let salaryTo = ''
-      
-      if (editingRole.salary) {
-        if (typeof editingRole.salary === 'string' && editingRole.salary.includes('-')) {
-          const salaryParts = editingRole.salary.split('-')
-          salaryFrom = salaryParts[0] || ''
-          salaryTo = salaryParts[1] || ''
-        } else {
-          // If it's a number or string without dash, put it in salaryFrom
-          salaryFrom = editingRole.salary.toString()
-        }
-      }
-      
       setRoleData({
-        roleTitle: editingRole.role || '',
-        rolePriority: editingRole.stages || '',
-        location: editingRole.focusPoint || '',
-        postalCode: '',
-        country: '',
-        salaryFrom,
-        salaryTo,
-        salaryCurrency: '',
-        salaryType: '',
+        roleTitle: editingRole.roleTitle || '',
+        rolePriority: editingRole.rolePriority || '',
+        location: editingRole.location || '',
+        postalCode: editingRole.postalCode || '',
+        country: editingRole.country || '',
+        salaryFrom: editingRole.salaryFrom || '',
+        salaryTo: editingRole.salaryTo || '',
+        salaryCurrency: editingRole.salaryCurrency || '',
+        salaryType: editingRole.salaryType || '',
         industry: editingRole.industry || '',
-        experienceRequired: '',
-        searchRadius: editingRole.miles?.toString() || '',
-        acmCategory: ''
+        experienceRequired: editingRole.experienceRequired || '',
+        searchRadius: editingRole.searchRadius || '',
+        acmCategory: editingRole.acmCategory || ''
       })
+      
+      // Set salary not defined if no salary values
+      setSalaryNotDefined(!editingRole.salaryFrom && !editingRole.salaryTo)
     }
   }, [editingRole])
 
@@ -73,48 +61,92 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
     setIsSubmitting(true)
     
     try {
-      const completeRoleData = {
-        ...roleData,
-        salaryNotDefined,
-        createdAt: new Date().toISOString(),
-        id: Date.now() // Temporary ID
+      // Get user data from localStorage
+      const userData = localStorage.getItem('user')
+      if (!userData) {
+        throw new Error('User not authenticated')
       }
       
-      console.log('Role Data:', completeRoleData)
+      const user = JSON.parse(userData)
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Call success callback to close sheet and show message
-      if (onSuccess) {
-        const message = editingRole 
-          ? 'Role Updated Successfully! 🎉' 
-          : 'Role Created Successfully! 🎉'
-        onSuccess(message)
+      // Prepare API data with proper type conversions
+      const apiData = {
+        roleTitle: roleData.roleTitle,
+        rolePriority: roleData.rolePriority,
+        location: roleData.location,
+        postalCode: roleData.postalCode || null,
+        country: roleData.country || null,
+        salaryFrom: roleData.salaryFrom ? parseFloat(roleData.salaryFrom) : null,
+        salaryTo: roleData.salaryTo ? parseFloat(roleData.salaryTo) : null,
+        salaryCurrency: roleData.salaryCurrency || null,
+        salaryType: roleData.salaryType || null,
+        salaryNotDefined: salaryNotDefined,
+        industry: roleData.industry,
+        experienceRequired: roleData.experienceRequired || null,
+        searchRadius: roleData.searchRadius ? parseInt(roleData.searchRadius) : null,
+        acmCategory: roleData.acmCategory || null,
+        userId: parseInt(user.id)
       }
       
-      // Reset form
-      setRoleData({
-        roleTitle: '',
-        rolePriority: '',
-        location: '',
-        postalCode: '',
-        country: '',
-        salaryFrom: '',
-        salaryTo: '',
-        salaryCurrency: '',
-        salaryType: '',
-        industry: '',
-        experienceRequired: '',
-        searchRadius: '',
-        acmCategory: ''
-      })
-      setSalaryNotDefined(false)
+      // If editing, use PUT request
+      let response
+      if (editingRole) {
+        response = await fetch(`http://localhost:3001/cv-sourcing/${editingRole.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(apiData)
+        })
+      } else {
+        // Creating new role, use POST request
+        response = await fetch('http://localhost:3001/cv-sourcing', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(apiData)
+        })
+      }
+      
+      const result = await response.json()
+      
+      if (result.success) {
+        // Call success callback to close sheet and show message
+        if (onSuccess) {
+          const message = editingRole 
+            ? 'Role Updated Successfully! 🎉' 
+            : 'Role Created Successfully! 🎉'
+          onSuccess(message)
+        }
+        
+        // Reset form only if creating new role
+        if (!editingRole) {
+          setRoleData({
+            roleTitle: '',
+            rolePriority: '',
+            location: '',
+            postalCode: '',
+            country: '',
+            salaryFrom: '',
+            salaryTo: '',
+            salaryCurrency: '',
+            salaryType: '',
+            industry: '',
+            experienceRequired: '',
+            searchRadius: '',
+            acmCategory: ''
+          })
+          setSalaryNotDefined(false)
+        }
+      } else {
+        throw new Error(result.message || 'Failed to save role')
+      }
       
     } catch (error) {
-      console.error('Error creating role:', error)
+      console.error('Error saving role:', error)
       if (onSuccess) {
-        onSuccess('Error creating role. Please try again.', 'error')
+        onSuccess(`Error ${editingRole ? 'updating' : 'creating'} role: ${error.message}`, 'error')
       }
     } finally {
       setIsSubmitting(false)
