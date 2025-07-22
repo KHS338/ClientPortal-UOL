@@ -263,62 +263,64 @@ export default function ClientProfilePage({ initial = {} }) {
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
             {/* Left Column - Profile Card */}
             <div className="xl:col-span-4">
-              <Card className="p-8 bg-gradient-to-br from-[#1a84de] to-[#1a84de] text-white shadow-2xl border-0 flex flex-col h-full">
-                <div className="text-center flex-1 flex flex-col justify-center">
-                  {/* Avatar and User Info - Centered */}
-                  <div className="space-y-6">
-                    {/* Avatar */}
-                    <div className="mx-auto">
-                      <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-white shadow-xl">
-                        <img
-                          src={form.avatar && form.avatar instanceof File 
-                            ? URL.createObjectURL(form.avatar) 
-                            : form.avatar 
-                            ? form.avatar 
-                            : "/images/profile.png"
-                          }
-                          alt="Profile"
-                          width={128}
-                          height={128}
-                          className="w-full h-full object-cover"
-                        />
+              <div className="sticky top-8">
+                <Card className="p-8 bg-gradient-to-br from-[#1a84de] to-[#1a84de] text-white shadow-2xl border-0 flex flex-col h-full">
+                  <div className="text-center flex-1 flex flex-col justify-center">
+                    {/* Avatar and User Info - Centered */}
+                    <div className="space-y-6">
+                      {/* Avatar */}
+                      <div className="mx-auto">
+                        <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-white shadow-xl">
+                          <img
+                            src={form.avatar && form.avatar instanceof File 
+                              ? URL.createObjectURL(form.avatar) 
+                              : form.avatar 
+                              ? form.avatar 
+                              : "/images/profile.png"
+                            }
+                            alt="Profile"
+                            width={128}
+                            height={128}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <button
+                          onClick={() => fileRef.current?.click()}
+                          className="mx-auto mt-4 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 group flex"
+                        >
+                          <FiCamera size={18} className="text-[#1a84de] group-hover:scale-110 transition-transform" />
+                          <input
+                            type="file"
+                            name="avatar"
+                            accept="image/*"
+                            ref={fileRef}
+                            className="hidden"
+                            onChange={handleChange}
+                          />
+                        </button>
                       </div>
-                      <button
-                        onClick={() => fileRef.current?.click()}
-                        className="mx-auto mt-4 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 group flex"
-                      >
-                        <FiCamera size={18} className="text-[#1a84de] group-hover:scale-110 transition-transform" />
-                        <input
-                          type="file"
-                          name="avatar"
-                          accept="image/*"
-                          ref={fileRef}
-                          className="hidden"
-                          onChange={handleChange}
-                        />
-                      </button>
-                    </div>
 
-                    {/* User Info */}
-                    <div>
-                      <h2 className="text-2xl font-bold mb-2">
-                        {form.firstName} {form.lastName}
-                      </h2>
-                      <p className="text-green-100 text-base mb-1">{form.companyName}</p>
-                      <p className="text-green-200 text-sm">{form.companymail}</p>
-                    </div>
+                      {/* User Info */}
+                      <div>
+                        <h2 className="text-2xl font-bold mb-2">
+                          {form.firstName} {form.lastName}
+                        </h2>
+                        <p className="text-green-100 text-base mb-1">{form.companyName}</p>
+                        <p className="text-green-200 text-sm">{form.companymail}</p>
+                      </div>
 
-                    {/* Stats */}
-                    <div className="w-full">
-                      <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm text-center">
-                        <FiCalendar className="mx-auto mb-2" size={20} />
-                        <div className="text-xs text-green-100 mb-1">Member Since</div>
-                        <div className="font-bold text-sm">{form.joinDate}</div>
+                      {/* Stats */}
+                      <div className="w-full">
+                        <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm text-center">
+                          <FiCalendar className="mx-auto mb-2" size={20} />
+                          <div className="text-xs text-green-100 mb-1">Member Since</div>
+                          <div className="font-bold text-sm">{form.joinDate}</div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </div>
             </div>
 
             {/* Right Column - Form */}
@@ -336,10 +338,19 @@ export default function ClientProfilePage({ initial = {} }) {
                         type="button"
                         onClick={() => setIsEditing(!isEditing)}
                         variant="outline"
-                        className="flex items-center gap-2 border-[#0958d9] text-[#0958d9] hover:border-[#24AC4A] hover:bg-[#24AC4A] hover:text-white transition-all duration-300"
+                        className="min-w-[100px] flex items-center justify-center gap-2 border-[#0958d9] text-[#0958d9] hover:border-[#24AC4A] hover:bg-[#24AC4A] hover:text-white transition-all duration-300"
                       >
-                        {isEditing ? <FiSave size={16} /> : <FiEdit3 size={16} />}
-                        {isEditing ? "Cancel" : "Edit"}
+                        {isEditing ? (
+                          <>
+                            <FiSave size={16} />
+                            <span>Cancel</span>
+                          </>
+                        ) : (
+                          <>
+                            <FiEdit3 size={16} />
+                            <span>Edit</span>
+                          </>
+                        )}
                       </Button>
                     </div>
 
@@ -412,17 +423,17 @@ export default function ClientProfilePage({ initial = {} }) {
                         type="button"
                         onClick={() => setIsEditing(false)}
                         variant="outline"
-                        className="px-6 py-2"
+                        className="min-w-[100px] px-6 py-2"
                       >
                         Cancel
                       </Button>
                       <Button
                         type="submit"
                         disabled={isLoading}
-                        className="px-8 py-2  bg-[#0958d9]  hover:bg-[#24AC4A] text-white shadow-lg hover:shadow-xl transition-all hover:ease-in-out duration-300 hover:-translate-y-1 hover:scale-[1.02]"
+                        className="min-w-[140px] px-8 py-2 bg-[#0958d9] hover:bg-[#24AC4A] text-white shadow-lg hover:shadow-xl transition-all hover:ease-in-out duration-300 hover:-translate-y-1 hover:scale-[1.02]"
                       >
                         {isLoading ? (
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center justify-center space-x-2">
                             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                             <span>Saving...</span>
                           </div>
@@ -468,7 +479,7 @@ export default function ClientProfilePage({ initial = {} }) {
                         <Button
                           type="button"
                           onClick={() => router.push('/profile/2fa')}
-                          className="bg-[#0958d9] hover:bg-[#24AC4A] text-white px-4 py-2 rounded-lg transition-all duration-300 cursor-pointer"
+                          className="min-w-[120px] bg-[#0958d9] hover:bg-[#24AC4A] text-white px-4 py-2 rounded-lg transition-all duration-300 cursor-pointer"
                         >
                           Manage 2FA
                         </Button>
@@ -487,7 +498,7 @@ export default function ClientProfilePage({ initial = {} }) {
                         type="button"
                         onClick={() => setShowPasswordModal(true)}
                         variant="outline"
-                        className="border-[#0958d9] text-[#0958d9] hover:border-[#24AC4A] hover:bg-[#24AC4A] hover:text-white transition-all duration-300 cursor-pointer"
+                        className="min-w-[150px] border-[#0958d9] text-[#0958d9] hover:border-[#24AC4A] hover:bg-[#24AC4A] hover:text-white transition-all duration-300 cursor-pointer"
                       >
                         Change Password
                       </Button>
@@ -588,17 +599,17 @@ export default function ClientProfilePage({ initial = {} }) {
                         setMessage({ type: '', text: '' });
                       }}
                       variant="outline"
-                      className="flex-1"
+                      className="flex-1 min-w-[100px]"
                     >
                       Cancel
                     </Button>
                     <Button
                       type="submit"
                       disabled={passwordLoading}
-                      className="flex-1 bg-[#24AC4A] hover:bg-[#1e8b3a] text-white"
+                      className="flex-1 min-w-[140px] bg-[#24AC4A] hover:bg-[#1e8b3a] text-white"
                     >
                       {passwordLoading ? (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center gap-2">
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                           Changing...
                         </div>

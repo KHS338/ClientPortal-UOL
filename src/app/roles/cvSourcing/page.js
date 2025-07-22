@@ -1,4 +1,3 @@
-// app/roles/cvSourcing/page.js
 "use client"
 
 import React, { useState, useEffect } from "react"
@@ -25,25 +24,24 @@ export default function CVSourcingPage() {
   const [error, setError] = useState(null)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [editingRole, setEditingRole] = useState(null)
-  const [successMessage, setSuccessMessage] = useState("")
+  const [message, setMessage] = useState("")
+  const [messageType, setMessageType] = useState("success")
 
-  // Fetch CV sourcing roles from backend
   const fetchCvSourcingRoles = async () => {
     if (!user || !isAuthenticated) {
-      setError('User not authenticated')
+      setError("User not authenticated")
       setIsLoading(false)
       return
     }
 
     setIsLoading(true)
     setError(null)
-    
+
     try {
       const response = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/cv-sourcing?userId=${user.id}`)
       const result = await response.json()
-      
+
       if (result.success) {
-        // Transform data to match the table columns
         const transformedData = result.data.map((role, index) => ({
           id: role.id,
           no: index + 1,
@@ -71,76 +69,66 @@ export default function CVSourcingPage() {
           createdAt: role.createdAt,
           updatedAt: role.updatedAt
         }))
-        
+
         setData(transformedData)
       } else {
-        throw new Error(result.message || 'Failed to fetch CV sourcing roles')
+        throw new Error(result.message || "Failed to fetch CV sourcing roles")
       }
     } catch (error) {
-      console.error('Error fetching CV sourcing roles:', error)
+      console.error("Error fetching CV sourcing roles:", error)
       setError(error.message)
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Load data on component mount, but only when user is authenticated
   useEffect(() => {
     if (isAuthenticated && user && !authLoading) {
       fetchCvSourcingRoles()
     }
   }, [isAuthenticated, user, authLoading])
 
-  // Handle form success (create/update)
-  const handleFormSuccess = (message) => {
-    setSuccessMessage(message)
+  const handleSuccess = (msg, type = 'success') => {
+    setMessage(msg)
+    setMessageType(type)
     setIsSheetOpen(false)
     setEditingRole(null)
-    
-    // Refresh data
     fetchCvSourcingRoles()
-    
-    // Clear success message after 3 seconds
-    setTimeout(() => setSuccessMessage(""), 3000)
+
+    setTimeout(() => {
+      setMessage('')
+    }, 5000)
   }
 
-  // Handle edit role
-  const handleEditRole = (role) => {
+  const handleEdit = (role) => {
     setEditingRole(role)
     setIsSheetOpen(true)
   }
 
-  // Handle delete role
   const handleDeleteRole = async (role) => {
-    if (!confirm('Are you sure you want to delete this role?')) {
-      return
-    }
+    if (!confirm("Are you sure you want to delete this role?")) return
 
     try {
       const response = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/cv-sourcing/${role.id}`, {
-        method: 'DELETE'
+        method: "DELETE",
       })
-      
+
       const result = await response.json()
-      
+
       if (result.success) {
-        setSuccessMessage('Role deleted successfully!')
-        fetchCvSourcingRoles()
-        setTimeout(() => setSuccessMessage(""), 3000)
+        handleSuccess("Role deleted successfully!")
       } else {
-        throw new Error(result.message || 'Failed to delete role')
+        throw new Error(result.message || "Failed to delete role")
       }
     } catch (error) {
-      console.error('Error deleting role:', error)
-      alert('Error deleting role: ' + error.message)
+      console.error("Error deleting role:", error)
+      handleSuccess("Error deleting role: " + error.message, "error")
     }
   }
 
-  // Make edit and delete functions available globally for the columns
   useEffect(() => {
-    window.handleEditRole = handleEditRole
+    window.handleEditRole = handleEdit
     window.handleDeleteRole = handleDeleteRole
-    
     return () => {
       delete window.handleEditRole
       delete window.handleDeleteRole
@@ -172,56 +160,63 @@ export default function CVSourcingPage() {
 
   return (
     <ProtectedRoute>
-      <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">CV Sourcing Roles</h1>
-          <p className="text-gray-600">Manage your CV sourcing roles and track candidates</p>
-        </div>
-
-        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-          <SheetTrigger asChild>
-            <button 
-              className="rounded bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
-              onClick={() => {
-                setEditingRole(null)
-                setIsSheetOpen(true)
-              }}
-            >
-              Add New Role
-            </button>
-          </SheetTrigger>
-          <SheetContent className="w-[600px] max-h-screen overflow-y-auto">
-            <SheetHeader>
-              <SheetTitle>
-                {editingRole ? 'Edit Role' : 'Add New Role'}
-              </SheetTitle>
-            </SheetHeader>
-            <AddRoleForm 
-              onSuccess={handleFormSuccess} 
-              editingRole={editingRole}
-            />
-          </SheetContent>
-        </Sheet>
-      </div>
-
-      {/* Success Message */}
-      {successMessage && (
-        <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
-          <div className="flex items-center justify-between">
-            <span>{successMessage}</span>
-            <button 
-              onClick={() => setSuccessMessage("")}
-              className="text-green-700 hover:text-green-900"
-            >
-              ×
-            </button>
+      <>
+        {/* Floating Message */}
+        {message && (
+          <div className={`fixed top-4 right-4 z-50 max-w-md rounded-lg border p-4 shadow-lg transition-all duration-300 ${
+            messageType === 'success'
+              ? 'border-green-200 bg-green-50 text-green-800'
+              : 'border-red-200 bg-red-50 text-red-800'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {/* Emoji Removed */}
+                <span className="font-semibold capitalize">{messageType}</span>
+                <span>{message}</span>
+              </div>
+              <button
+                onClick={() => setMessage('')}
+                className="ml-4 text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <DataTable columns={columns} data={data} />
-      </div>
+        <div className="container mx-auto px-4 py-8 flex flex-col items-center">
+          <h1 className="mb-4 text-center text-4xl font-bold text-gray-900">
+            Manage Your CV Sourcing Roles
+          </h1>
+
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+            <SheetTrigger asChild>
+              <button className="rounded-lg bg-[#0958d9] px-6 py-2 font-semibold text-white transition-colors hover:bg-[#24AC4A]">
+                Add CV Sourcing Role
+              </button>
+            </SheetTrigger>
+
+            <SheetContent
+              side="right"
+              size="full"
+              className="sm:max-w-[480px] sm:rounded-l-lg overflow-y-auto"
+            >
+              <SheetHeader className="sr-only">
+                <SheetTitle>{editingRole ? "Edit CV Sourcing Role" : "Add New CV Sourcing Role"}</SheetTitle>
+              </SheetHeader>
+              <AddRoleForm onSuccess={handleSuccess} editingRole={editingRole} />
+              <SheetClose className="absolute top-4 right-4" />
+            </SheetContent>
+          </Sheet>
+        </div>
+
+        <section className="container mx-auto px-4 py-10">
+          <div className="mb-6 rounded-lg bg-gray-100 px-6 py-4">
+            <h2 className="text-3xl font-bold text-gray-900">CV Sourcing Roles</h2>
+          </div>
+          <DataTable columns={columns} data={data} />
+        </section>
+      </>
     </ProtectedRoute>
   )
 }

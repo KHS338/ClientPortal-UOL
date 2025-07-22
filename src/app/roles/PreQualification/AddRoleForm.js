@@ -7,8 +7,42 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
   const { user, isAuthenticated } = useAuth()
   const [salaryNotDefined, setSalaryNotDefined] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [countrySearch, setCountrySearch] = useState("")
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false)
   
-  
+  const countries = [
+    "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina", "Armenia",
+    "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados",
+    "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina",
+    "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia",
+    "Cameroon", "Canada", "Cape Verde", "Central African Republic", "Chad", "Chile", "China",
+    "Colombia", "Comoros", "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic",
+    "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador",
+    "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland",
+    "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada",
+    "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary",
+    "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica",
+    "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Korea North", "Korea South",
+    "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya",
+    "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives",
+    "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia",
+    "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia",
+    "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Macedonia",
+    "Norway", "Oman", "Pakistan", "Palau", "Panama", "Papua New Guinea", "Paraguay", "Peru",
+    "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis",
+    "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe",
+    "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia",
+    "Slovenia", "Solomon Islands", "Somalia", "South Africa", "Spain", "Sri Lanka", "Sudan",
+    "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand",
+    "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda",
+    "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan",
+    "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+  ];
+
+  const filteredCountries = countries.filter((country) =>
+    country.toLowerCase().includes(countrySearch.toLowerCase())
+  )
+
   const [roleData, setRoleData] = useState({
     roleTitle: '',
     rolePriority: '',
@@ -43,13 +77,12 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
         searchRadius: editingRole.searchRadius || '',
         acmCategory: editingRole.acmCategory || ''
       })
-      
+
       // Set salary not defined if no salary values
       setSalaryNotDefined(!editingRole.salaryFrom && !editingRole.salaryTo)
     }
   }, [editingRole])
 
-  
   const handleInputChange = (field, value) => {
     setRoleData(prev => ({
       ...prev,
@@ -57,17 +90,16 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
     }))
   }
 
-
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
-    
+
     try {
       // Check if user is authenticated and available
       if (!isAuthenticated || !user) {
         throw new Error('User not authenticated')
       }
-      
+
       // Prepare API data with proper type conversions
       const apiData = {
         roleTitle: roleData.roleTitle,
@@ -86,7 +118,7 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
         acmCategory: roleData.acmCategory || null,
         userId: parseInt(user.id)
       }
-      
+
       // If editing, use PUT request
       let response
       if (editingRole) {
@@ -107,18 +139,18 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
           body: JSON.stringify(apiData)
         })
       }
-      
+
       const result = await response.json()
-      
+
       if (result.success) {
         // Call success callback to close sheet and show message
         if (onSuccess) {
-          const message = editingRole 
-            ? 'Prequalification Role Updated Successfully! 🎉' 
+          const message = editingRole
+            ? 'Prequalification Role Updated Successfully! 🎉'
             : 'Prequalification Role Created Successfully! 🎉'
           onSuccess(message)
         }
-        
+
         // Reset form only if creating new role
         if (!editingRole) {
           setRoleData({
@@ -141,7 +173,7 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
       } else {
         throw new Error(result.message || 'Failed to save prequalification role')
       }
-      
+
     } catch (error) {
       console.error('Error saving prequalification role:', error)
       if (onSuccess) {
@@ -159,8 +191,8 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
           {editingRole ? 'Edit Prequalification Role' : 'Create New Prequalification Role'}
         </h2>
         <p className="text-gray-600 text-sm">
-          {editingRole 
-            ? 'Update the prequalification role information below.' 
+          {editingRole
+            ? 'Update the prequalification role information below.'
             : 'Fill out the form below to add a new prequalification role to the system.'
           }
         </p>
@@ -169,259 +201,306 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
       <div className="flex-1 overflow-y-auto p-6 bg-white">
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Role Title */}
-          <div className="md:col-span-2">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Role Title <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              value={roleData.roleTitle}
-              onChange={(e) => handleInputChange('roleTitle', e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              placeholder="e.g., Senior Frontend Developer"
-            />
-          </div>
-
-          {/* Role Priority */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Role Priority <span className="text-red-500">*</span>
-            </label>
-            <select 
-              value={roleData.rolePriority}
-              onChange={(e) => handleInputChange('rolePriority', e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            >
-              <option value="">..</option>
-              <option value="low">🟢 Low</option>
-              <option value="medium">🟡 Medium</option>
-              <option value="high">🟠 High</option>
-              <option value="critical">🔴 Critical</option>
-            </select>
-          </div>
-
-          {/* Location */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Location <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              value={roleData.location}
-              onChange={(e) => handleInputChange('location', e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              placeholder="e.g., London, New York"
-            />
-          </div>
-
-          {/* Postal Code */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Postal Code</label>
-            <input
-              type="text"
-              value={roleData.postalCode}
-              onChange={(e) => handleInputChange('postalCode', e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              placeholder="e.g., SW1A 1AA"
-            />
-          </div>
-
-          {/* Country */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Country <span className="text-red-500">*</span>
-            </label>
-            <select 
-              value={roleData.country}
-              onChange={(e) => handleInputChange('country', e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            >
-              <option value="">..</option>
-              <option value="us">🇺🇸 United States</option>
-              <option value="uk">🇬🇧 United Kingdom</option>
-              <option value="ca">🇨🇦 Canada</option>
-              <option value="au">🇦🇺 Australia</option>
-              <option value="de">🇩🇪 Germany</option>
-              <option value="fr">🇫🇷 France</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Salary Section */}
-        <div className="bg-gray-50 rounded-lg p-6 space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">💰 Salary Information</h3>
-          
-          <div className="flex items-center mb-4">
-            <input
-              type="checkbox"
-              id="salaryNotDefined"
-              checked={salaryNotDefined}
-              onChange={(e) => setSalaryNotDefined(e.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="salaryNotDefined" className="ml-2 text-sm font-medium text-gray-700">
-              Salary Not Defined
-            </label>
-          </div>
-
-          {!salaryNotDefined && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Salary Range From */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">From</label>
-                <input
-                  type="number"
-                  value={roleData.salaryFrom}
-                  onChange={(e) => handleInputChange('salaryFrom', e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  placeholder="50,000"
-                  min="0"
-                />
-              </div>
-
-              {/* Salary Range To */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">To</label>
-                <input
-                  type="number"
-                  value={roleData.salaryTo}
-                  onChange={(e) => handleInputChange('salaryTo', e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  placeholder="80,000"
-                  min="0"
-                />
-              </div>
-
-              {/* Salary Currency */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Currency</label>
-                <select 
-                  value={roleData.salaryCurrency}
-                  onChange={(e) => handleInputChange('salaryCurrency', e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                >
-                  <option value="">..</option>
-                  <option value="usd">💵 USD - US Dollar</option>
-                  <option value="gbp">💷 GBP - British Pound</option>
-                  <option value="eur">💶 EUR - Euro</option>
-                  <option value="cad">🍁 CAD - Canadian Dollar</option>
-                </select>
-              </div>
-
-              {/* Salary Type */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Type</label>
-                <select 
-                  value={roleData.salaryType}
-                  onChange={(e) => handleInputChange('salaryType', e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                >
-                  <option value="">..</option>
-                  <option value="annual">📅 Annual</option>
-                  <option value="monthly">📆 Monthly</option>
-                  <option value="weekly">🗓️ Weekly</option>
-                  <option value="hourly">⏰ Hourly</option>
-                </select>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Additional Information */}
-        <div className="bg-blue-50 rounded-lg p-6 space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">📋 Additional Information</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Industry */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Industry</label>
+            {/* Role Title */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Role Title <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
-                value={roleData.industry}
-                onChange={(e) => handleInputChange('industry', e.target.value)}
+                required
+                value={roleData.roleTitle}
+                onChange={(e) => handleInputChange('roleTitle', e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                placeholder="e.g., Technology, Healthcare"
+                placeholder="e.g., Senior Frontend Developer"
               />
             </div>
 
-            {/* Months Back */}
+            {/* Role Priority */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Required EXP</label>
-              <select 
-                value={roleData.experienceRequired}
-                onChange={(e) => handleInputChange('experienceRequired', e.target.value)}
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Role Priority <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={roleData.rolePriority}
+                onChange={(e) => handleInputChange('rolePriority', e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               >
                 <option value="">..</option>
-                <option value="1">1+ Years</option>
-                <option value="3">3+ Years</option>
-                <option value="5">5+ Years</option>
-                <option value="10">10+ Years</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="critical">Critical</option>
               </select>
             </div>
 
-            {/* Radius Miles */}
+            {/* Location */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Search Radius</label>
-              <select 
-                value={roleData.searchRadius}
-                onChange={(e) => handleInputChange('searchRadius', e.target.value)}
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Location <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={roleData.location}
+                onChange={(e) => handleInputChange('location', e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              >
-                <option value="">..</option>
-                <option value="5">📍 5 Miles</option>
-                <option value="10">📍 10 Miles</option>
-                <option value="25">📍 25 Miles</option>
-                <option value="50">📍 50 Miles</option>
-                <option value="100">📍 100 Miles</option>
-                <option value="remote">🌐 Remote</option>
-              </select>
+                placeholder="e.g., London, New York"
+              />
             </div>
 
-            {/* ACM */}
+            {/* Postal Code */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">ACM Category</label>
-              <select 
-                value={roleData.acmCategory}
-                onChange={(e) => handleInputChange('acmCategory', e.target.value)}
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Postal Code</label>
+              <input
+                type="text"
+                value={roleData.postalCode}
+                onChange={(e) => handleInputChange('postalCode', e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              >
-                <option value="">..</option>
-                <option value="technical">Technical</option>
-                <option value="management">Management</option>
-                <option value="creative">Creative</option>
-                <option value="sales">Sales</option>
-              </select>
+                placeholder="e.g., SW1A 1AA"
+              />
+            </div>
+
+            {/* Country - Searchable Dropdown */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Country <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={showCountryDropdown ? countrySearch : (roleData.country || '')}
+                  onChange={(e) => {
+                    setCountrySearch(e.target.value)
+                    setShowCountryDropdown(true)
+                  }}
+                  onFocus={() => {
+                    setShowCountryDropdown(true)
+                    setCountrySearch('')
+                  }}
+                  onBlur={() => {
+                    setTimeout(() => {
+                      setShowCountryDropdown(false)
+                      if (!roleData.country) {
+                        setCountrySearch('')
+                      }
+                    }, 200)
+                  }}
+                  placeholder="Select or search for a country..."
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  required
+                />
+                <div 
+                  className="absolute inset-y-0 right-0 flex items-center px-2 cursor-pointer"
+                  onClick={() => {
+                    setShowCountryDropdown(!showCountryDropdown)
+                    setCountrySearch('')
+                  }}
+                >
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+                
+                {/* Dropdown list */}
+                {showCountryDropdown && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {(countrySearch ? filteredCountries : countries).map((country) => (
+                      <div
+                        key={country}
+                        onClick={() => {
+                          handleInputChange('country', country)
+                          setCountrySearch('')
+                          setShowCountryDropdown(false)
+                        }}
+                        className={`px-4 py-2 cursor-pointer hover:bg-blue-50 transition-colors ${
+                          roleData.country === country ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-900'
+                        }`}
+                      >
+                        {country}
+                      </div>
+                    ))}
+                    {countrySearch && filteredCountries.length === 0 && (
+                      <div className="px-4 py-2 text-gray-500 text-sm">
+                        No countries found
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className={`flex-1 font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-              isSubmitting
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-[#0958d9]  hover:bg-[#24AC4A] hover:scale-[1.02] text-white'
-            }`}
-          >
-            {isSubmitting ? (
-              <span className="flex items-center justify-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                {editingRole ? 'Updating Prequalification Role...' : 'Creating Prequalification Role...'}
-              </span>
-            ) : (
-              editingRole ? '✏️ Update Prequalification Role' : '🚀 Create Prequalification Role'
+          {/* Salary Section */}
+          <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">💰 Salary Information</h3>
+
+            <div className="flex items-center mb-4">
+              <input
+                type="checkbox"
+                id="salaryNotDefined"
+                checked={salaryNotDefined}
+                onChange={(e) => setSalaryNotDefined(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="salaryNotDefined" className="ml-2 text-sm font-medium text-gray-700">
+                Salary Not Defined
+              </label>
+            </div>
+
+            {!salaryNotDefined && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Salary Range From */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">From</label>
+                  <input
+                    type="number"
+                    value={roleData.salaryFrom}
+                    onChange={(e) => handleInputChange('salaryFrom', e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    placeholder="50,000"
+                    min="0"
+                  />
+                </div>
+
+                {/* Salary Range To */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">To</label>
+                  <input
+                    type="number"
+                    value={roleData.salaryTo}
+                    onChange={(e) => handleInputChange('salaryTo', e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    placeholder="80,000"
+                    min="0"
+                  />
+                </div>
+
+                {/* Salary Currency */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Currency</label>
+                  <select
+                    value={roleData.salaryCurrency}
+                    onChange={(e) => handleInputChange('salaryCurrency', e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="">..</option>
+                    <option value="usd">💵 USD - US Dollar</option>
+                    <option value="gbp">💷 GBP - British Pound</option>
+                    <option value="eur">💶 EUR - Euro</option>
+                    <option value="cad">🍁 CAD - Canadian Dollar</option>
+                  </select>
+                </div>
+
+                {/* Salary Type */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Type</label>
+                  <select
+                    value={roleData.salaryType}
+                    onChange={(e) => handleInputChange('salaryType', e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="">..</option>
+                    <option value="annual">Annual</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="hourly">Hourly</option>
+                  </select>
+                </div>
+              </div>
             )}
-          </button>
-         
-        </div>
-      </form>
+          </div>
+
+          {/* Additional Information */}
+          <div className="bg-blue-50 rounded-lg p-6 space-y-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">📋 Additional Information</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Industry */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Industry</label>
+                <input
+                  type="text"
+                  value={roleData.industry}
+                  onChange={(e) => handleInputChange('industry', e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="e.g., Technology, Healthcare"
+                />
+              </div>
+
+              {/* Months Back */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Required EXP</label>
+                <select
+                  value={roleData.experienceRequired}
+                  onChange={(e) => handleInputChange('experienceRequired', e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                >
+                  <option value="">..</option>
+                  <option value="1">1+ Years</option>
+                  <option value="3">3+ Years</option>
+                  <option value="5">5+ Years</option>
+                  <option value="10">10+ Years</option>
+                </select>
+              </div>
+
+              {/* Radius Miles */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Search Radius</label>
+                <select
+                  value={roleData.searchRadius}
+                  onChange={(e) => handleInputChange('searchRadius', e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                >
+                  <option value="">..</option>
+                  <option value="5">5 Miles</option>
+                  <option value="10">10 Miles</option>
+                  <option value="25">25 Miles</option>
+                  <option value="50">50 Miles</option>
+                  <option value="100">100 Miles</option>
+                  <option value="remote">Remote</option>
+                </select>
+              </div>
+
+              {/* ACM */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">ACM Category</label>
+                <select
+                  value={roleData.acmCategory}
+                  onChange={(e) => handleInputChange('acmCategory', e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                >
+                  <option value="">..</option>
+                  <option value="technical">Technical</option>
+                  <option value="management">Management</option>
+                  <option value="creative">Creative</option>
+                  <option value="sales">Sales</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={`flex-1 font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${isSubmitting
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-[#0958d9] hover:bg-[#24AC4A] hover:scale-[1.02] text-white'
+                }`}
+            >
+              {isSubmitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  {editingRole ? 'Updating Prequalification Role...' : 'Creating Prequalification Role...'}
+                </span>
+              ) : (
+                editingRole ? '✏️ Update Prequalification Role' : 'Create Prequalification Role'
+              )}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )
