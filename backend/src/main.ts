@@ -9,7 +9,9 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       process.env.FRONTEND_URL || 'http://localhost:3000',
-      'https://client-portal-uol.vercel.app/'
+      'https://client-portal-uol.vercel.app',
+      'https://client-portal-uol-git-master-khs338s-projects.vercel.app',
+      'https://client-portal-to05smla6-khs338s-projects.vercel.app',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
