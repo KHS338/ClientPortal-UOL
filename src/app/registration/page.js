@@ -74,6 +74,8 @@ export default function ClientRegistrationPage() {
         avatar: form.avatar ? 'uploaded-avatar.jpg' : null // For now, just a placeholder
       };
 
+      console.log("Sending user data:", userData);
+
       // Call backend API
       const response = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/users/register', {
         method: 'POST',
@@ -82,6 +84,13 @@ export default function ClientRegistrationPage() {
         },
         body: JSON.stringify(userData)
       });
+
+      console.log("Response status:", response.status);
+      console.log("Response headers:", response.headers);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const result = await response.json();
       console.log("Backend response:", result);
@@ -107,8 +116,13 @@ export default function ClientRegistrationPage() {
     } catch (error) {
       // Handle network errors
       console.error('Registration error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       setIsLoading(false);
-      setError('Network error. Please check your connection and try again.');
+      setError(`Network error: ${error.message}. Please check your connection and try again.`);
     }
   };
  
