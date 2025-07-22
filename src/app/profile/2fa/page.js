@@ -6,9 +6,11 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import QRCode from "react-qr-code";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function TwoFactorAuthSettings() {
-  const [user, setUser] = useState(null);
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [isEnabled, setIsEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [setupData, setSetupData] = useState(null);
@@ -19,14 +21,12 @@ export default function TwoFactorAuthSettings() {
   const [copiedCodes, setCopiedCodes] = useState({});
 
   useEffect(() => {
-    // Get user data from localStorage
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
-      setIsEnabled(parsedUser.twoFactorEnabled || false);
+    // Use user data from authentication context
+    if (user && isAuthenticated) {
+      console.log('2FA page - Loading user data from auth context:', user);
+      setIsEnabled(user.twoFactorEnabled || false);
     }
-  }, []);
+  }, [user, isAuthenticated]);
 
   const setup2FA = async () => {
     if (!user) return;
@@ -161,7 +161,8 @@ export default function TwoFactorAuthSettings() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
+    <ProtectedRoute>
+      <div className="max-w-4xl mx-auto p-6 space-y-6">
       <div className="text-center mb-8">
         <div className="flex justify-center mb-4">
           <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
@@ -360,5 +361,6 @@ export default function TwoFactorAuthSettings() {
         )}
       </Card>
     </div>
+    </ProtectedRoute>
   );
 }

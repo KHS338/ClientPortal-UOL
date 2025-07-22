@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 export function middleware(request) {
   const { pathname } = request.nextUrl;
   
+  console.log(`Middleware: Checking path: ${pathname}`);
+  
   // Define protected routes
   const protectedRoutes = [
     '/dashboard',
@@ -28,6 +30,8 @@ export function middleware(request) {
     pathname.startsWith(route)
   );
   
+  console.log(`Middleware: Is protected route: ${isProtectedRoute}`);
+  
   // Check if the current path is a public route
   const isPublicRoute = publicRoutes.some(route => 
     pathname === route || pathname.startsWith(route)
@@ -39,13 +43,17 @@ export function middleware(request) {
     const token = request.cookies.get('auth_token')?.value || 
                   request.headers.get('authorization')?.replace('Bearer ', '');
     
+    console.log(`Middleware: Protected route accessed. Token exists: ${!!token}`);
+    
     // If no token, redirect to login
     if (!token) {
+      console.log(`Middleware: No token found, redirecting to login`);
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('from', pathname);
       return NextResponse.redirect(loginUrl);
     }
     
+    console.log(`Middleware: Token found, allowing access`);
     // Here you could add token validation logic
     // For now, we'll trust that the client-side authentication is working
   }

@@ -28,12 +28,15 @@ export default function CVSourcingPage() {
   const [messageType, setMessageType] = useState("success")
 
   const fetchCvSourcingRoles = async () => {
+<<<<<<< HEAD
     if (!user || !isAuthenticated) {
       setError("User not authenticated")
       setIsLoading(false)
       return
     }
 
+=======
+>>>>>>> e299621cc918d4505f13310a60614d7e54b3c3f1
     setIsLoading(true)
     setError(null)
 
@@ -82,11 +85,18 @@ export default function CVSourcingPage() {
     }
   }
 
+<<<<<<< HEAD
+=======
+  // Load data on component mount, ProtectedRoute ensures authentication
+>>>>>>> e299621cc918d4505f13310a60614d7e54b3c3f1
   useEffect(() => {
-    if (isAuthenticated && user && !authLoading) {
+    if (user && !authLoading) {
       fetchCvSourcingRoles()
+    } else if (!authLoading) {
+      // If no user after auth loading is complete, set loading to false
+      setIsLoading(false)
     }
-  }, [isAuthenticated, user, authLoading])
+  }, [user, authLoading])
 
   const handleSuccess = (msg, type = 'success') => {
     setMessage(msg)
