@@ -10,7 +10,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function TwoFactorAuthSettings() {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading, updateUser } = useAuth();
   const [isEnabled, setIsEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [setupData, setSetupData] = useState(null);
@@ -79,10 +79,9 @@ export default function TwoFactorAuthSettings() {
       const result = await response.json();
       
       if (result.success) {
-        // Update user state and localStorage
+        // Update user state using auth context
         const updatedUser = { ...user, twoFactorEnabled: true };
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        updateUser(updatedUser);
         
         setIsEnabled(true);
         setSuccess('Two-factor authentication enabled successfully!');
@@ -121,10 +120,9 @@ export default function TwoFactorAuthSettings() {
       const result = await response.json();
       
       if (result.success) {
-        // Update user state and localStorage
+        // Update user state using auth context
         const updatedUser = { ...user, twoFactorEnabled: false };
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        updateUser(updatedUser);
         
         setIsEnabled(false);
         setSuccess('Two-factor authentication disabled successfully!');
