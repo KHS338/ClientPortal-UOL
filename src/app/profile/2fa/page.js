@@ -216,7 +216,7 @@ export default function TwoFactorAuthSettings() {
         {!isEnabled && !setupData && (
           <div className="text-center">
             <p className="text-gray-600 mb-4">
-              Secure your account by enabling two-factor authentication. You'll need to verify your identity using a code from your authenticator app.
+              Secure your account by enabling two-factor authentication. You&apos;ll need to verify your identity using a code from your authenticator app.
             </p>
             <Button
               onClick={setup2FA}
@@ -249,7 +249,7 @@ export default function TwoFactorAuthSettings() {
 
             <div className="bg-gray-50 p-4 rounded-lg">
               <h4 className="font-semibold mb-2">Manual Entry</h4>
-              <p className="text-sm text-gray-600 mb-2">If you can't scan the QR code, enter this code manually:</p>
+              <p className="text-sm text-gray-600 mb-2">If you can&apos;t scan the QR code, enter this code manually:</p>
               <div className="flex items-center space-x-2">
                 <code className="bg-white px-3 py-2 rounded text-sm font-mono border flex-1">
                   {setupData.secret}

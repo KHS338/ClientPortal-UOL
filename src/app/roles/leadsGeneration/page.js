@@ -1,6 +1,6 @@
 // app/roles/leadsGeneration/page.js
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { DataTable } from "./data-table";
 import { jobsColumns, industryColumns } from "./columns";
 import AddRoleForm from "./AddRoleForm";
@@ -847,24 +847,24 @@ export default function RolesPage() {
     if (user) {
       loadData();
     }
-  }, [user]);
+  }, [user, loadData]);
 
   // Helper function to show success message
-  const showSuccessMessage = (message) => {
+  const showSuccessMessage = useCallback((message) => {
     setSuccessMessage(message);
     setErrorMessage("");
     setTimeout(() => setSuccessMessage(""), 4000);
-  };
+  }, []);
 
   // Helper function to show error message
-  const showErrorMessage = (message) => {
+  const showErrorMessage = useCallback((message) => {
     setErrorMessage(message);
     setSuccessMessage("");
     setTimeout(() => setErrorMessage(""), 4000);
-  };
+  }, []);
 
   // Function to load data from backend
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -915,10 +915,10 @@ export default function RolesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, showErrorMessage]);
 
   // Function to handle form submissions
-  const handleFormSubmit = async (formData, formType) => {
+  const handleFormSubmit = useCallback(async (formData, formType) => {
     if (!user) {
       showErrorMessage('Please log in to continue');
       return;
@@ -987,23 +987,23 @@ export default function RolesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, editingEntry, showSuccessMessage, showErrorMessage, loadData]);
 
   // Function to handle edit
-  const handleEdit = (entry) => {
+  const handleEdit = useCallback((entry) => {
     setEditingEntry(entry);
     setSelected(entry.type);
     setShowForm(true);
-  };
+  }, []);
 
   // Function to handle delete
-  const handleDelete = async (entry) => {
+  const handleDelete = useCallback(async (entry) => {
     setEntryToDelete(entry);
     setIsDeleteDialogOpen(true);
-  };
+  }, []);
 
   // Function to confirm delete
-  const confirmDelete = async () => {
+  const confirmDelete = useCallback(async () => {
     if (!entryToDelete) return;
 
     try {
@@ -1033,13 +1033,13 @@ export default function RolesPage() {
       setEntryToDelete(null);
       setIsDeleteDialogOpen(false);
     }
-  };
+  }, [entryToDelete, showSuccessMessage, showErrorMessage, loadData]);
 
   // Function to cancel delete
-  const cancelDelete = () => {
+  const cancelDelete = useCallback(() => {
     setEntryToDelete(null);
     setIsDeleteDialogOpen(false);
-  };
+  }, []);
 
   // Make functions available globally for column actions
   useEffect(() => {
@@ -1050,7 +1050,7 @@ export default function RolesPage() {
       delete window.handleEditRole;
       delete window.handleDeleteRole;
     };
-  }, [submittedData]);
+  }, [handleEdit, handleDelete]);
 
   // Filter data based on type
   const jobsData = submittedData.filter(entry => entry.type === 'jobs');
