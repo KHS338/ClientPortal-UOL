@@ -7,7 +7,10 @@ async function bootstrap() {
   
   // Enable CORS for frontend communication
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: [
+      process.env.FRONTEND_URL || 'http://localhost:3000',
+      'https://client-portal-uol.vercel.app/'
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
