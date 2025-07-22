@@ -7,10 +7,12 @@ import Link from "next/link";
 import { FiCamera, FiEdit3, FiSave, FiUser, FiBriefcase, FiMail, FiPhone, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiCalendar, FiX } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ClientProfilePage({ initial = {} }) {
   const router = useRouter();
-  const [user, setUser] = useState(null);
+  const { user: authUser, isAuthenticated, isLoading: authLoading } = useAuth();
   const [form, setForm] = useState({
     companymail: "",
     firstName: "",
@@ -27,7 +29,6 @@ export default function ClientProfilePage({ initial = {} }) {
 
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingUser, setIsLoadingUser] = useState(true);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
@@ -39,57 +40,51 @@ export default function ClientProfilePage({ initial = {} }) {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const fileRef = useRef();
 
-  // Load user data from localStorage
+  // Load user data from authentication context
   useEffect(() => {
-    const loadUserData = () => {
-      const userData = localStorage.getItem('user');
-      if (userData) {
-        try {
-          const parsedUser = JSON.parse(userData);
-          setUser(parsedUser);
-          
-          // Format dates
-          const joinDate = parsedUser.createdAt ? new Date(parsedUser.createdAt).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long'
-          }) : "N/A";
-          
-          const lastLogin = parsedUser.lastLogin ? new Date(parsedUser.lastLogin).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          }) : "Never";
+    console.log('Profile page - Auth state:', { isAuthenticated, authLoading, authUser });
+    
+    if (!authLoading && !isAuthenticated) {
+      console.log('Profile page - User not authenticated, redirecting to login');
+      router.push('/login');
+      return;
+    }
+    
+    if (authUser) {
+      console.log('Profile page - Loading user data from auth context:', authUser);
+      
+      // Format dates
+      const joinDate = authUser.createdAt ? new Date(authUser.createdAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long'
+      }) : "N/A";
+      
+      const lastLogin = authUser.lastLogin ? new Date(authUser.lastLogin).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) : "Never";
 
-          setForm({
-            companymail: parsedUser.companymail || "",
-            firstName: parsedUser.firstName || "",
-            lastName: parsedUser.lastName || "",
-            companyName: parsedUser.companyName || "",
-            companySize: parsedUser.companySize || "",
-            email: parsedUser.email || "",
-            phone: parsedUser.phone || "",
-            avatar: parsedUser.avatar || null,
-            joinDate: joinDate,
-            lastLogin: lastLogin,
-            twoFactorEnabled: parsedUser.twoFactorEnabled || false,
-          });
-        } catch (error) {
-          console.error('Error parsing user data:', error);
-          router.push('/login');
-        }
-      } else {
-        router.push('/login');
-      }
-      setIsLoadingUser(false);
-    };
+      setForm({
+        companymail: authUser.companymail || "",
+        firstName: authUser.firstName || "",
+        lastName: authUser.lastName || "",
+        companyName: authUser.companyName || "",
+        companySize: authUser.companySize || "",
+        email: authUser.email || "",
+        phone: authUser.phone || "",
+        avatar: authUser.avatar || null,
+        joinDate: joinDate,
+        lastLogin: lastLogin,
+        twoFactorEnabled: authUser.twoFactorEnabled || false,
+      });
+    }
+  }, [authUser, isAuthenticated, authLoading, router]);
 
-    loadUserData();
-  }, [router]);
-
-  // Show loading state
-  if (isLoadingUser) {
+  // Show loading state while authentication is loading
+  if (authLoading || (!isAuthenticated && !authLoading)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50 flex items-center justify-center">
         <div className="text-center">
@@ -113,17 +108,17 @@ export default function ClientProfilePage({ initial = {} }) {
     try {
       // Prepare update data - only include fields that have actually changed
       const updateData = {
-        userId: user.id,
+        userId: authUser.id,
       };
 
       // Only include fields that have changed from the original user data
-      if (form.firstName !== user.firstName) updateData.firstName = form.firstName;
-      if (form.lastName !== user.lastName) updateData.lastName = form.lastName;
-      if (form.companyName !== user.companyName) updateData.companyName = form.companyName;
-      if (form.companySize !== user.companySize) updateData.companySize = form.companySize;
-      if (form.email !== user.email) updateData.email = form.email;
-      if (form.phone !== user.phone) updateData.phone = form.phone;
-      if (form.companymail !== user.companymail) updateData.companymail = form.companymail;
+      if (form.firstName !== authUser.firstName) updateData.firstName = form.firstName;
+      if (form.lastName !== authUser.lastName) updateData.lastName = form.lastName;
+      if (form.companyName !== authUser.companyName) updateData.companyName = form.companyName;
+      if (form.companySize !== authUser.companySize) updateData.companySize = form.companySize;
+      if (form.email !== authUser.email) updateData.email = form.email;
+      if (form.phone !== authUser.phone) updateData.phone = form.phone;
+      if (form.companymail !== authUser.companymail) updateData.companymail = form.companymail;
 
       // Don't include password in regular profile update
       // Password changes will be handled separately
@@ -140,10 +135,9 @@ export default function ClientProfilePage({ initial = {} }) {
       const result = await response.json();
       
       if (result.success) {
-        // Update localStorage with new user data
-        const updatedUser = { ...user, ...result.user };
+        // Update localStorage with new user data (for compatibility)
+        const updatedUser = { ...authUser, ...result.user };
         localStorage.setItem('user', JSON.stringify(updatedUser));
-        setUser(updatedUser);
         
         // Update form state with the updated user data
         setForm(prev => ({
@@ -205,7 +199,7 @@ export default function ClientProfilePage({ initial = {} }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: user.id,
+          userId: authUser.id,
           currentPassword: passwordForm.currentPassword,
           newPassword: passwordForm.newPassword,
           twoFactorCode: passwordForm.twoFactorCode || null
@@ -241,7 +235,8 @@ export default function ClientProfilePage({ initial = {} }) {
   const primaryDark = "#06398e";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50">
       <div className="max-w-7xl mx-auto p-6 lg:p-8">
         <div className="space-y-8">
           {/* Header */}
@@ -619,7 +614,8 @@ export default function ClientProfilePage({ initial = {} }) {
 
         </div>
       </div>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }
 

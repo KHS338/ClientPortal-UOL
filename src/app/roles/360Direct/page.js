@@ -4,6 +4,8 @@
 import React, { useState, useEffect } from "react"
 import { columns } from "./columns"
 import { DataTable } from "./data-table"
+import ProtectedRoute from "@/components/ProtectedRoute"
+import { useAuth } from "@/contexts/AuthContext"
 
 import {
   Sheet,
@@ -17,6 +19,7 @@ import {
 import AddRoleForm from "./AddRoleForm"
 
 export default function DirectPage() {
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
@@ -26,18 +29,15 @@ export default function DirectPage() {
 
   // Fetch 360 direct data from API
   const fetchData = async () => {
+    if (!user || !isAuthenticated) {
+      setLoading(false)
+      return
+    }
+
     try {
       setLoading(true)
       
-      // Get user data from localStorage
-      const userData = localStorage.getItem('user')
-      if (!userData) {
-        throw new Error('User not authenticated')
-      }
-      
-      const user = JSON.parse(userData)
-      
-      // Fetch direct roles for this user
+      // Fetch direct roles for this user using the user from context
       const response = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/direct?userId=${user.id}`)
       const result = await response.json()
       
@@ -56,8 +56,10 @@ export default function DirectPage() {
   }
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    if (isAuthenticated && user && !authLoading) {
+      fetchData()
+    }
+  }, [isAuthenticated, user, authLoading])
 
   // Handle role creation/editing success
   const handleSuccess = (successMsg, msgType = 'success') => {
@@ -130,7 +132,8 @@ export default function DirectPage() {
   }, [handleEdit, handleDeleteRole])
 
   return (
-    <>
+    <ProtectedRoute>
+      <>
       {/* Success/Error Message */}
       {message && (
         <div className={`fixed top-4 right-4 z-50 max-w-md rounded-lg border p-4 shadow-lg transition-all duration-300 ${
@@ -193,6 +196,7 @@ export default function DirectPage() {
           <DataTable columns={columns} data={data} />
         )}
       </section>
-    </>
+      </>
+    </ProtectedRoute>
   )
 }

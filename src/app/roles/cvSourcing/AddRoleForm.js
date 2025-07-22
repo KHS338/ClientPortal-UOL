@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useAuth } from "@/contexts/AuthContext"
 
 export default function AddRoleForm({ onSuccess, editingRole = null }) {
+  const { user, isAuthenticated } = useAuth()
   const [salaryNotDefined, setSalaryNotDefined] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   
@@ -61,13 +63,10 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
     setIsSubmitting(true)
     
     try {
-      // Get user data from localStorage
-      const userData = localStorage.getItem('user')
-      if (!userData) {
+      // Check if user is authenticated and available
+      if (!isAuthenticated || !user) {
         throw new Error('User not authenticated')
       }
-      
-      const user = JSON.parse(userData)
       
       // Prepare API data with proper type conversions
       const apiData = {

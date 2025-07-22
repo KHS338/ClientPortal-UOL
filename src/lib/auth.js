@@ -17,6 +17,36 @@ export const authUtils = {
     return null;
   },
 
+  // Set cookie helper
+  setCookie: (name, value, days = 7) => {
+    if (typeof window !== 'undefined') {
+      const expires = new Date();
+      expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+      document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Strict`;
+    }
+  },
+
+  // Get cookie helper
+  getCookie: (name) => {
+    if (typeof window !== 'undefined') {
+      const nameEQ = name + "=";
+      const ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+      }
+    }
+    return null;
+  },
+
+  // Delete cookie helper
+  deleteCookie: (name) => {
+    if (typeof window !== 'undefined') {
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+    }
+  },
+
   // Set authentication data
   setAuth: (token, user, remember = false) => {
     if (typeof window !== 'undefined') {
@@ -30,12 +60,16 @@ export const authUtils = {
         // Clear sessionStorage if we're using localStorage
         sessionStorage.removeItem('authToken');
         sessionStorage.removeItem('userData');
+        // Set cookie for middleware
+        authUtils.setCookie('auth_token', token, 7);
       } else {
         sessionStorage.setItem('authToken', token);
         sessionStorage.setItem('userData', JSON.stringify(user));
         // Clear localStorage if we're using sessionStorage
         localStorage.removeItem('authToken');
         localStorage.removeItem('userData');
+        // Set cookie for middleware (session cookie)
+        authUtils.setCookie('auth_token', token, 1);
       }
     }
   },
@@ -47,6 +81,8 @@ export const authUtils = {
       localStorage.removeItem('userData');
       sessionStorage.removeItem('authToken');
       sessionStorage.removeItem('userData');
+      // Clear cookie
+      authUtils.deleteCookie('auth_token');
     }
   },
 

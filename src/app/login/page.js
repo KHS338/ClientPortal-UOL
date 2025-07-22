@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isAuthenticated, isLoading: authLoading, error: authError, clearError } = useAuth();
+  const { login, isAuthenticated, isLoading: authLoading, error: authError, clearError, updateUser } = useAuth();
 
   const [form, setForm] = useState({
     email: "",
@@ -50,33 +50,42 @@ export default function LoginPage() {
     setLocalError("");
 
     try {
-      const loginData = {
-        email: form.email,
-        password: form.password,
-        ...(form.twoFactorToken && { twoFactorToken: form.twoFactorToken })
-      };
+      if (requiresTwoFactor && form.twoFactorToken) {
+        // Handle 2FA verification
+        const response = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/users/verify-2fa', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: userId,
+            twoFactorToken: form.twoFactorToken
+          })
+        });
 
-      const response = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(loginData)
-      });
+        const result = await response.json();
 
-      const result = await response.json();
-
-      if (result.success) {
-        // Store user data and redirect
-        localStorage.setItem('user', JSON.stringify(result.user));
-        router.push('/dashboard');
-      } else if (result.requiresTwoFactor) {
-        // Show 2FA input
-        setRequiresTwoFactor(true);
-        setUserId(result.userId);
-        setLocalError("Please enter your two-factor authentication code");
+        if (result.success) {
+          // Use the auth context to properly update the user data after 2FA completion
+          updateUser(result.user);
+          router.push('/dashboard');
+        } else {
+          setLocalError(result.message || '2FA verification failed.');
+        }
       } else {
-        setLocalError(result.message || 'Login failed. Please check your credentials.');
+        // Regular login
+        const loginResult = await login(form.email, form.password, rememberMe);
+        
+        if (loginResult.success) {
+          router.push('/dashboard');
+        } else if (loginResult.requiresTwoFactor) {
+          // Show 2FA input
+          setRequiresTwoFactor(true);
+          setUserId(loginResult.userId);
+          setLocalError("Please enter your two-factor authentication code");
+        } else {
+          setLocalError(loginResult.message || 'Login failed. Please check your credentials.');
+        }
       }
     } catch (error) {
       console.error('Login error:', error);

@@ -4,6 +4,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { DataTable } from "./data-table";
 import { jobsColumns, industryColumns } from "./columns";
 import AddRoleForm from "./AddRoleForm";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Add animation keyframes using style tag
 const styles = `
@@ -822,6 +824,7 @@ const JobsForm = ({ onSubmit, editingData, onCancel, onError }) => {
 
 // Main Component
 export default function RolesPage() {
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth()
   const [data, setData] = useState([]);
   const [selected, setSelected] = useState("jobs");
   const [submittedData, setSubmittedData] = useState([]);
@@ -830,24 +833,8 @@ export default function RolesPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-
-  // Get user info from context or localStorage
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-  }, []);
-
-  // Load data on component mount
-  useEffect(() => {
-    if (user) {
-      loadData();
-    }
-  }, [user, loadData]);
 
   // Helper function to show success message
   const showSuccessMessage = useCallback((message) => {
@@ -916,6 +903,13 @@ export default function RolesPage() {
       setLoading(false);
     }
   }, [user, showErrorMessage]);
+
+  // Load data on component mount
+  useEffect(() => {
+    if (user && isAuthenticated && !authLoading) {
+      loadData();
+    }
+  }, [user, isAuthenticated, authLoading, loadData]);
 
   // Function to handle form submissions
   const handleFormSubmit = useCallback(async (formData, formType) => {
@@ -1073,7 +1067,8 @@ export default function RolesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50 p-4 sm:p-6 animate-fadeIn">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50 p-4 sm:p-6 animate-fadeIn">
       {/* Delete Dialog */}
       {isDeleteDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-lg">
@@ -1258,6 +1253,7 @@ export default function RolesPage() {
           </a>
         </div>
       )}
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

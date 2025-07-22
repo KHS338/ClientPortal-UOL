@@ -212,12 +212,22 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
   };
 
+  // Update user data (useful for 2FA completion)
+  const updateUser = (userData) => {
+    authUtils.setAuth(state.token, userData, true);
+    dispatch({
+      type: AUTH_ACTIONS.UPDATE_USER,
+      payload: userData
+    });
+  };
+
   const value = {
     ...state,
     login,
     logout,
     fetchProfile,
-    clearError
+    clearError,
+    updateUser
   };
 
   return (

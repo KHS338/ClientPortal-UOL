@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 const invoiceData = {
   companyName: "ClientPortal UOL",
@@ -268,7 +269,8 @@ export default function ClientInvoicePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Invoice</h1>
 
@@ -374,6 +376,7 @@ export default function ClientInvoicePage() {
           )}
         </Card>
       </div>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

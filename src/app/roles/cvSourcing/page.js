@@ -4,6 +4,8 @@
 import React, { useState, useEffect } from "react"
 import { columns } from "./columns"
 import { DataTable } from "./data-table"
+import ProtectedRoute from "@/components/ProtectedRoute"
+import { useAuth } from "@/contexts/AuthContext"
 
 import {
   Sheet,
@@ -17,6 +19,7 @@ import {
 import AddRoleForm from "./AddRoleForm"
 
 export default function CVSourcingPage() {
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const [data, setData] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -24,26 +27,18 @@ export default function CVSourcingPage() {
   const [editingRole, setEditingRole] = useState(null)
   const [successMessage, setSuccessMessage] = useState("")
 
-  // Get user data from localStorage
-  const getUserData = () => {
-    if (typeof window !== 'undefined') {
-      const userData = localStorage.getItem('user')
-      return userData ? JSON.parse(userData) : null
-    }
-    return null
-  }
-
   // Fetch CV sourcing roles from backend
   const fetchCvSourcingRoles = async () => {
+    if (!user || !isAuthenticated) {
+      setError('User not authenticated')
+      setIsLoading(false)
+      return
+    }
+
     setIsLoading(true)
     setError(null)
     
     try {
-      const user = getUserData()
-      if (!user) {
-        throw new Error('User not authenticated')
-      }
-
       const response = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/cv-sourcing?userId=${user.id}`)
       const result = await response.json()
       
@@ -89,10 +84,12 @@ export default function CVSourcingPage() {
     }
   }
 
-  // Load data on component mount
+  // Load data on component mount, but only when user is authenticated
   useEffect(() => {
-    fetchCvSourcingRoles()
-  }, [])
+    if (isAuthenticated && user && !authLoading) {
+      fetchCvSourcingRoles()
+    }
+  }, [isAuthenticated, user, authLoading])
 
   // Handle form success (create/update)
   const handleFormSuccess = (message) => {
@@ -174,7 +171,8 @@ export default function CVSourcingPage() {
   }
 
   return (
-    <div className="p-6">
+    <ProtectedRoute>
+      <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">CV Sourcing Roles</h1>
@@ -223,6 +221,7 @@ export default function CVSourcingPage() {
       )}
 
       <DataTable columns={columns} data={data} />
-    </div>
+      </div>
+    </ProtectedRoute>
   )
 }

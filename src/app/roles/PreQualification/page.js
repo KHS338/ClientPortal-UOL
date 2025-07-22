@@ -4,6 +4,8 @@
 import React, { useState, useEffect } from "react"
 import { columns } from "./columns"
 import { DataTable } from "./data-table"
+import ProtectedRoute from "@/components/ProtectedRoute"
+import { useAuth } from "@/contexts/AuthContext"
 
 import {
   Sheet,
@@ -17,6 +19,7 @@ import {
 import AddRoleForm from "./AddRoleForm"
 
 export default function PreQualificationPage() {
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
@@ -26,16 +29,12 @@ export default function PreQualificationPage() {
 
   // Fetch prequalification data from API
   const fetchData = async () => {
+    if (!isAuthenticated || !user) {
+      return;
+    }
+    
     try {
       setLoading(true)
-      
-      // Get user data from localStorage
-      const userData = localStorage.getItem('user')
-      if (!userData) {
-        throw new Error('User not authenticated')
-      }
-      
-      const user = JSON.parse(userData)
       
       // Fetch prequalification roles for this user
       const response = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/prequalification?userId=${user.id}`)
@@ -56,8 +55,10 @@ export default function PreQualificationPage() {
   }
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    if (isAuthenticated && user && !authLoading) {
+      fetchData()
+    }
+  }, [isAuthenticated, user, authLoading])
 
   // Handle role creation/editing success
   const handleSuccess = (successMsg, msgType = 'success') => {
@@ -130,7 +131,7 @@ export default function PreQualificationPage() {
   }, [handleEdit, handleDeleteRole])
 
   return (
-    <>
+    <ProtectedRoute>
       {/* Success/Error Message */}
       {message && (
         <div className={`fixed top-4 right-4 z-50 max-w-md rounded-lg border p-4 shadow-lg transition-all duration-300 ${
@@ -193,6 +194,6 @@ export default function PreQualificationPage() {
           <DataTable columns={columns} data={data} />
         )}
       </section>
-    </>
+    </ProtectedRoute>
   )
 }

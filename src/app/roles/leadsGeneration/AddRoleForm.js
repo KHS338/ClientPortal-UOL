@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useAuth } from "@/contexts/AuthContext"
 
 export default function AddRoleForm({ onSuccess, editingRole = null }) {
+  const { user, isAuthenticated } = useAuth()
   const [salaryNotDefined, setSalaryNotDefined] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   

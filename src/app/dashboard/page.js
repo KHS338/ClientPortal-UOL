@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { FiUser, FiDollarSign, FiCalendar, FiBriefcase, FiClock, FiCheckCircle, FiSettings, FiTarget, FiUsers, FiFileText } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function DashboardPage() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -127,7 +128,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50">
       <div className="max-w-7xl mx-auto p-6 lg:p-8">
         <div className="space-y-8">
           {/* Header */}
@@ -328,6 +330,7 @@ export default function DashboardPage() {
           </Card>
         </div>
       </div>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

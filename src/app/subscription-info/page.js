@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, Toast } from "@/components/ui/alert-dialog";
 import StripePayment from "@/components/StripePayment";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function SubscriptionInfoPage() {
   const [billingCycle, setBillingCycle] = useState("monthly");
@@ -235,7 +236,8 @@ export default function SubscriptionInfoPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50">
       <div className="max-w-7xl mx-auto p-6 lg:p-8">
         <div className="space-y-8">
           {/* Header */}
@@ -555,6 +557,7 @@ export default function SubscriptionInfoPage() {
           onCancel={handlePaymentCancel}
         />
       )}
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

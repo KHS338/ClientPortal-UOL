@@ -6,6 +6,7 @@ import { FiCheckCircle, FiStar, FiArrowRight, FiGift, FiZap } from "react-icons/
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import StripePayment from "@/components/StripePayment";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function SubscriptionPage() {
   const router = useRouter();
@@ -166,7 +167,8 @@ export default function SubscriptionPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50 relative">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50 relative">
       {/* Loading Overlay */}
       {isRedirecting && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -425,6 +427,7 @@ export default function SubscriptionPage() {
           onCancel={handlePaymentCancel}
         />
       )}
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }
