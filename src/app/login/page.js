@@ -51,26 +51,13 @@ export default function LoginPage() {
 
     try {
       if (requiresTwoFactor && form.twoFactorToken) {
-        // Handle 2FA verification
-        const response = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/users/verify-2fa', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: userId,
-            twoFactorToken: form.twoFactorToken
-          })
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          // Use the auth context to properly update the user data after 2FA completion
-          updateUser(result.user);
+        // Handle 2FA verification - call login again with the 2FA token
+        const loginResult = await login(form.email, form.password, rememberMe, form.twoFactorToken);
+        
+        if (loginResult.success) {
           router.push('/dashboard');
         } else {
-          setLocalError(result.message || '2FA verification failed.');
+          setLocalError(loginResult.message || '2FA verification failed.');
         }
       } else {
         // Regular login

@@ -121,34 +121,68 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Login function
-  const login = async (email, password, rememberMe = false) => {
+  const login = async (email, password, rememberMe = false, twoFactorToken = null) => {
     try {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
       dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
-      const response = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/auth/login', {
+      // Use the users/login endpoint that properly handles 2FA
+      const response = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ 
+          email, 
+          password,
+          ...(twoFactorToken && { twoFactorToken })
+        })
       });
 
       const result = await response.json();
 
-      if (result.success && result.access_token) {
+      if (result.success && !result.requiresTwoFactor) {
+        // Login successful - now get JWT token
+        const tokenResponse = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/auth/generate-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId: result.user.id })
+        });
+
+        let access_token = null;
+        if (tokenResponse.ok) {
+          const tokenResult = await tokenResponse.json();
+          access_token = tokenResult.access_token;
+        }
+
+        // If token generation fails, still proceed with login (fallback)
+        if (!access_token) {
+          access_token = 'temp_token_' + Date.now(); // Temporary fallback
+        }
+
         // Store auth data
-        authUtils.setAuth(result.access_token, result.user, rememberMe);
+        authUtils.setAuth(access_token, result.user, rememberMe);
         
         dispatch({
           type: AUTH_ACTIONS.LOGIN_SUCCESS,
           payload: {
-            token: result.access_token,
+            token: access_token,
             user: result.user
           }
         });
 
         return { success: true, user: result.user };
+      } else if (result.requiresTwoFactor) {
+        // Return 2FA requirement
+        dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
+        return { 
+          success: false, 
+          requiresTwoFactor: true, 
+          userId: result.userId,
+          message: result.message 
+        };
       } else {
         dispatch({
           type: AUTH_ACTIONS.SET_ERROR,

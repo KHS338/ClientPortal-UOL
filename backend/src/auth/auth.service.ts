@@ -29,6 +29,16 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Check if 2FA is enabled - if so, don't issue token immediately
+    if (user.twoFactorEnabled) {
+      return {
+        success: false,
+        requiresTwoFactor: true,
+        userId: user.id,
+        message: 'Two-factor authentication required'
+      };
+    }
+
     // Update last login
     await this.usersService.updateLastLogin(user.id);
 
@@ -74,6 +84,19 @@ export class AuthService {
         isActive: user.isActive,
         twoFactorEnabled: user.twoFactorEnabled
       }
+    };
+  }
+
+  async generateTokenForUser(user: any) {
+    const payload: JwtPayload = { 
+      sub: user.id, 
+      email: user.email,
+      companymail: user.companymail 
+    };
+
+    return {
+      success: true,
+      access_token: this.jwtService.sign(payload),
     };
   }
 }
