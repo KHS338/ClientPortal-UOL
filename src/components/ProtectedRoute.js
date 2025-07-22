@@ -9,41 +9,49 @@ const ProtectedRoute = ({ children }) => {
   const router = useRouter();
 
   useEffect(() => {
+    console.log('ProtectedRoute - Auth state:', { isAuthenticated, isLoading, hasUser: !!user });
+    
     if (!isLoading && !isAuthenticated) {
+      console.log('ProtectedRoute - User not authenticated, redirecting to login');
       // Clear any existing user data from localStorage
       localStorage.removeItem('user');
       localStorage.removeItem('userSubscription');
       
       // Redirect to login page
-      router.push('/login');
+      router.replace('/login');
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, router, user]);
 
-  // Show loading spinner while checking authentication
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Verifying authentication...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Don't render children if not authenticated
+  // NEVER render children if not authenticated, regardless of loading state
   if (!isAuthenticated) {
+    const message = isLoading ? 'Verifying authentication...' : 'Redirecting to login...';
+    const borderColor = isLoading ? 'border-green-500' : 'border-red-500';
+    
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Redirecting to login...</p>
+          <div className={`w-16 h-16 border-4 ${borderColor} border-t-transparent rounded-full animate-spin mx-auto mb-4`}></div>
+          <p className="text-gray-600">{message}</p>
         </div>
       </div>
     );
   }
 
-  // Render children if authenticated
+  // Additional check for user data
+  if (!user) {
+    console.log('ProtectedRoute - No user data found, showing loading');
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading user data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Render children only if fully authenticated with user data
+  console.log('ProtectedRoute - Rendering protected content');
   return children;
 };
 

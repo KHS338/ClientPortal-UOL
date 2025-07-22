@@ -29,12 +29,6 @@ export default function CVSourcingPage() {
 
   // Fetch CV sourcing roles from backend
   const fetchCvSourcingRoles = async () => {
-    if (!user || !isAuthenticated) {
-      setError('User not authenticated')
-      setIsLoading(false)
-      return
-    }
-
     setIsLoading(true)
     setError(null)
     
@@ -84,12 +78,15 @@ export default function CVSourcingPage() {
     }
   }
 
-  // Load data on component mount, but only when user is authenticated
+  // Load data on component mount, ProtectedRoute ensures authentication
   useEffect(() => {
-    if (isAuthenticated && user && !authLoading) {
+    if (user && !authLoading) {
       fetchCvSourcingRoles()
+    } else if (!authLoading) {
+      // If no user after auth loading is complete, set loading to false
+      setIsLoading(false)
     }
-  }, [isAuthenticated, user, authLoading])
+  }, [user, authLoading])
 
   // Handle form success (create/update)
   const handleFormSuccess = (message) => {
