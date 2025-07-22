@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }) => {
         
         // Then fetch fresh user data to get updated 2FA status
         try {
-          const response = await authUtils.fetchWithAuth('http://localhost:3001/auth/profile');
+          const response = await authUtils.fetchWithAuth('https://8w2mk49p-3001.inc1.devtunnels.ms/auth/profile');
           const result = await response.json();
           
           if (result.success) {
@@ -126,7 +126,7 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
       dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
-      const response = await fetch('http://localhost:3001/auth/login', {
+      const response = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -169,7 +169,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       // Call backend logout endpoint (optional)
-      await authUtils.fetchWithAuth('http://localhost:3001/auth/logout', {
+      await authUtils.fetchWithAuth('https://8w2mk49p-3001.inc1.devtunnels.ms/auth/logout', {
         method: 'POST'
       });
     } catch (error) {
@@ -184,7 +184,7 @@ export const AuthProvider = ({ children }) => {
   // Get user profile from backend
   const fetchProfile = async () => {
     try {
-      const response = await authUtils.fetchWithAuth('http://localhost:3001/auth/profile');
+      const response = await authUtils.fetchWithAuth('https://8w2mk49p-3001.inc1.devtunnels.ms/auth/profile');
       const result = await response.json();
       
       if (result.success) {

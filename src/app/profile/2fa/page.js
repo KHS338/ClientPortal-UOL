@@ -35,7 +35,7 @@ export default function TwoFactorAuthSettings() {
     setError('');
     
     try {
-      const response = await fetch('http://localhost:3001/users/2fa/setup', {
+      const response = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/users/2fa/setup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ export default function TwoFactorAuthSettings() {
     setError('');
     
     try {
-      const response = await fetch('http://localhost:3001/users/2fa/enable', {
+      const response = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/users/2fa/enable', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ export default function TwoFactorAuthSettings() {
     setError('');
     
     try {
-      const response = await fetch('http://localhost:3001/users/2fa/disable', {
+      const response = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/users/2fa/disable', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
