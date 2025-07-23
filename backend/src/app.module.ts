@@ -10,6 +10,7 @@ import { PrequalificationModule } from './prequalification/prequalification.modu
 import { DirectModule } from './direct/direct.module';
 import { LeadGenerationIndustryModule } from './lead-generation-industry/lead-generation-industry.module';
 import { LeadGenerationJobModule } from './lead-generation-job/lead-generation-job.module';
+import { SubscriptionModule } from './subscriptions/subscription.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { LeadGenerationJobModule } from './lead-generation-job/lead-generation-j
     DirectModule, // Added DirectModule import
     LeadGenerationIndustryModule, // Added LeadGenerationIndustryModule import
     LeadGenerationJobModule, // Added LeadGenerationJobModule import
+    SubscriptionModule, // Added SubscriptionModule import
   ],
 })
 export class AppModule {}

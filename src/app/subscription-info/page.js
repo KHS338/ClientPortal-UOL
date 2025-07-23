@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { AlertDialog, Toast } from "@/components/ui/alert-dialog";
 import StripePayment from "@/components/StripePayment";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { authUtils } from "@/lib/auth";
 
 export default function SubscriptionInfoPage() {
   const [billingCycle, setBillingCycle] = useState("monthly");
@@ -14,6 +15,10 @@ export default function SubscriptionInfoPage() {
   const [currentService, setCurrentService] = useState("");
   const [currentBillingCycle, setCurrentBillingCycle] = useState("monthly");
   const [subscriptionData, setSubscriptionData] = useState(null);
+  const [billingOptions, setBillingOptions] = useState([]);
+  const [isLoadingPlans, setIsLoadingPlans] = useState(true);
+  const [userCredits, setUserCredits] = useState(null);
+  const [totalRemainingCredits, setTotalRemainingCredits] = useState(0);
   
   // Payment modal states
   const [showPayment, setShowPayment] = useState(false);
@@ -24,23 +29,136 @@ export default function SubscriptionInfoPage() {
   const [selectedService, setSelectedService] = useState("");
   const [creditsCount, setCreditsCount] = useState(1);
   
-  // Load subscription data from localStorage on component mount
+  // Load subscription data and plans from API
   useEffect(() => {
-    const savedSubscription = localStorage.getItem('userSubscription');
-    if (savedSubscription) {
-      const data = JSON.parse(savedSubscription);
-      setSubscriptionData(data);
-      setCurrentService(data.service);
-      setCurrentBillingCycle(data.billingCycle);
-      setCurrentPlan(data.planKey);
-      setBillingCycle(data.billingCycle);
-    } else {
-      // Fallback to default values if no subscription found
-      setCurrentService("No Active Subscription");
-      setCurrentBillingCycle("monthly");
-      setCurrentPlan("");
-    }
+    const loadData = async () => {
+      // Load user subscription data from localStorage
+      const savedSubscription = localStorage.getItem('userSubscription');
+      if (savedSubscription) {
+        const data = JSON.parse(savedSubscription);
+        setSubscriptionData(data);
+        setCurrentService(data.service);
+        setCurrentBillingCycle(data.billingCycle);
+        setCurrentPlan(data.planKey);
+        setBillingCycle(data.billingCycle);
+      } else {
+        // Fallback to default values if no subscription found
+        setCurrentService("No Active Subscription");
+        setCurrentBillingCycle("monthly");
+        setCurrentPlan("");
+      }
+
+      // Load subscription plans from API
+      try {
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const response = await fetch(`${apiBaseUrl}/subscriptions`);
+        const result = await response.json();
+        
+        if (result.success) {
+          setBillingOptions(result.data);
+        } else {
+          console.error('Failed to load subscription plans:', result.message);
+          // Fallback to hardcoded data if API fails
+          setBillingOptions(getDefaultSubscriptions());
+        }
+      } catch (error) {
+        console.error('Error loading subscription plans:', error);
+        // Fallback to hardcoded data if API fails
+        setBillingOptions(getDefaultSubscriptions());
+      }
+
+      // Load user subscription and credits from user_subscription table
+      try {
+        const userId = 1; // TODO: Get from auth context
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const subscriptionResponse = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/user/${userId}/summary`);
+        const subscriptionResult = await subscriptionResponse.json();
+        
+        if (subscriptionResult && subscriptionResult.activeSubscription) {
+          setUserCredits(subscriptionResult.subscriptionHistory || []);
+          setTotalRemainingCredits(subscriptionResult.totalRemainingCredits || 0);
+          
+          // Update current subscription info from active subscription
+          const activeSubscription = subscriptionResult.activeSubscription;
+          if (activeSubscription && activeSubscription.subscription) {
+            setCurrentService(activeSubscription.subscription.title);
+            setCurrentBillingCycle(activeSubscription.billingCycle);
+            setCurrentPlan(`${activeSubscription.subscription.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${activeSubscription.billingCycle}`);
+          }
+        } else {
+          console.log('No active subscription found for user');
+          setUserCredits([]);
+          setTotalRemainingCredits(0);
+        }
+      } catch (error) {
+        console.error('Error loading user subscription data:', error);
+        setUserCredits([]);
+        setTotalRemainingCredits(0);
+      } finally {
+        setIsLoadingPlans(false);
+      }
+    };
+
+    loadData();
   }, []);
+
+  // Fallback subscription data (same as before)
+  const getDefaultSubscriptions = () => [
+    {
+      title: "CV Sourcing",
+      monthly: { price: "$19/mo", key: "cv-sourcing-monthly", credits: 30 },
+      annual: { price: "$190/yr", key: "cv-sourcing-annual", savings: "Save $38", credits: 360 },
+      adhoc: { price: "£50/credit", key: "cv-sourcing-adhoc" },
+      creditPrice: 50,
+      features: ["Basic CV Collection", "Standard Filtering", "Email Support", "Monthly Reports"],
+      description: "Essential CV sourcing and basic candidate filtering"
+    },
+    {
+      title: "Prequalification",
+      monthly: { price: "$39/mo", key: "prequalification-monthly", credits: 30 },
+      annual: { price: "$390/yr", key: "prequalification-annual", savings: "Save $78", credits: 360 },
+      adhoc: { price: "£70/credit", key: "prequalification-adhoc" },
+      creditPrice: 70,
+      features: ["Advanced CV Sourcing", "Skill Assessment", "Video Interviews", "Priority Support", "Weekly Reports"],
+      description: "Comprehensive candidate prequalification and assessment"
+    },
+    {
+      title: "360/Direct",
+      monthly: { price: "$69/mo", key: "360-direct-monthly", credits: 30 },
+      annual: { price: "$690/yr", key: "360-direct-annual", savings: "Save $138", credits: 360 },
+      adhoc: { price: "£90/credit", key: "360-direct-adhoc" },
+      creditPrice: 90,
+      features: ["Full 360° Assessment", "Direct Placement", "Custom Integrations", "Dedicated Support", "Real-time Analytics", "White-label Options"],
+      description: "Complete recruitment solution with direct placement services"
+    },
+    {
+      title: "Lead Generation",
+      monthly: { price: "$69/mo", key: "lead-generation-monthly", credits: 30 },
+      annual: { price: "$690/yr", key: "lead-generation-annual", savings: "Save $138", credits: 360 },
+      adhoc: { price: "£110/credit", key: "lead-generation-adhoc" },
+      creditPrice: 110,
+      features: ["Lead Identification", "Contact Discovery", "Email Campaigns", "CRM Integration", "Analytics Dashboard", "Lead Scoring"],
+      description: "Comprehensive lead generation and outreach solution"
+    },
+    {
+      title: "VA",
+      monthly: { price: "$69/mo", key: "va-monthly", credits: 30 },
+      annual: { price: "$690/yr", key: "va-annual", savings: "Save $138", credits: 360 },
+      adhoc: { price: "£130/credit", key: "va-adhoc" },
+      creditPrice: 130,
+      features: ["Full 360° Assessment", "Direct Placement", "Custom Integrations", "Dedicated Support", "Real-time Analytics", "White-label Options"],
+      description: "Complete recruitment solution with direct placement services"
+    },
+    {
+      title: "Enterprise",
+      isEnterprise: true,
+      monthly: { price: "Get Quote", key: "enterprise-monthly" },
+      annual: { price: "Get Quote", key: "enterprise-annual" },
+      creditPrice: 0,
+      features: ["Unlimited Everything", "White-label Solution", "Custom Development", "24/7 Priority Support", "Dedicated Account Manager", "SLA Guarantee", "Custom Integrations", "On-premise Deployment"],
+      description: "Fully customizable enterprise solution with dedicated support"
+    }
+  ];
   
   // Alert states
   const [alertConfig, setAlertConfig] = useState({
@@ -117,7 +235,10 @@ export default function SubscriptionInfoPage() {
       return;
     }
 
-    const totalPrice = creditsCount * 50;
+    // Get the credit price for the selected service
+    const service = billingOptions.find(s => s.title === selectedService);
+    const creditPrice = parseFloat(service?.creditPrice || '50');
+    const totalPrice = creditsCount * creditPrice;
     
     setIsProcessing(true);
     setTimeout(() => {
@@ -127,13 +248,14 @@ export default function SubscriptionInfoPage() {
         billingCycle: "adhoc",
         price: `£${totalPrice}`, // Pass as string for Stripe compatibility
         credits: creditsCount,
+        creditPrice: creditPrice,
         description: `${creditsCount} credit${creditsCount > 1 ? 's' : ''} for ${selectedService}`
       });
       setShowPayment(true);
     }, 1000);
   };
 
-  const completePlanChange = (serviceTitle, cycle, price, paymentResult) => {
+  const completePlanChange = async (serviceTitle, cycle, price, paymentResult) => {
     // Calculate next payment date based on new billing cycle
     const getNextPaymentDate = (billingCycle) => {
       const now = new Date();
@@ -150,6 +272,90 @@ export default function SubscriptionInfoPage() {
         day: 'numeric' 
       });
     };
+
+    try {
+      // Create user subscription entry in database
+      const userId = 1; // TODO: Get from auth context
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      
+      // Find the subscription ID from the service title
+      const subscription = billingOptions.find(s => s.title === serviceTitle);
+      if (!subscription) {
+        console.error('Subscription not found for title:', serviceTitle);
+        console.error('Available subscriptions:', billingOptions);
+        throw new Error('Subscription not found');
+      }
+
+      if (!subscription.id) {
+        console.error('Subscription found but has no ID:', subscription);
+        throw new Error('Subscription ID is missing');
+      }
+
+      console.log('Found subscription:', subscription);
+
+      // Determine credits based on billing cycle
+      let totalCredits = 0;
+      let paidAmount = 0;
+      
+      if (cycle === 'monthly') {
+        totalCredits = subscription.monthlyCredits || 30;
+        paidAmount = parseFloat(subscription.monthlyPrice || '0');
+      } else if (cycle === 'annual') {
+        totalCredits = subscription.annualCredits || 360;
+        paidAmount = parseFloat(subscription.annualPrice || '0');
+      } else if (cycle === 'adhoc') {
+        totalCredits = selectedPlan?.credits || 1;
+        paidAmount = (selectedPlan?.creditPrice ? parseFloat(selectedPlan.creditPrice) : parseFloat(subscription.creditPrice || '0')) * totalCredits;
+      }
+
+      const userSubscriptionData = {
+        userId: userId,
+        subscriptionId: subscription.id,
+        billingCycle: cycle,
+        paidAmount: paidAmount,
+        currency: 'GBP',
+        totalCredits: totalCredits,
+        startDate: new Date().toISOString().split('T')[0], // Current date in YYYY-MM-DD format
+        paymentIntentId: paymentResult?.paymentIntentId || null,
+        status: 'active'
+      };
+
+      console.log('Creating user subscription with data:', userSubscriptionData);
+
+      const response = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userSubscriptionData)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server response:', response.status, errorText);
+        throw new Error(`Failed to create user subscription: ${response.status} ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log('User subscription created:', result);
+
+      // Reload credits data
+      const subscriptionResponse = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/user/${userId}/summary`);
+      const subscriptionResult = await subscriptionResponse.json();
+      
+      if (subscriptionResult && subscriptionResult.activeSubscription) {
+        setUserCredits(subscriptionResult.subscriptionHistory || []);
+        setTotalRemainingCredits(subscriptionResult.totalRemainingCredits || 0);
+      }
+
+    } catch (error) {
+      console.error('Error creating user subscription:', error);
+      setToast({
+        isOpen: true,
+        message: 'Subscription created but there was an error saving to database: ' + error.message,
+        type: "warning"
+      });
+    }
 
     const planKey = `${serviceTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${cycle}`;
     
@@ -229,56 +435,30 @@ export default function SubscriptionInfoPage() {
     });
   };
 
-  const billingOptions = [
-    {
-      title: "CV Sourcing",
-      monthly: { price: "$19/mo", key: "cv-sourcing-monthly" },
-      annual: { price: "$190/yr", key: "cv-sourcing-annual", savings: "Save $38" },
-      adhoc: { price: "£50/credit", key: "cv-sourcing-adhoc" },
-      features: ["Basic CV Collection", "Standard Filtering", "Email Support", "Monthly Reports"],
-      description: "Essential CV sourcing and basic candidate filtering"
-    },
-    {
-      title: "Prequalification",
-      monthly: { price: "$39/mo", key: "prequalification-monthly" },
-      annual: { price: "$390/yr", key: "prequalification-annual", savings: "Save $78" },
-      adhoc: { price: "£50/credit", key: "prequalification-adhoc" },
-      features: ["Advanced CV Sourcing", "Skill Assessment", "Video Interviews", "Priority Support", "Weekly Reports"],
-      description: "Comprehensive candidate prequalification and assessment"
-    },
-    {
-      title: "360/Direct",
-      monthly: { price: "$69/mo", key: "360-direct-monthly" },
-      annual: { price: "$690/yr", key: "360-direct-annual", savings: "Save $138" },
-      adhoc: { price: "£50/credit", key: "360-direct-adhoc" },
-      features: ["Full 360° Assessment", "Direct Placement", "Custom Integrations", "Dedicated Support", "Real-time Analytics", "White-label Options"],
-      description: "Complete recruitment solution with direct placement services"
-    },
-    {
-      title: "VA",
-      monthly: { price: "$69/mo", key: "va-monthly" },
-      annual: { price: "$690/yr", key: "va-annual", savings: "Save $138" },
-      adhoc: { price: "£50/credit", key: "va-adhoc" },
-      features: ["Full 360° Assessment", "Direct Placement", "Custom Integrations", "Dedicated Support", "Real-time Analytics", "White-label Options"],
-      description: "Complete recruitment solution with direct placement services"
-    },
-    {
-      title: "Lead Generation",
-      monthly: { price: "$69/mo", key: "lead-generation-monthly" },
-      annual: { price: "$690/yr", key: "lead-generation-annual", savings: "Save $138" },
-      adhoc: { price: "£50/credit", key: "lead-generation-adhoc" },
-      features: ["Lead Identification", "Contact Discovery", "Email Campaigns", "CRM Integration", "Analytics Dashboard", "Lead Scoring"],
-      description: "Comprehensive lead generation and outreach solution"
-    },
-    {
-      title: "Enterprise",
-      isEnterprise: true,
-      monthly: { price: "Get Quote", key: "enterprise-monthly" },
-      annual: { price: "Get Quote", key: "enterprise-annual" },
-      features: ["Unlimited Everything", "White-label Solution", "Custom Development", "24/7 Priority Support", "Dedicated Account Manager", "SLA Guarantee", "Custom Integrations", "On-premise Deployment"],
-      description: "Fully customizable enterprise solution with dedicated support"
-    }
-  ];
+  // Show loading state while plans are being fetched
+  if (isLoadingPlans) {
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50">
+          <div className="max-w-7xl mx-auto p-6 lg:p-8">
+            <div className="space-y-8">
+              <div className="text-center mb-8">
+                <h1 className="text-4xl font-bold text-gray-800 mb-2">
+                  Subscription Information
+                </h1>
+                <p className="text-lg text-gray-600">
+                  Loading subscription plans...
+                </p>
+              </div>
+              <div className="flex justify-center items-center py-20">
+                <div className="w-8 h-8 border-4 border-[#19AF1A] border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute>
@@ -293,11 +473,49 @@ export default function SubscriptionInfoPage() {
             <p className="text-lg text-gray-600">
               Manage your subscription plans and billing preferences
             </p>
+            
+            {/* Temporary seed button for development */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mt-4">
+                <button
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/subscriptions/seed', { method: 'POST' });
+                      const result = await response.json();
+                      if (result.success) {
+                        setToast({
+                          isOpen: true,
+                          message: "Subscription data seeded successfully!",
+                          type: "success"
+                        });
+                        // Reload the page to show seeded data
+                        window.location.reload();
+                      } else {
+                        setToast({
+                          isOpen: true,
+                          message: "Failed to seed data: " + result.message,
+                          type: "error"
+                        });
+                      }
+                    } catch (error) {
+                      setToast({
+                        isOpen: true,
+                        message: "Error seeding data: " + error.message,
+                        type: "error"
+                      });
+                    }
+                  }}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg text-sm hover:bg-gray-700"
+                >
+                  🌱 Seed Subscription Data (Dev Only)
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Current Subscription Overview - Only show if user has an active subscription */}
-          {currentService && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {currentService && currentService !== "No Active Subscription" && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               <Card className="p-6 bg-gradient-to-br from-[#1a84de] to-[#06398e] text-white">
                 <div className="flex items-center gap-3 mb-2">
                   <FiCheckCircle size={24} />
@@ -330,11 +548,24 @@ export default function SubscriptionInfoPage() {
                 </p>
                 <p className="text-gray-600 text-sm">Auto-renewal enabled</p>
               </Card>
+
+              <Card className="p-6 bg-gradient-to-br from-[#24AC4A] to-[#19AF1A] text-white">
+                <div className="flex items-center gap-3 mb-2">
+                  <FiCheckCircle size={24} />
+                  <h3 className="text-lg font-semibold">Credits</h3>
+                </div>
+                <p className="text-2xl font-bold">{totalRemainingCredits}</p>
+                <p className="text-green-100 text-sm">
+                  {userCredits && userCredits.length > 0 ? 
+                    `${userCredits.filter(sub => sub.status === 'active').length} active subscription${userCredits.filter(sub => sub.status === 'active').length !== 1 ? 's' : ''}` : 
+                    "No active subscriptions"}
+                </p>
+              </Card>
             </div>
           )}
 
           {/* No Subscription Message - Only show if user has no active subscription */}
-          {!currentService && (
+          {(!currentService || currentService === "No Active Subscription") && (
             <div className="mb-8">
               <Card className="p-8 bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-dashed border-gray-300">
                 <div className="text-center">
@@ -345,9 +576,51 @@ export default function SubscriptionInfoPage() {
                   <p className="text-gray-600">
                     You currently don&apos;t have an active subscription. Choose a plan below to get started!
                   </p>
+                  {totalRemainingCredits > 0 && (
+                    <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-green-800 font-medium">
+                        You have {totalRemainingCredits} credits available for use!
+                      </p>
+                    </div>
+                  )}
                 </div>
               </Card>
             </div>
+          )}
+
+          {/* Credits Breakdown - Show if user has any subscriptions */}
+          {userCredits && userCredits.length > 0 && (
+            <Card className="p-6 mb-8 bg-white/90 backdrop-blur-sm shadow-lg border-0">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-3">
+                <FiCreditCard className="text-[#0958d9]" />
+                Credits Breakdown
+              </h3>
+              <div className="space-y-4">
+                {userCredits.map((subscription, index) => (
+                  <div key={subscription.id || index} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                    <div>
+                      <h4 className="font-semibold text-gray-800">
+                        {subscription.subscription?.title || 'Unknown Service'}
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        {subscription.billingCycle} • Status: {subscription.status}
+                      </p>
+                      {subscription.endDate && (
+                        <p className="text-xs text-gray-500">
+                          Expires: {new Date(subscription.endDate).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-gray-800">
+                        {subscription.remainingCredits} / {subscription.totalCredits}
+                      </p>
+                      <p className="text-sm text-gray-600">Credits</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
           )}
 
           {/* Subscription Plans */}
@@ -480,7 +753,7 @@ export default function SubscriptionInfoPage() {
                 <div className="bg-white rounded-2xl shadow-xl border border-[#0958d9]/20 p-8">
                   <div className="text-center mb-8">
                     <h4 className="text-2xl font-bold text-gray-800 mb-2">Adhoc Credit Purchase</h4>
-                    <p className="text-gray-600">Pay as you go - £50 per credit</p>
+                    <p className="text-gray-600">Pay as you go - prices vary by service</p>
                   </div>
 
                   <div className="space-y-6">
@@ -522,11 +795,16 @@ export default function SubscriptionInfoPage() {
                     <div className="bg-gray-50 rounded-lg p-6 text-center">
                       <div className="text-sm text-gray-600 mb-2">Total Amount</div>
                       <div className="text-3xl font-bold text-[#0958d9]">
-                        £{creditsCount * 50}
+                        £{creditsCount * parseFloat(billingOptions.find(s => s.title === selectedService)?.creditPrice || '50')}
                       </div>
                       <div className="text-sm text-gray-500 mt-1">
-                        {creditsCount} credit{creditsCount > 1 ? 's' : ''} × £50 each
+                        {creditsCount} credit{creditsCount > 1 ? 's' : ''} × £{parseFloat(billingOptions.find(s => s.title === selectedService)?.creditPrice || '50')} each
                       </div>
+                      {selectedService && (
+                        <div className="text-xs text-gray-400 mt-2">
+                          Service: {selectedService}
+                        </div>
+                      )}
                     </div>
 
                     {/* Selected Service Info */}
@@ -562,7 +840,7 @@ export default function SubscriptionInfoPage() {
                           Processing...
                         </div>
                       ) : (
-                        `Purchase ${creditsCount} Credit${creditsCount > 1 ? 's' : ''} for £${creditsCount * 50}`
+                        `Purchase ${creditsCount} Credit${creditsCount > 1 ? 's' : ''} for £${creditsCount * parseFloat(billingOptions.find(s => s.title === selectedService)?.creditPrice || '50')}`
                       )}
                     </Button>
                   </div>
@@ -611,6 +889,11 @@ export default function SubscriptionInfoPage() {
                             )}
                             {billingCycle === "adhoc" && (
                               <p className="text-sm text-gray-500">Pay per use</p>
+                            )}
+                            {(billingCycle === "monthly" || billingCycle === "annual") && currentPlanPrice.credits && (
+                              <p className="text-sm text-green-600 font-medium">
+                                {currentPlanPrice.credits} credits included
+                              </p>
                             )}
                           </div>
 

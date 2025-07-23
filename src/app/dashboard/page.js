@@ -5,6 +5,7 @@ import { FiUser, FiDollarSign, FiCalendar, FiBriefcase, FiClock, FiCheckCircle, 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { authUtils } from "@/lib/auth";
 
 export default function DashboardPage() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -15,6 +16,8 @@ export default function DashboardPage() {
     planPrice: "N/A"
   });
   const [userSubscription, setUserSubscription] = useState(null);
+  const [totalRemainingCredits, setTotalRemainingCredits] = useState(0);
+  const [userCredits, setUserCredits] = useState([]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -26,7 +29,7 @@ export default function DashboardPage() {
 
   // Load subscription data from localStorage
   useEffect(() => {
-    const loadSubscription = () => {
+    const loadSubscription = async () => {
       const savedSubscription = localStorage.getItem('userSubscription');
       if (savedSubscription) {
         const data = JSON.parse(savedSubscription);
@@ -49,6 +52,27 @@ export default function DashboardPage() {
           nextPayment: "N/A",
           planPrice: "N/A"
         });
+      }
+
+      // Load user subscription and credits from user_subscription table
+      try {
+        const userId = 1; // TODO: Get from auth context
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const subscriptionResponse = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/user/${userId}/summary`);
+        const subscriptionResult = await subscriptionResponse.json();
+        
+        if (subscriptionResult && subscriptionResult.activeSubscription) {
+          setUserCredits(subscriptionResult.subscriptionHistory || []);
+          setTotalRemainingCredits(subscriptionResult.totalRemainingCredits || 0);
+        } else {
+          console.log('No active subscription found for user');
+          setUserCredits([]);
+          setTotalRemainingCredits(0);
+        }
+      } catch (error) {
+        console.error('Error loading user subscription data:', error);
+        setUserCredits([]);
+        setTotalRemainingCredits(0);
       }
     };
 
@@ -185,6 +209,38 @@ export default function DashboardPage() {
               </div>
             </div>
           </Card>
+
+          {/* Credits Overview */}
+          {userCredits.length > 0 && (
+            <Card className="p-6 bg-gradient-to-br from-[#24AC4A] to-[#19AF1A] text-white shadow-xl border-0">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold flex items-center gap-3">
+                  <FiCheckCircle size={24} />
+                  Credits Overview
+                </h3>
+                <Button 
+                  className="bg-white text-[#24AC4A] hover:bg-gray-100"
+                  onClick={() => window.location.href = '/subscription-info'}
+                >
+                  View Details
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <p className="text-green-100 text-sm">Total Available</p>
+                  <p className="text-2xl font-bold">{totalRemainingCredits}</p>
+                </div>
+                <div>
+                  <p className="text-green-100 text-sm">Active Subscriptions</p>
+                  <p className="text-2xl font-bold">{userCredits.filter(sub => sub.status === 'active').length}</p>
+                </div>
+                <div>
+                  <p className="text-green-100 text-sm">Total Subscriptions</p>
+                  <p className="text-2xl font-bold">{userCredits.length}</p>
+                </div>
+              </div>
+            </Card>
+          )}
 
           
 
