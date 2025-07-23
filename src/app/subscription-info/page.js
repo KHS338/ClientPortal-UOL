@@ -20,6 +20,10 @@ export default function SubscriptionInfoPage() {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   
+  // Adhoc states
+  const [selectedService, setSelectedService] = useState("");
+  const [creditsCount, setCreditsCount] = useState(1);
+  
   // Load subscription data from localStorage on component mount
   useEffect(() => {
     const savedSubscription = localStorage.getItem('userSubscription');
@@ -94,6 +98,41 @@ export default function SubscriptionInfoPage() {
     setSelectedPlan(null);
   };
 
+  const handleAdhocPayment = () => {
+    if (!selectedService) {
+      setToast({
+        isOpen: true,
+        message: "Please select a subscription type.",
+        type: "error"
+      });
+      return;
+    }
+
+    if (creditsCount < 1) {
+      setToast({
+        isOpen: true,
+        message: "Please enter a valid number of credits.",
+        type: "error"
+      });
+      return;
+    }
+
+    const totalPrice = creditsCount * 50;
+    
+    setIsProcessing(true);
+    setTimeout(() => {
+      setIsProcessing(false);
+      setSelectedPlan({
+        title: selectedService,
+        billingCycle: "adhoc",
+        price: `£${totalPrice}`, // Pass as string for Stripe compatibility
+        credits: creditsCount,
+        description: `${creditsCount} credit${creditsCount > 1 ? 's' : ''} for ${selectedService}`
+      });
+      setShowPayment(true);
+    }, 1000);
+  };
+
   const completePlanChange = (serviceTitle, cycle, price, paymentResult) => {
     // Calculate next payment date based on new billing cycle
     const getNextPaymentDate = (billingCycle) => {
@@ -123,10 +162,11 @@ export default function SubscriptionInfoPage() {
     const updatedSubscriptionData = {
       service: serviceTitle,
       billingCycle: cycle,
-      price: price,
+      price: price, // Price is now always a string
       subscribedDate: subscriptionData?.subscribedDate || new Date().toISOString(),
       nextPayment: getNextPaymentDate(cycle),
       planKey: planKey,
+      credits: selectedPlan?.credits || null, // Store credits for adhoc purchases
       paymentInfo: paymentResult ? {
         paymentIntentId: paymentResult.paymentIntentId,
         paymentMethod: paymentResult.paymentMethod,
@@ -194,6 +234,7 @@ export default function SubscriptionInfoPage() {
       title: "CV Sourcing",
       monthly: { price: "$19/mo", key: "cv-sourcing-monthly" },
       annual: { price: "$190/yr", key: "cv-sourcing-annual", savings: "Save $38" },
+      adhoc: { price: "£50/credit", key: "cv-sourcing-adhoc" },
       features: ["Basic CV Collection", "Standard Filtering", "Email Support", "Monthly Reports"],
       description: "Essential CV sourcing and basic candidate filtering"
     },
@@ -201,6 +242,7 @@ export default function SubscriptionInfoPage() {
       title: "Prequalification",
       monthly: { price: "$39/mo", key: "prequalification-monthly" },
       annual: { price: "$390/yr", key: "prequalification-annual", savings: "Save $78" },
+      adhoc: { price: "£50/credit", key: "prequalification-adhoc" },
       features: ["Advanced CV Sourcing", "Skill Assessment", "Video Interviews", "Priority Support", "Weekly Reports"],
       description: "Comprehensive candidate prequalification and assessment"
     },
@@ -208,6 +250,7 @@ export default function SubscriptionInfoPage() {
       title: "360/Direct",
       monthly: { price: "$69/mo", key: "360-direct-monthly" },
       annual: { price: "$690/yr", key: "360-direct-annual", savings: "Save $138" },
+      adhoc: { price: "£50/credit", key: "360-direct-adhoc" },
       features: ["Full 360° Assessment", "Direct Placement", "Custom Integrations", "Dedicated Support", "Real-time Analytics", "White-label Options"],
       description: "Complete recruitment solution with direct placement services"
     },
@@ -215,6 +258,7 @@ export default function SubscriptionInfoPage() {
       title: "VA",
       monthly: { price: "$69/mo", key: "va-monthly" },
       annual: { price: "$690/yr", key: "va-annual", savings: "Save $138" },
+      adhoc: { price: "£50/credit", key: "va-adhoc" },
       features: ["Full 360° Assessment", "Direct Placement", "Custom Integrations", "Dedicated Support", "Real-time Analytics", "White-label Options"],
       description: "Complete recruitment solution with direct placement services"
     },
@@ -222,6 +266,7 @@ export default function SubscriptionInfoPage() {
       title: "Lead Generation",
       monthly: { price: "$69/mo", key: "lead-generation-monthly" },
       annual: { price: "$690/yr", key: "lead-generation-annual", savings: "Save $138" },
+      adhoc: { price: "£50/credit", key: "lead-generation-adhoc" },
       features: ["Lead Identification", "Contact Discovery", "Email Campaigns", "CRM Integration", "Analytics Dashboard", "Lead Scoring"],
       description: "Comprehensive lead generation and outreach solution"
     },
@@ -268,10 +313,10 @@ export default function SubscriptionInfoPage() {
                   <h3 className="text-lg font-semibold text-gray-800">Billing Cycle</h3>
                 </div>
                 <p className="text-2xl font-bold text-gray-800">
-                  {currentBillingCycle === "monthly" ? "Monthly" : currentBillingCycle === "annual" ? "Annual" : "Enterprise"}
+                  {currentBillingCycle === "monthly" ? "Monthly" : currentBillingCycle === "annual" ? "Annual" : currentBillingCycle === "adhoc" ? "Adhoc" : "Enterprise"}
                 </p>
                 <p className="text-gray-600 text-sm">
-                  {currentBillingCycle === "monthly" ? "Billed monthly" : currentBillingCycle === "annual" ? "Billed annually" : "Custom billing"}
+                  {currentBillingCycle === "monthly" ? "Billed monthly" : currentBillingCycle === "annual" ? "Billed annually" : currentBillingCycle === "adhoc" ? "Pay per use" : "Custom billing"}
                 </p>
               </Card>
 
@@ -334,6 +379,16 @@ export default function SubscriptionInfoPage() {
                     }`}
                 >
                   Annual
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBillingCycle("adhoc")}
+                  className={`px-6 py-2 rounded-lg font-medium transition-all duration-300 ${billingCycle === "adhoc"
+                    ? "bg-[#0958d9] text-white shadow-md"
+                    : "text-gray-600 hover:text-gray-800"
+                    }`}
+                >
+                  Adhoc
                 </button>
                 <button
                   type="button"
@@ -419,11 +474,105 @@ export default function SubscriptionInfoPage() {
                   </div>
                 </div>
               </div>
+            ) : billingCycle === "adhoc" ? (
+              /* Adhoc Credit Purchase UI */
+              <div className="max-w-2xl mx-auto">
+                <div className="bg-white rounded-2xl shadow-xl border border-[#0958d9]/20 p-8">
+                  <div className="text-center mb-8">
+                    <h4 className="text-2xl font-bold text-gray-800 mb-2">Adhoc Credit Purchase</h4>
+                    <p className="text-gray-600">Pay as you go - £50 per credit</p>
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* Service Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Select Subscription Type
+                      </label>
+                      <select
+                        value={selectedService}
+                        onChange={(e) => setSelectedService(e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0958d9] focus:border-transparent transition-all duration-200"
+                      >
+                        <option value="">-- Select a service --</option>
+                        {billingOptions.filter(service => !service.isEnterprise).map((service) => (
+                          <option key={service.title} value={service.title}>
+                            {service.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Credits Count */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Number of Credits
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={creditsCount}
+                        onChange={(e) => setCreditsCount(Math.max(1, parseInt(e.target.value) || 1))}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0958d9] focus:border-transparent transition-all duration-200"
+                        placeholder="Enter number of credits"
+                      />
+                    </div>
+
+                    {/* Price Display */}
+                    <div className="bg-gray-50 rounded-lg p-6 text-center">
+                      <div className="text-sm text-gray-600 mb-2">Total Amount</div>
+                      <div className="text-3xl font-bold text-[#0958d9]">
+                        £{creditsCount * 50}
+                      </div>
+                      <div className="text-sm text-gray-500 mt-1">
+                        {creditsCount} credit{creditsCount > 1 ? 's' : ''} × £50 each
+                      </div>
+                    </div>
+
+                    {/* Selected Service Info */}
+                    {selectedService && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h5 className="font-semibold text-blue-900 mb-2">{selectedService}</h5>
+                        <p className="text-blue-700 text-sm">
+                          {billingOptions.find(s => s.title === selectedService)?.description}
+                        </p>
+                        <div className="mt-3">
+                          <div className="text-xs text-blue-600 font-medium mb-1">Features included:</div>
+                          <ul className="text-xs text-blue-700 space-y-1">
+                            {billingOptions.find(s => s.title === selectedService)?.features.slice(0, 3).map((feature, index) => (
+                              <li key={index} className="flex items-center gap-1">
+                                <FiCheckCircle size={12} className="text-blue-500" />
+                                {feature}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Purchase Button */}
+                    <Button
+                      onClick={handleAdhocPayment}
+                      disabled={!selectedService || creditsCount < 1 || isProcessing}
+                      className="w-full py-4 text-lg font-semibold bg-[#1a84de] hover:bg-[#24AC4A] text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isProcessing ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          Processing...
+                        </div>
+                      ) : (
+                        `Purchase ${creditsCount} Credit${creditsCount > 1 ? 's' : ''} for £${creditsCount * 50}`
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
             ) : (
               /* Regular Plans Display */
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 grid-rows-2">
                 {billingOptions.filter(service => !service.isEnterprise).map((service, index) => {
-                  const currentPlanPrice = billingCycle === "monthly" ? service.monthly : service.annual;
+                  const currentPlanPrice = billingCycle === "monthly" ? service.monthly : billingCycle === "annual" ? service.annual : service.adhoc;
                   const isCurrentPlan = currentPlan === currentPlanPrice.key;
 
                   return (
@@ -453,12 +602,15 @@ export default function SubscriptionInfoPage() {
                                 ? "text-[#0958d9]" 
                                 : "text-[#0958d9] group-hover:text-[#24AC4A]"
                             }`}>{currentPlanPrice.price}</p>
-                            {billingCycle === "annual" && service.annual.savings && (
+                            {billingCycle === "annual" && service.annual?.savings && (
                               <p className={`text-sm font-medium transition-colors duration-300 ${
                                 isCurrentPlan 
                                   ? "text-[#1a84de]" 
                                   : "text-[#1a84de] group-hover:text-[#24AC4A]"
                               }`}>{service.annual.savings}</p>
+                            )}
+                            {billingCycle === "adhoc" && (
+                              <p className="text-sm text-gray-500">Pay per use</p>
                             )}
                           </div>
 

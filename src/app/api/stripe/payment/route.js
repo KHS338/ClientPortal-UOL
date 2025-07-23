@@ -10,9 +10,18 @@ export async function POST(request) {
   try {
     const { planDetails, customerInfo, cardDetails } = await request.json();
 
-    // Extract price amount (remove $ and convert to cents)
-    const priceString = planDetails.price.replace(/[$,]/g, '');
+    // Extract price amount (remove $ or £ and convert to cents)
+    const priceString = planDetails.price.replace(/[$£,]/g, '');
     const amount = Math.round(parseFloat(priceString) * 100); // Convert to cents
+    
+    // Debug logging to help track price parsing
+    console.log('Original price:', planDetails.price);
+    console.log('Parsed price string:', priceString);
+    console.log('Final amount in cents:', amount);
+    
+    if (isNaN(amount)) {
+      throw new Error(`Invalid price format: ${planDetails.price}. Could not parse to a valid number.`);
+    }
 
     // Map card numbers to Stripe test payment method tokens
     const getTestPaymentMethod = (cardNumber) => {
