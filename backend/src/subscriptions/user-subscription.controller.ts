@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Query, ParseIntPipe, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query, ParseIntPipe, UseGuards, Request, Delete } from '@nestjs/common';
 import { UserSubscriptionService } from './user-subscription.service';
 import { CreateUserSubscriptionDto } from './dto/create-user-subscription.dto';
 import { UpdateUserSubscriptionDto } from './dto/update-user-subscription.dto';
@@ -29,6 +29,78 @@ export class UserSubscriptionController {
       console.error('Error in user subscription controller:', error);
       throw error;
     }
+  }
+
+  // Secure endpoints that use authenticated user's ID
+  @Get('my-subscriptions')
+  findMySubscriptions(@Request() req: any) {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new Error('User ID not found in authenticated request');
+    }
+    return this.userSubscriptionService.findByUserId(userId);
+  }
+
+  @Get('my-active-subscription')
+  findMyActiveSubscription(@Request() req: any) {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new Error('User ID not found in authenticated request');
+    }
+    return this.userSubscriptionService.findActiveByUserId(userId);
+  }
+
+  @Get('my-summary')
+  getMySubscriptionSummary(@Request() req: any) {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new Error('User ID not found in authenticated request');
+    }
+    return this.userSubscriptionService.getSubscriptionSummary(userId);
+  }
+
+  @Get('my-credits')
+  getMyTotalCredits(@Request() req: any) {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new Error('User ID not found in authenticated request');
+    }
+    return this.userSubscriptionService.getTotalRemainingCredits(userId);
+  }
+
+  @Post('use-my-credits')
+  useMyCredits(
+    @Request() req: any,
+    @Body() body: { creditsToUse: number }
+  ) {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new Error('User ID not found in authenticated request');
+    }
+    return this.userSubscriptionService.useCredits(userId, body.creditsToUse);
+  }
+
+  @Post('add-my-adhoc-credits')
+  addMyAdhocCredits(
+    @Request() req: any,
+    @Body() body: { 
+      subscriptionId: number;
+      credits: number;
+      paidAmount: number;
+      paymentIntentId: string;
+    }
+  ) {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new Error('User ID not found in authenticated request');
+    }
+    return this.userSubscriptionService.addAdhocCredits(
+      userId,
+      body.subscriptionId,
+      body.credits,
+      body.paidAmount,
+      body.paymentIntentId
+    );
   }
 
   @Get('user/:userId')
@@ -91,5 +163,14 @@ export class UserSubscriptionController {
   @Post('check-expired')
   checkExpiredSubscriptions() {
     return this.userSubscriptionService.checkExpiredSubscriptions();
+  }
+
+  @Delete('cancel')
+  cancelMySubscription(@Request() req: any) {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new Error('User ID not found in authenticated request');
+    }
+    return this.userSubscriptionService.cancelUserSubscription(userId);
   }
 }

@@ -87,7 +87,7 @@ export function AppSidebar() {
   const [mounted, setMounted] = useState(false)
   const [userSubscription, setUserSubscription] = useState(null)
   const router = useRouter()
-  const { logout } = useAuth()
+  const { user, logout, token } = useAuth()
 
   // Handle logout
   const handleLogout = async () => {
@@ -107,16 +107,39 @@ export function AppSidebar() {
     }
   }
 
-  // Load user subscription from localStorage
+  // Load user subscription from database
   useEffect(() => {
-    const loadSubscription = () => {
-      const savedSubscription = localStorage.getItem('userSubscription');
-      if (savedSubscription) {
-        const data = JSON.parse(savedSubscription);
-        console.log('Sidebar - Loaded subscription data:', data);
-        setUserSubscription(data.service);
-      } else {
-        console.log('Sidebar - No subscription data found');
+    const loadSubscription = async () => {
+      if (!token || !user?.id) {
+        console.log('Sidebar - No token or user, clearing subscription');
+        setUserSubscription(null);
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:3001/user-subscriptions/my-active-subscription', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Sidebar - Loaded subscription data from database:', data);
+          
+          if (data.subscription?.name) {
+            setUserSubscription(data.subscription.name);
+          } else {
+            setUserSubscription(null);
+          }
+        } else {
+          console.log('Sidebar - Failed to load subscription:', response.status);
+          setUserSubscription(null);
+        }
+      } catch (error) {
+        console.error('Sidebar - Error loading subscription:', error);
         setUserSubscription(null);
       }
     };
@@ -124,28 +147,18 @@ export function AppSidebar() {
     // Load initial subscription data
     loadSubscription();
 
-    // Listen for storage changes (when localStorage is updated from other tabs/components)
-    const handleStorageChange = (e) => {
-      if (e.key === 'userSubscription') {
-        console.log('Sidebar - Storage change detected for userSubscription');
-        loadSubscription();
-      }
-    };
-
-    // Listen for custom event (when localStorage is updated from same tab)
+    // Listen for custom event (when subscription is updated from other components)
     const handleSubscriptionUpdate = () => {
       console.log('Sidebar - Custom subscription update event detected');
       loadSubscription();
     };
 
-    window.addEventListener('storage', handleStorageChange);
     window.addEventListener('subscriptionUpdated', handleSubscriptionUpdate);
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('subscriptionUpdated', handleSubscriptionUpdate);
     };
-  }, []);
+  }, [token, user?.id]);
 
   // Ensure hydration consistency
   React.useEffect(() => {
