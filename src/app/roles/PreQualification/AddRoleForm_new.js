@@ -91,7 +91,7 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
       // If editing, use PUT request
       let response
       if (editingRole) {
-        response = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/prequalification/${editingRole.id}`, {
+        response = await fetch(`http://localhost:3001/prequalification/${editingRole.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -100,7 +100,7 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
         })
       } else {
         // Creating new role, use POST request
-        response = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/prequalification', {
+        response = await fetch('http://localhost:3001/prequalification', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

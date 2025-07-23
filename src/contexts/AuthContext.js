@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }) => {
         
         // Then fetch fresh user data to get updated 2FA status
         try {
-          const response = await authUtils.fetchWithAuth('https://8w2mk49p-3001.inc1.devtunnels.ms/auth/profile');
+          const response = await authUtils.fetchWithAuth('http://localhost:3001/auth/profile');
           const result = await response.json();
           
           if (result.success) {
@@ -127,7 +127,7 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
 
       // Use the users/login endpoint that properly handles 2FA
-      const response = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/users/login', {
+      const response = await fetch('http://localhost:3001/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -143,7 +143,7 @@ export const AuthProvider = ({ children }) => {
 
       if (result.success && !result.requiresTwoFactor) {
         // Login successful - now get JWT token
-        const tokenResponse = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/auth/generate-token', {
+        const tokenResponse = await fetch('http://localhost:3001/auth/generate-token', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -203,7 +203,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       // Call backend logout endpoint (optional)
-      await authUtils.fetchWithAuth('https://8w2mk49p-3001.inc1.devtunnels.ms/auth/logout', {
+      await authUtils.fetchWithAuth('http://localhost:3001/auth/logout', {
         method: 'POST'
       });
     } catch (error) {
@@ -218,7 +218,7 @@ export const AuthProvider = ({ children }) => {
   // Get user profile from backend
   const fetchProfile = async () => {
     try {
-      const response = await authUtils.fetchWithAuth('https://8w2mk49p-3001.inc1.devtunnels.ms/auth/profile');
+      const response = await authUtils.fetchWithAuth('http://localhost:3001/auth/profile');
       const result = await response.json();
       
       if (result.success) {

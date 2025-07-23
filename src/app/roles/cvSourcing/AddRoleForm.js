@@ -122,7 +122,7 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
       // If editing, use PUT request
       let response
       if (editingRole) {
-        response = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/cv-sourcing/${editingRole.id}`, {
+        response = await fetch(`http://localhost:3001/cv-sourcing/${editingRole.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -131,7 +131,7 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
         })
       } else {
         // Creating new role, use POST request
-        response = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/cv-sourcing', {
+        response = await fetch('http://localhost:3001/cv-sourcing', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

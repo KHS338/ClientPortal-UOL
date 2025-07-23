@@ -124,7 +124,7 @@ export default function ClientProfilePage({ initial = {} }) {
       // Password changes will be handled separately
 
       // Call the backend API to update user profile
-      const response = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/users/update-profile', {
+      const response = await fetch('http://localhost:3001/users/update-profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -193,7 +193,7 @@ export default function ClientProfilePage({ initial = {} }) {
     setMessage({ type: '', text: '' });
 
     try {
-      const response = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/users/change-password', {
+      const response = await fetch('http://localhost:3001/users/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
