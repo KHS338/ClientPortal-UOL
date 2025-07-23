@@ -15,6 +15,8 @@ import {
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useAuth } from "@/contexts/AuthContext"
+import { authUtils } from "@/lib/auth"
+import { getCurrentSubscription } from "@/lib/subscription"
 
 import {
   Sidebar,
@@ -107,16 +109,22 @@ export function AppSidebar() {
     }
   }
 
-  // Load user subscription from localStorage
+  // Load subscription data from backend (prioritize backend over localStorage)
   useEffect(() => {
-    const loadSubscription = () => {
-      const savedSubscription = localStorage.getItem('userSubscription');
-      if (savedSubscription) {
-        const data = JSON.parse(savedSubscription);
-        console.log('Sidebar - Loaded subscription data:', data);
-        setUserSubscription(data.service);
-      } else {
-        console.log('Sidebar - No subscription data found');
+    const loadSubscription = async () => {
+      try {
+        const userId = 1; // TODO: Get from auth context
+        const subscriptionData = await getCurrentSubscription(userId);
+        
+        if (subscriptionData) {
+          console.log('Sidebar - Loaded subscription from backend:', subscriptionData.service);
+          setUserSubscription(subscriptionData.service);
+        } else {
+          console.log('Sidebar - No active subscription found');
+          setUserSubscription(null);
+        }
+      } catch (error) {
+        console.error('Error loading subscription from backend:', error);
         setUserSubscription(null);
       }
     };
@@ -138,12 +146,20 @@ export function AppSidebar() {
       loadSubscription();
     };
 
+    // Listen for user logout event to reset subscription state
+    const handleUserLogout = () => {
+      console.log('Sidebar - User logout detected, clearing subscription state');
+      setUserSubscription(null);
+    };
+
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('subscriptionUpdated', handleSubscriptionUpdate);
+    window.addEventListener('userLoggedOut', handleUserLogout);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('subscriptionUpdated', handleSubscriptionUpdate);
+      window.removeEventListener('userLoggedOut', handleUserLogout);
     };
   }, []);
 

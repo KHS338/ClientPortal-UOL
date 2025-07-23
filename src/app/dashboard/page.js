@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { authUtils } from "@/lib/auth";
+import { getCurrentSubscription } from "@/lib/subscription";
 
 export default function DashboardPage() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -27,52 +28,55 @@ export default function DashboardPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Load subscription data from localStorage
+  // Load subscription data from backend (prioritize backend over localStorage)
   useEffect(() => {
     const loadSubscription = async () => {
-      const savedSubscription = localStorage.getItem('userSubscription');
-      if (savedSubscription) {
-        const data = JSON.parse(savedSubscription);
-        console.log('Dashboard - Loaded subscription data:', data);
-        setUserSubscription(data.service);
-        setSubscriptionInfo({
-          currentPlan: data.service,
-          billingCycle: data.billingCycle === 'monthly' ? 'Monthly' : 
-                       data.billingCycle === 'annual' ? 'Annual' : 
-                       data.billingCycle === 'enterprise' ? 'Enterprise' : 'Custom',
-          nextPayment: data.nextPayment,
-          planPrice: data.price
-        });
-      } else {
-        // Reset to default state if no subscription
+      try {
+        const userId = 1; // TODO: Get from auth context
+        const subscriptionData = await getCurrentSubscription(userId);
+        
+        if (subscriptionData) {
+          setUserSubscription(subscriptionData.service);
+          setUserCredits(subscriptionData.credits.history);
+          setTotalRemainingCredits(subscriptionData.credits.total);
+          
+          setSubscriptionInfo({
+            currentPlan: subscriptionData.service,
+            billingCycle: subscriptionData.billingCycle === 'monthly' ? 'Monthly' : 
+                         subscriptionData.billingCycle === 'annual' ? 'Annual' : 
+                         subscriptionData.billingCycle === 'enterprise' ? 'Enterprise' : 'Custom',
+            nextPayment: subscriptionData.nextPayment,
+            planPrice: subscriptionData.price
+          });
+          
+          console.log('Dashboard - Loaded subscription from backend:', subscriptionData.service);
+        } else {
+          // No active subscription found
+          console.log('Dashboard - No active subscription found');
+          
+          setUserSubscription(null);
+          setUserCredits([]);
+          setTotalRemainingCredits(0);
+          setSubscriptionInfo({
+            currentPlan: "No Active Plan",
+            billingCycle: "N/A",
+            nextPayment: "N/A",
+            planPrice: "N/A"
+          });
+        }
+      } catch (error) {
+        console.error('Error loading user subscription data:', error);
+        
+        // Reset to default state on error
         setUserSubscription(null);
+        setUserCredits([]);
+        setTotalRemainingCredits(0);
         setSubscriptionInfo({
           currentPlan: "No Active Plan",
           billingCycle: "N/A",
           nextPayment: "N/A",
           planPrice: "N/A"
         });
-      }
-
-      // Load user subscription and credits from user_subscription table
-      try {
-        const userId = 1; // TODO: Get from auth context
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const subscriptionResponse = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/user/${userId}/summary`);
-        const subscriptionResult = await subscriptionResponse.json();
-        
-        if (subscriptionResult && subscriptionResult.activeSubscription) {
-          setUserCredits(subscriptionResult.subscriptionHistory || []);
-          setTotalRemainingCredits(subscriptionResult.totalRemainingCredits || 0);
-        } else {
-          console.log('No active subscription found for user');
-          setUserCredits([]);
-          setTotalRemainingCredits(0);
-        }
-      } catch (error) {
-        console.error('Error loading user subscription data:', error);
-        setUserCredits([]);
-        setTotalRemainingCredits(0);
       }
     };
 
@@ -85,10 +89,26 @@ export default function DashboardPage() {
       loadSubscription();
     };
 
+    // Listen for user logout event to reset state
+    const handleUserLogout = () => {
+      console.log('Dashboard - User logout detected, resetting subscription state');
+      setUserSubscription(null);
+      setUserCredits([]);
+      setTotalRemainingCredits(0);
+      setSubscriptionInfo({
+        currentPlan: "No Active Plan",
+        billingCycle: "N/A",
+        nextPayment: "N/A",
+        planPrice: "N/A"
+      });
+    };
+
     window.addEventListener('subscriptionUpdated', handleSubscriptionUpdate);
+    window.addEventListener('userLoggedOut', handleUserLogout);
 
     return () => {
       window.removeEventListener('subscriptionUpdated', handleSubscriptionUpdate);
+      window.removeEventListener('userLoggedOut', handleUserLogout);
     };
   }, []);
 

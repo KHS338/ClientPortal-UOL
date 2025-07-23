@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useReducer, useEffect } from 'react';
 import { authUtils } from '@/lib/auth';
+import { clearSubscriptionData } from '@/lib/subscription';
 import { jwtDecode } from 'jwt-decode';
 
 // Initial state
@@ -238,7 +239,14 @@ export const AuthProvider = ({ children }) => {
     } finally {
       // Clear local storage and state
       authUtils.clearAuth();
+      
+      // Clear subscription data using utility function
+      clearSubscriptionData();
+      
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
+      
+      // Dispatch event to notify components that user has logged out
+      window.dispatchEvent(new CustomEvent('userLoggedOut'));
     }
   };
 

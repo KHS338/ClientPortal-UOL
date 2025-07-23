@@ -8,6 +8,7 @@ import { AlertDialog, Toast } from "@/components/ui/alert-dialog";
 import StripePayment from "@/components/StripePayment";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { authUtils } from "@/lib/auth";
+import { getCurrentSubscription, updateSubscriptionData } from "@/lib/subscription";
 
 export default function SubscriptionInfoPage() {
   const [billingCycle, setBillingCycle] = useState("monthly");
@@ -32,20 +33,47 @@ export default function SubscriptionInfoPage() {
   // Load subscription data and plans from API
   useEffect(() => {
     const loadData = async () => {
-      // Load user subscription data from localStorage
-      const savedSubscription = localStorage.getItem('userSubscription');
-      if (savedSubscription) {
-        const data = JSON.parse(savedSubscription);
-        setSubscriptionData(data);
-        setCurrentService(data.service);
-        setCurrentBillingCycle(data.billingCycle);
-        setCurrentPlan(data.planKey);
-        setBillingCycle(data.billingCycle);
-      } else {
-        // Fallback to default values if no subscription found
+      try {
+        // Load user subscription and credits from backend first (source of truth)
+        const userId = 1; // TODO: Get from auth context
+        const subscriptionData = await getCurrentSubscription(userId);
+        
+        if (subscriptionData) {
+          // Use backend data as source of truth
+          setUserCredits(subscriptionData.credits.history);
+          setTotalRemainingCredits(subscriptionData.credits.total);
+          
+          // Update current subscription info from active subscription
+          setCurrentService(subscriptionData.service);
+          setCurrentBillingCycle(subscriptionData.billingCycle);
+          setCurrentPlan(subscriptionData.planKey);
+          setBillingCycle(subscriptionData.billingCycle);
+          setSubscriptionData(subscriptionData);
+          
+          console.log('Subscription-info - Loaded from backend:', subscriptionData.service);
+        } else {
+          // No active subscription found in backend
+          console.log('Subscription-info - No active subscription found in backend');
+          
+          setCurrentService("No Active Subscription");
+          setCurrentBillingCycle("monthly");
+          setCurrentPlan("");
+          setBillingCycle("monthly");
+          setSubscriptionData(null);
+          setUserCredits([]);
+          setTotalRemainingCredits(0);
+        }
+      } catch (error) {
+        console.error('Error loading user subscription data from backend:', error);
+        
+        // Set empty state on error
         setCurrentService("No Active Subscription");
         setCurrentBillingCycle("monthly");
         setCurrentPlan("");
+        setBillingCycle("monthly");
+        setSubscriptionData(null);
+        setUserCredits([]);
+        setTotalRemainingCredits(0);
       }
 
       // Load subscription plans from API
@@ -65,41 +93,30 @@ export default function SubscriptionInfoPage() {
         console.error('Error loading subscription plans:', error);
         // Fallback to hardcoded data if API fails
         setBillingOptions(getDefaultSubscriptions());
-      }
-
-      // Load user subscription and credits from user_subscription table
-      try {
-        const userId = 1; // TODO: Get from auth context
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const subscriptionResponse = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/user/${userId}/summary`);
-        const subscriptionResult = await subscriptionResponse.json();
-        
-        if (subscriptionResult && subscriptionResult.activeSubscription) {
-          setUserCredits(subscriptionResult.subscriptionHistory || []);
-          setTotalRemainingCredits(subscriptionResult.totalRemainingCredits || 0);
-          
-          // Update current subscription info from active subscription
-          const activeSubscription = subscriptionResult.activeSubscription;
-          if (activeSubscription && activeSubscription.subscription) {
-            setCurrentService(activeSubscription.subscription.title);
-            setCurrentBillingCycle(activeSubscription.billingCycle);
-            setCurrentPlan(`${activeSubscription.subscription.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${activeSubscription.billingCycle}`);
-          }
-        } else {
-          console.log('No active subscription found for user');
-          setUserCredits([]);
-          setTotalRemainingCredits(0);
-        }
-      } catch (error) {
-        console.error('Error loading user subscription data:', error);
-        setUserCredits([]);
-        setTotalRemainingCredits(0);
       } finally {
         setIsLoadingPlans(false);
       }
     };
 
     loadData();
+
+    // Listen for user logout event to reset state
+    const handleUserLogout = () => {
+      console.log('Subscription-info - User logout detected, resetting state');
+      setCurrentService("No Active Subscription");
+      setCurrentBillingCycle("monthly");
+      setCurrentPlan("");
+      setBillingCycle("monthly");
+      setSubscriptionData(null);
+      setUserCredits([]);
+      setTotalRemainingCredits(0);
+    };
+
+    window.addEventListener('userLoggedOut', handleUserLogout);
+
+    return () => {
+      window.removeEventListener('userLoggedOut', handleUserLogout);
+    };
   }, []);
 
   // Fallback subscription data (same as before)
@@ -382,13 +399,9 @@ export default function SubscriptionInfoPage() {
       }
     };
     
-    localStorage.setItem('userSubscription', JSON.stringify(updatedSubscriptionData));
+    // Use the subscription utility to update data
+    updateSubscriptionData(updatedSubscriptionData);
     setSubscriptionData(updatedSubscriptionData);
-    
-    // Dispatch custom event to notify other components (like sidebar) of the update
-    window.dispatchEvent(new CustomEvent('subscriptionUpdated', { 
-      detail: updatedSubscriptionData 
-    }));
     
     // Clear payment modal states
     setShowPayment(false);
@@ -440,7 +453,7 @@ export default function SubscriptionInfoPage() {
           setUserCredits([]);
           setTotalRemainingCredits(0);
           
-          // Clear localStorage
+          // Clear localStorage using utility function
           localStorage.removeItem('userSubscription');
           
           // Dispatch custom event to notify other components
