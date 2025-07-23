@@ -8,16 +8,13 @@ import { AlertDialog, Toast } from "@/components/ui/alert-dialog";
 import StripePayment from "@/components/StripePayment";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { authUtils } from "@/lib/auth";
-import { useAuth } from "@/contexts/AuthContext";
 
 export default function SubscriptionInfoPage() {
-  const { user, isAuthenticated } = useAuth();
   const [billingCycle, setBillingCycle] = useState("monthly");
   const [currentPlan, setCurrentPlan] = useState("");
   const [currentService, setCurrentService] = useState("");
   const [currentBillingCycle, setCurrentBillingCycle] = useState("monthly");
   const [subscriptionData, setSubscriptionData] = useState(null);
-  const [activeSubscription, setActiveSubscription] = useState(null);
   const [billingOptions, setBillingOptions] = useState([]);
   const [isLoadingPlans, setIsLoadingPlans] = useState(true);
   const [userCredits, setUserCredits] = useState(null);
@@ -35,15 +32,25 @@ export default function SubscriptionInfoPage() {
   // Load subscription data and plans from API
   useEffect(() => {
     const loadData = async () => {
-      if (!isAuthenticated || !user?.id) {
-        setIsLoadingPlans(false);
-        return;
+      // Load user subscription data from localStorage
+      const savedSubscription = localStorage.getItem('userSubscription');
+      if (savedSubscription) {
+        const data = JSON.parse(savedSubscription);
+        setSubscriptionData(data);
+        setCurrentService(data.service);
+        setCurrentBillingCycle(data.billingCycle);
+        setCurrentPlan(data.planKey);
+        setBillingCycle(data.billingCycle);
+      } else {
+        // Fallback to default values if no subscription found
+        setCurrentService("No Active Subscription");
+        setCurrentBillingCycle("monthly");
+        setCurrentPlan("");
       }
 
+      // Load subscription plans from API
       try {
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        
-        // Load subscription plans from API
         const response = await fetch(`${apiBaseUrl}/subscriptions`);
         const result = await response.json();
         
@@ -51,78 +58,49 @@ export default function SubscriptionInfoPage() {
           setBillingOptions(result.data);
         } else {
           console.error('Failed to load subscription plans:', result.message);
+          // Fallback to hardcoded data if API fails
           setBillingOptions(getDefaultSubscriptions());
         }
       } catch (error) {
         console.error('Error loading subscription plans:', error);
+        // Fallback to hardcoded data if API fails
         setBillingOptions(getDefaultSubscriptions());
       }
 
       // Load user subscription and credits from user_subscription table
       try {
+        const userId = 1; // TODO: Get from auth context
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const subscriptionResponse = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/user/${userId}/summary`);
+        const subscriptionResult = await subscriptionResponse.json();
         
-        // Get user's active subscription
-        const activeSubResponse = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/my-active-subscription`);
-        
-        if (activeSubResponse.ok) {
-          const activeSubData = await activeSubResponse.json();
+        if (subscriptionResult && subscriptionResult.activeSubscription) {
+          setUserCredits(subscriptionResult.subscriptionHistory || []);
+          setTotalRemainingCredits(subscriptionResult.totalRemainingCredits || 0);
           
-          if (activeSubData && activeSubData.id) {
-            setActiveSubscription(activeSubData);
-            
-            // Update current subscription info
-            if (activeSubData.subscription) {
-              setCurrentService(activeSubData.subscription.title);
-              setCurrentBillingCycle(activeSubData.billingCycle);
-              setCurrentPlan(`${activeSubData.subscription.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${activeSubData.billingCycle}`);
-            }
-            
-            // Set remaining credits
-            setTotalRemainingCredits(activeSubData.remainingCredits || 0);
-          } else {
-            // No active subscription
-            setCurrentService("No Active Subscription");
-            setCurrentBillingCycle("monthly");
-            setCurrentPlan("");
-            setTotalRemainingCredits(0);
-            setActiveSubscription(null);
+          // Update current subscription info from active subscription
+          const activeSubscription = subscriptionResult.activeSubscription;
+          if (activeSubscription && activeSubscription.subscription) {
+            setCurrentService(activeSubscription.subscription.title);
+            setCurrentBillingCycle(activeSubscription.billingCycle);
+            setCurrentPlan(`${activeSubscription.subscription.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${activeSubscription.billingCycle}`);
           }
         } else {
-          // Handle non-ok response
           console.log('No active subscription found for user');
-          setCurrentService("No Active Subscription");
-          setCurrentBillingCycle("monthly");
-          setCurrentPlan("");
-          setTotalRemainingCredits(0);
-          setActiveSubscription(null);
-        }
-
-        // Get subscription summary for credits history
-        const summaryResponse = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/my-summary`);
-        
-        if (summaryResponse.ok) {
-          const summaryData = await summaryResponse.json();
-          setUserCredits(summaryData.subscriptionHistory || []);
-        } else {
           setUserCredits([]);
+          setTotalRemainingCredits(0);
         }
-
       } catch (error) {
         console.error('Error loading user subscription data:', error);
-        setCurrentService("No Active Subscription");
-        setCurrentBillingCycle("monthly");
-        setCurrentPlan("");
         setUserCredits([]);
         setTotalRemainingCredits(0);
-        setActiveSubscription(null);
       } finally {
         setIsLoadingPlans(false);
       }
     };
 
     loadData();
-  }, [isAuthenticated, user?.id]);
+  }, []);
 
   // Fallback subscription data (same as before)
   const getDefaultSubscriptions = () => [
@@ -277,54 +255,6 @@ export default function SubscriptionInfoPage() {
     }, 1000);
   };
 
-  // Function to refresh user subscription data
-  const refreshUserSubscriptionData = async () => {
-    if (!user?.id) return;
-
-    try {
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      
-      // Get user's active subscription
-      const activeSubResponse = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/my-active-subscription`);
-      
-      if (activeSubResponse.ok) {
-        const activeSubData = await activeSubResponse.json();
-        
-        if (activeSubData && activeSubData.id) {
-          setActiveSubscription(activeSubData);
-          
-          // Update current subscription info
-          if (activeSubData.subscription) {
-            setCurrentService(activeSubData.subscription.title);
-            setCurrentBillingCycle(activeSubData.billingCycle);
-            setCurrentPlan(`${activeSubData.subscription.title.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${activeSubData.billingCycle}`);
-          }
-          
-          // Set remaining credits
-          setTotalRemainingCredits(activeSubData.remainingCredits || 0);
-        } else {
-          // No active subscription
-          setCurrentService("No Active Subscription");
-          setCurrentBillingCycle("monthly");
-          setCurrentPlan("");
-          setTotalRemainingCredits(0);
-          setActiveSubscription(null);
-        }
-      }
-
-      // Get subscription summary for credits history
-      const summaryResponse = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/my-summary`);
-      
-      if (summaryResponse.ok) {
-        const summaryData = await summaryResponse.json();
-        setUserCredits(summaryData.subscriptionHistory || []);
-      }
-
-    } catch (error) {
-      console.error('Error refreshing user subscription data:', error);
-    }
-  };
-
   const completePlanChange = async (serviceTitle, cycle, price, paymentResult) => {
     // Calculate next payment date based on new billing cycle
     const getNextPaymentDate = (billingCycle) => {
@@ -345,10 +275,7 @@ export default function SubscriptionInfoPage() {
 
     try {
       // Create user subscription entry in database
-      if (!user?.id) {
-        throw new Error('User not authenticated');
-      }
-      
+      const userId = 1; // TODO: Get from auth context
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       
       // Find the subscription ID from the service title
@@ -382,6 +309,7 @@ export default function SubscriptionInfoPage() {
       }
 
       const userSubscriptionData = {
+        userId: userId,
         subscriptionId: subscription.id,
         billingCycle: cycle,
         paidAmount: paidAmount,
@@ -411,8 +339,14 @@ export default function SubscriptionInfoPage() {
       const result = await response.json();
       console.log('User subscription created:', result);
 
-      // Reload user subscription data after successful creation
-      await refreshUserSubscriptionData();
+      // Reload credits data
+      const subscriptionResponse = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/user/${userId}/summary`);
+      const subscriptionResult = await subscriptionResponse.json();
+      
+      if (subscriptionResult && subscriptionResult.activeSubscription) {
+        setUserCredits(subscriptionResult.subscriptionHistory || []);
+        setTotalRemainingCredits(subscriptionResult.totalRemainingCredits || 0);
+      }
 
     } catch (error) {
       console.error('Error creating user subscription:', error);
@@ -423,6 +357,39 @@ export default function SubscriptionInfoPage() {
       });
     }
 
+    const planKey = `${serviceTitle.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${cycle}`;
+    
+    // Update state variables
+    setCurrentPlan(planKey);
+    setCurrentService(serviceTitle);
+    setCurrentBillingCycle(cycle);
+    
+    // Update localStorage with new subscription data
+    const updatedSubscriptionData = {
+      service: serviceTitle,
+      billingCycle: cycle,
+      price: price, // Price is now always a string
+      subscribedDate: subscriptionData?.subscribedDate || new Date().toISOString(),
+      nextPayment: getNextPaymentDate(cycle),
+      planKey: planKey,
+      credits: selectedPlan?.credits || null, // Store credits for adhoc purchases
+      paymentInfo: paymentResult ? {
+        paymentIntentId: paymentResult.paymentIntentId,
+        paymentMethod: paymentResult.paymentMethod,
+        status: 'paid'
+      } : subscriptionData?.paymentInfo || {
+        status: 'trial'
+      }
+    };
+    
+    localStorage.setItem('userSubscription', JSON.stringify(updatedSubscriptionData));
+    setSubscriptionData(updatedSubscriptionData);
+    
+    // Dispatch custom event to notify other components (like sidebar) of the update
+    window.dispatchEvent(new CustomEvent('subscriptionUpdated', { 
+      detail: updatedSubscriptionData 
+    }));
+    
     // Clear payment modal states
     setShowPayment(false);
     setSelectedPlan(null);
@@ -441,34 +408,16 @@ export default function SubscriptionInfoPage() {
       title: "Confirm Unsubscription",
       message: `Are you sure you want to unsubscribe from ${serviceTitle}? This action cannot be undone and you will lose access to all features after your current billing period ends.`,
       type: "warning",
-      onConfirm: async () => {
+      onConfirm: () => {
         console.log(`Unsubscribe requested for: ${serviceTitle}`);
-        
-        try {
-          // Clear the subscription in the database
-          const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-          
-          const response = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/cancel`, {
-            method: 'DELETE',
-          });
-          
-          if (response.ok) {
-            console.log('Successfully cancelled subscription in database');
-          } else {
-            console.error('Failed to cancel subscription in database');
-          }
-        } catch (error) {
-          console.error('Error cancelling subscription:', error);
-        }
-        
         // Clear the current plan selection
         setCurrentPlan("");
         setCurrentService("No Active Subscription");
         setCurrentBillingCycle("monthly");
         setSubscriptionData(null);
         
-        // Refresh subscription data from database
-        await refreshUserSubscriptionData();
+        // Clear localStorage
+        localStorage.removeItem('userSubscription');
         
         // Dispatch custom event to notify other components
         window.dispatchEvent(new CustomEvent('subscriptionUpdated', { 
@@ -595,18 +544,9 @@ export default function SubscriptionInfoPage() {
                   <h3 className="text-lg font-semibold text-gray-800">Next Payment</h3>
                 </div>
                 <p className="text-2xl font-bold text-gray-800">
-                  {activeSubscription?.nextRenewalDate ? 
-                    new Date(activeSubscription.nextRenewalDate).toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'short', 
-                      day: 'numeric' 
-                    }) : 
-                    "Not Available"
-                  }
+                  {subscriptionData?.nextPayment || "Not Available"}
                 </p>
-                <p className="text-gray-600 text-sm">
-                  {activeSubscription?.autoRenew ? "Auto-renewal enabled" : "Manual renewal"}
-                </p>
+                <p className="text-gray-600 text-sm">Auto-renewal enabled</p>
               </Card>
 
               <Card className="p-6 bg-gradient-to-br from-[#24AC4A] to-[#19AF1A] text-white">

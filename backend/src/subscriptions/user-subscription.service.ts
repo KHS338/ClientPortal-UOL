@@ -191,39 +191,4 @@ export class UserSubscriptionService {
       }
     }
   }
-
-  async cancelUserSubscription(userId: number) {
-    try {
-      // Find the user's active subscription
-      const activeSubscription = await this.userSubscriptionRepository.findOne({
-        where: { 
-          userId: userId,
-          status: 'active'
-        },
-        relations: ['subscription']
-      });
-
-      if (!activeSubscription) {
-        return {
-          success: false,
-          message: 'No active subscription found to cancel'
-        };
-      }
-
-      // Update subscription status to cancelled
-      activeSubscription.status = 'cancelled';
-      activeSubscription.endDate = new Date(); // End immediately
-      
-      await this.userSubscriptionRepository.save(activeSubscription);
-
-      return {
-        success: true,
-        message: 'Subscription cancelled successfully',
-        data: activeSubscription
-      };
-    } catch (error) {
-      console.error('Error cancelling subscription:', error);
-      throw new Error('Failed to cancel subscription');
-    }
-  }
 }
