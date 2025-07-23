@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import StripePayment from "@/components/StripePayment";
 import ProtectedRoute from "@/components/ProtectedRoute";
-
+//add 
 export default function SubscriptionPage() {
   const router = useRouter();
   const [billingCycle, setBillingCycle] = useState("monthly");
