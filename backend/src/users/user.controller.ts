@@ -1,5 +1,5 @@
 // backend/src/users/user.controller.ts
-import { Controller, Get, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, HttpCode, HttpStatus, Param } from '@nestjs/common';
 import { UsersService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 
@@ -10,6 +10,40 @@ export class UsersController {
   @Get() // 👈 Full route: GET /users
   async findAll() {
     return this.usersService.findAll();
+  }
+
+  @Get('profile/:id') // 👈 Full route: GET /users/profile/:id
+  async getProfile(@Param('id') id: string) {
+    try {
+      const userId = parseInt(id, 10);
+      if (isNaN(userId)) {
+        return {
+          success: false,
+          message: 'Invalid user ID'
+        };
+      }
+
+      const user = await this.usersService.findById(userId);
+      if (!user) {
+        return {
+          success: false,
+          message: 'User not found'
+        };
+      }
+
+      // Return user profile (password is already excluded in findById)
+      return {
+        success: true,
+        message: 'Profile retrieved successfully',
+        user: user
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message,
+        error: error.name
+      };
+    }
   }
 
   @Post('register') // 👈 Full route: POST /users/register

@@ -29,6 +29,7 @@ export default function ClientProfilePage({ initial = {} }) {
 
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
@@ -40,7 +41,70 @@ export default function ClientProfilePage({ initial = {} }) {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const fileRef = useRef();
 
-  // Load user data from authentication context
+  // Fetch detailed profile information from backend
+  const fetchDetailedProfile = async () => {
+    if (!authUser?.id) return;
+    
+    setIsLoadingProfile(true);
+    try {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiBaseUrl}/users/profile/${authUser.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+      
+      if (result.success && result.user) {
+        const user = result.user;
+        console.log('Profile page - Fetched detailed profile:', user);
+        
+        // Format dates
+        const joinDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long'
+        }) : "N/A";
+        
+        const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }) : "Never";
+
+        // Set the detailed profile data
+        setForm({
+          companymail: user.companymail || "",
+          firstName: user.firstName || "",
+          lastName: user.lastName || "",
+          companyName: user.companyName || "",
+          companySize: user.companySize || "",
+          email: user.email || "",
+          phone: user.phone || "",
+          avatar: user.avatar || null,
+          joinDate: joinDate,
+          lastLogin: lastLogin,
+          twoFactorEnabled: user.twoFactorEnabled || false,
+        });
+
+        // Store detailed profile data temporarily (will be cleared on unmount)
+        sessionStorage.setItem('profilePageData', JSON.stringify(user));
+      } else {
+        console.error('Failed to fetch profile:', result.message);
+        setMessage({ type: 'error', text: 'Failed to load profile information' });
+      }
+    } catch (error) {
+      console.error('Error fetching detailed profile:', error);
+      setMessage({ type: 'error', text: 'Network error while loading profile' });
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  };
+
+  // Load user data from authentication context and fetch detailed profile
   useEffect(() => {
     console.log('Profile page - Auth state:', { isAuthenticated, authLoading, authUser });
     
@@ -50,46 +114,32 @@ export default function ClientProfilePage({ initial = {} }) {
       return;
     }
     
-    if (authUser) {
-      console.log('Profile page - Loading user data from auth context:', authUser);
-      
-      // Format dates
-      const joinDate = authUser.createdAt ? new Date(authUser.createdAt).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long'
-      }) : "N/A";
-      
-      const lastLogin = authUser.lastLogin ? new Date(authUser.lastLogin).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      }) : "Never";
-
-      setForm({
-        companymail: authUser.companymail || "",
-        firstName: authUser.firstName || "",
-        lastName: authUser.lastName || "",
-        companyName: authUser.companyName || "",
-        companySize: authUser.companySize || "",
-        email: authUser.email || "",
-        phone: authUser.phone || "",
-        avatar: authUser.avatar || null,
-        joinDate: joinDate,
-        lastLogin: lastLogin,
-        twoFactorEnabled: authUser.twoFactorEnabled || false,
-      });
+    if (authUser && isAuthenticated) {
+      // Fetch detailed profile information from the server
+      fetchDetailedProfile();
     }
   }, [authUser, isAuthenticated, authLoading, router]);
 
-  // Show loading state while authentication is loading
-  if (authLoading || (!isAuthenticated && !authLoading)) {
+  // Cleanup: Clear detailed profile data when component unmounts
+  useEffect(() => {
+    return () => {
+      // Clear detailed profile data from session storage when leaving the profile page
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('profilePageData');
+        console.log('Profile page - Cleaned up detailed profile data from session storage');
+      }
+    };
+  }, []);
+
+  // Show loading state while authentication is loading or fetching profile
+  if (authLoading || (!isAuthenticated && !authLoading) || isLoadingProfile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-0 via-white to-green-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#1a84de] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Loading your profile...</p>
+          <p className="text-lg text-gray-600">
+            {authLoading ? 'Authenticating...' : isLoadingProfile ? 'Loading your profile...' : 'Loading...'}
+          </p>
         </div>
       </div>
     );
@@ -106,25 +156,27 @@ export default function ClientProfilePage({ initial = {} }) {
     setMessage({ type: '', text: '' });
 
     try {
+      // Get the detailed profile from session storage for comparison
+      const profilePageData = sessionStorage.getItem('profilePageData');
+      const originalUser = profilePageData ? JSON.parse(profilePageData) : authUser;
+
       // Prepare update data - only include fields that have actually changed
       const updateData = {
         userId: authUser.id,
       };
 
       // Only include fields that have changed from the original user data
-      if (form.firstName !== authUser.firstName) updateData.firstName = form.firstName;
-      if (form.lastName !== authUser.lastName) updateData.lastName = form.lastName;
-      if (form.companyName !== authUser.companyName) updateData.companyName = form.companyName;
-      if (form.companySize !== authUser.companySize) updateData.companySize = form.companySize;
-      if (form.email !== authUser.email) updateData.email = form.email;
-      if (form.phone !== authUser.phone) updateData.phone = form.phone;
-      if (form.companymail !== authUser.companymail) updateData.companymail = form.companymail;
-
-      // Don't include password in regular profile update
-      // Password changes will be handled separately
+      if (form.firstName !== originalUser.firstName) updateData.firstName = form.firstName;
+      if (form.lastName !== originalUser.lastName) updateData.lastName = form.lastName;
+      if (form.companyName !== originalUser.companyName) updateData.companyName = form.companyName;
+      if (form.companySize !== originalUser.companySize) updateData.companySize = form.companySize;
+      if (form.email !== originalUser.email) updateData.email = form.email;
+      if (form.phone !== originalUser.phone) updateData.phone = form.phone;
+      if (form.companymail !== originalUser.companymail) updateData.companymail = form.companymail;
 
       // Call the backend API to update user profile
-      const response = await fetch('http://localhost:3001/users/update-profile', {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiBaseUrl}/users/update-profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -135,9 +187,9 @@ export default function ClientProfilePage({ initial = {} }) {
       const result = await response.json();
       
       if (result.success) {
-        // Update localStorage with new user data (for compatibility)
-        const updatedUser = { ...authUser, ...result.user };
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        // Update session storage with new user data (for profile page only)
+        const updatedUser = { ...originalUser, ...result.user };
+        sessionStorage.setItem('profilePageData', JSON.stringify(updatedUser));
         
         // Update form state with the updated user data
         setForm(prev => ({
@@ -193,7 +245,8 @@ export default function ClientProfilePage({ initial = {} }) {
     setMessage({ type: '', text: '' });
 
     try {
-      const response = await fetch('http://localhost:3001/users/change-password', {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiBaseUrl}/users/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
