@@ -408,29 +408,61 @@ export default function SubscriptionInfoPage() {
       title: "Confirm Unsubscription",
       message: `Are you sure you want to unsubscribe from ${serviceTitle}? This action cannot be undone and you will lose access to all features after your current billing period ends.`,
       type: "warning",
-      onConfirm: () => {
+      onConfirm: async () => {
         console.log(`Unsubscribe requested for: ${serviceTitle}`);
-        // Clear the current plan selection
-        setCurrentPlan("");
-        setCurrentService("No Active Subscription");
-        setCurrentBillingCycle("monthly");
-        setSubscriptionData(null);
         
-        // Clear localStorage
-        localStorage.removeItem('userSubscription');
-        
-        // Dispatch custom event to notify other components
-        window.dispatchEvent(new CustomEvent('subscriptionUpdated', { 
-          detail: null 
-        }));
-        
-        // Show success toast
-        setToast({
-          isOpen: true,
-          message: `Successfully unsubscribed from ${serviceTitle}`,
-          type: "success"
-        });
-        // Here you would typically make an API call to handle the unsubscription
+        try {
+          // Call API to cancel subscription in database
+          const userId = 1; // TODO: Get from auth context
+          const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+          
+          const response = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/user/${userId}/cancel`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Failed to cancel subscription:', errorText);
+            throw new Error(`Failed to cancel subscription: ${response.status} ${errorText}`);
+          }
+
+          const result = await response.json();
+          console.log('Subscription cancelled:', result);
+
+          // Clear the current plan selection
+          setCurrentPlan("");
+          setCurrentService("No Active Subscription");
+          setCurrentBillingCycle("monthly");
+          setSubscriptionData(null);
+          setUserCredits([]);
+          setTotalRemainingCredits(0);
+          
+          // Clear localStorage
+          localStorage.removeItem('userSubscription');
+          
+          // Dispatch custom event to notify other components
+          window.dispatchEvent(new CustomEvent('subscriptionUpdated', { 
+            detail: null 
+          }));
+          
+          // Show success toast
+          setToast({
+            isOpen: true,
+            message: `Successfully unsubscribed from ${serviceTitle}`,
+            type: "success"
+          });
+
+        } catch (error) {
+          console.error('Error cancelling subscription:', error);
+          setToast({
+            isOpen: true,
+            message: 'Failed to cancel subscription: ' + error.message,
+            type: "error"
+          });
+        }
       }
     });
   };

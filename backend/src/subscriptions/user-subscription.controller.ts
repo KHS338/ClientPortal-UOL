@@ -92,4 +92,9 @@ export class UserSubscriptionController {
   checkExpiredSubscriptions() {
     return this.userSubscriptionService.checkExpiredSubscriptions();
   }
+
+  @Post('user/:userId/cancel')
+  cancelUserSubscription(@Param('userId', ParseIntPipe) userId: number) {
+    return this.userSubscriptionService.cancelUserSubscription(userId);
+  }
 }
