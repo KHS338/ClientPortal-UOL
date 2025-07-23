@@ -42,28 +42,17 @@ export class AuthService {
     // Update last login
     await this.usersService.updateLastLogin(user.id);
 
+    // JWT payload with minimal data only
     const payload: JwtPayload = { 
       sub: user.id, 
       email: user.email,
-      companymail: user.companymail 
+      firstName: user.firstName,
+      lastName: user.lastName
     };
 
     return {
       success: true,
       message: 'Login successful',
-      user: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        companymail: user.companymail,
-        companyName: user.companyName,
-        companySize: user.companySize,
-        phone: user.phone,
-        subscriptionStatus: user.subscriptionStatus,
-        isActive: user.isActive,
-        twoFactorEnabled: user.twoFactorEnabled
-      },
       access_token: this.jwtService.sign(payload),
     };
   }
@@ -91,7 +80,8 @@ export class AuthService {
     const payload: JwtPayload = { 
       sub: user.id, 
       email: user.email,
-      companymail: user.companymail 
+      firstName: user.firstName,
+      lastName: user.lastName
     };
 
     return {

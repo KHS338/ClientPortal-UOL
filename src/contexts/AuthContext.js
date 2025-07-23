@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useReducer, useEffect } from 'react';
 import { authUtils } from '@/lib/auth';
+import { jwtDecode } from 'jwt-decode';
 
 // Initial state
 const initialState = {
@@ -78,6 +79,24 @@ const authReducer = (state, action) => {
 // Create context
 const AuthContext = createContext(null);
 
+// Helper function to decode JWT and extract user data
+const getUserFromToken = (token) => {
+  if (!token) return null;
+  
+  try {
+    const decoded = jwtDecode(token);
+    return {
+      id: decoded.sub,
+      email: decoded.email,
+      firstName: decoded.firstName,
+      lastName: decoded.lastName
+    };
+  } catch (error) {
+    console.error('Error decoding JWT:', error);
+    return null;
+  }
+};
+
 // Auth Provider component
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
@@ -86,31 +105,39 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       const token = authUtils.getToken();
-      const user = authUtils.getUserData();
       
-      if (token && user) {
-        // First set the user from storage
-        dispatch({
-          type: AUTH_ACTIONS.LOGIN_SUCCESS,
-          payload: { token, user }
-        });
+      if (token) {
+        // Get user data from JWT token
+        const user = getUserFromToken(token);
         
-        // Then fetch fresh user data to get updated 2FA status
-        try {
-          const response = await authUtils.fetchWithAuth('http://localhost:3001/auth/profile');
-          const result = await response.json();
+        if (user) {
+          dispatch({
+            type: AUTH_ACTIONS.LOGIN_SUCCESS,
+            payload: { token, user }
+          });
           
-          if (result.success) {
-            // Update user data with fresh info from server
-            authUtils.setAuth(token, result.user, true); // Update storage
-            dispatch({
-              type: AUTH_ACTIONS.UPDATE_USER,
-              payload: result.user
-            });
+          // Optionally fetch additional user details from profile endpoint
+          try {
+            const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+            const response = await authUtils.fetchWithAuth(`${apiBaseUrl}/auth/profile`);
+            const result = await response.json();
+            
+            if (result.success) {
+              // Merge JWT user data with profile data
+              const fullUser = { ...user, ...result.user };
+              dispatch({
+                type: AUTH_ACTIONS.UPDATE_USER,
+                payload: fullUser
+              });
+            }
+          } catch (error) {
+            console.error('Error fetching profile:', error);
+            // Continue with JWT user data if profile fetch fails
           }
-        } catch (error) {
-          console.error('Error fetching fresh user data:', error);
-          // Continue with cached user data if API call fails
+        } else {
+          // Invalid token, clear auth
+          authUtils.clearAuth();
+          dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
         }
       } else {
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
@@ -125,9 +152,10 @@ export const AuthProvider = ({ children }) => {
     try {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: true });
       dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      // Use the users/login endpoint that properly handles 2FA
-      const response = await fetch('http://localhost:3001/users/login', {
+      // First check credentials and 2FA with users/login
+      const userLoginResponse = await fetch(`${apiBaseUrl}/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -139,56 +167,54 @@ export const AuthProvider = ({ children }) => {
         })
       });
 
-      const result = await response.json();
+      const userResult = await userLoginResponse.json();
 
-      if (result.success && !result.requiresTwoFactor) {
-        // Login successful - now get JWT token
-        const tokenResponse = await fetch('http://localhost:3001/auth/generate-token', {
+      if (userResult.success) {
+        // Now get JWT token from auth/login
+        const authResponse = await fetch(`${apiBaseUrl}/auth/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ userId: result.user.id })
+          body: JSON.stringify({ email, password })
         });
 
-        let access_token = null;
-        if (tokenResponse.ok) {
-          const tokenResult = await tokenResponse.json();
-          access_token = tokenResult.access_token;
-        }
+        const authResult = await authResponse.json();
 
-        // If token generation fails, still proceed with login (fallback)
-        if (!access_token) {
-          access_token = 'temp_token_' + Date.now(); // Temporary fallback
-        }
+        if (authResult.success && authResult.access_token) {
+          // Get user data from JWT token
+          const user = getUserFromToken(authResult.access_token);
+          
+          if (user) {
+            // Store JWT token only
+            authUtils.setAuth(authResult.access_token, user, rememberMe);
+            
+            dispatch({
+              type: AUTH_ACTIONS.LOGIN_SUCCESS,
+              payload: {
+                token: authResult.access_token,
+                user: user
+              }
+            });
 
-        // Store auth data
-        authUtils.setAuth(access_token, result.user, rememberMe);
-        
-        dispatch({
-          type: AUTH_ACTIONS.LOGIN_SUCCESS,
-          payload: {
-            token: access_token,
-            user: result.user
+            return { success: true, user: user };
           }
-        });
-
-        return { success: true, user: result.user };
-      } else if (result.requiresTwoFactor) {
+        }
+      } else if (userResult.requiresTwoFactor) {
         // Return 2FA requirement
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
         return { 
           success: false, 
           requiresTwoFactor: true, 
-          userId: result.userId,
-          message: result.message 
+          userId: userResult.userId,
+          message: userResult.message 
         };
       } else {
         dispatch({
           type: AUTH_ACTIONS.SET_ERROR,
-          payload: result.message || 'Login failed'
+          payload: userResult.message || 'Login failed'
         });
-        return { success: false, message: result.message };
+        return { success: false, message: userResult.message };
       }
     } catch (error) {
       dispatch({
@@ -203,7 +229,8 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       // Call backend logout endpoint (optional)
-      await authUtils.fetchWithAuth('http://localhost:3001/auth/logout', {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+      await authUtils.fetchWithAuth(`${apiBaseUrl}/auth/logout`, {
         method: 'POST'
       });
     } catch (error) {
@@ -218,19 +245,21 @@ export const AuthProvider = ({ children }) => {
   // Get user profile from backend
   const fetchProfile = async () => {
     try {
-      const response = await authUtils.fetchWithAuth('http://localhost:3001/auth/profile');
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await authUtils.fetchWithAuth(`${apiBaseUrl}/auth/profile`);
       const result = await response.json();
       
       if (result.success) {
-        // Update storage with fresh user data
+        // Merge JWT user data with profile data
         const token = authUtils.getToken();
-        authUtils.setAuth(token, result.user, false); // Will preserve existing storage location
+        const jwtUser = getUserFromToken(token);
+        const fullUser = { ...jwtUser, ...result.user };
         
         dispatch({
           type: AUTH_ACTIONS.UPDATE_USER,
-          payload: result.user
+          payload: fullUser
         });
-        return result.user;
+        return fullUser;
       }
     } catch (error) {
       console.error('Error fetching profile:', error);

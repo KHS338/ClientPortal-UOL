@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function TwoFactorAuthSettings() {
   const { user, isAuthenticated, isLoading: authLoading, updateUser } = useAuth();
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
   const [isEnabled, setIsEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [setupData, setSetupData] = useState(null);
@@ -35,7 +36,7 @@ export default function TwoFactorAuthSettings() {
     setError('');
     
     try {
-      const response = await fetch('http://localhost:3001/users/2fa/setup', {
+      const response = await fetch(`${apiBaseUrl}/users/2fa/setup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,7 +66,7 @@ export default function TwoFactorAuthSettings() {
     setError('');
     
     try {
-      const response = await fetch('http://localhost:3001/users/2fa/enable', {
+      const response = await fetch(`${apiBaseUrl}/users/2fa/enable`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -106,7 +107,7 @@ export default function TwoFactorAuthSettings() {
     setError('');
     
     try {
-      const response = await fetch('http://localhost:3001/users/2fa/disable', {
+      const response = await fetch(`${apiBaseUrl}/users/2fa/disable`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

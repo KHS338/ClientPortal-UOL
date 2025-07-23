@@ -177,13 +177,10 @@ export class UsersController {
       // Update last login
       await this.usersService.updateLastLogin(user.id);
 
-      // Return user data (excluding password and sensitive info)
-      const { password: _, twoFactorSecret: __, twoFactorBackupCodes: ___, ...userWithoutPassword } = user;
-      
+      // Return minimal response - JWT will contain user info
       return {
         success: true,
         message: 'Login successful',
-        user: userWithoutPassword,
         requiresTwoFactor: false
       };
     } catch (error) {
