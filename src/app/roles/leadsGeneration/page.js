@@ -828,7 +828,7 @@ export default function RolesPage() {
   const [data, setData] = useState([]);
   const [selected, setSelected] = useState("jobs");
   const [submittedData, setSubmittedData] = useState([]);
-  const [showForm, setShowForm] = useState(true);
+  const [showForm, setShowForm] = useState(false); // Changed to false - show data table first
   const [editingEntry, setEditingEntry] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState(null);
@@ -857,8 +857,8 @@ export default function RolesPage() {
       
       // Load both jobs and industry data
       const [jobsResponse, industryResponse] = await Promise.all([
-        fetch(`/api/lead-generation-job?userId=${user.id}`),
-        fetch(`/api/lead-generation-industry?userId=${user.id}`)
+        fetch(`http://localhost:3001/lead-generation-job?userId=${user.id}`),
+        fetch(`http://localhost:3001/lead-generation-industry?userId=${user.id}`)
       ]);
       
       const jobsData = await jobsResponse.json();
@@ -937,8 +937,8 @@ export default function RolesPage() {
       if (editingEntry) {
         // Update existing entry
         const endpoint = formType === 'jobs' ? 
-          `/api/lead-generation-job/${editingEntry.id}` : 
-          `/api/lead-generation-industry/${editingEntry.id}`;
+          `http://localhost:3001/lead-generation-job/${editingEntry.id}` : 
+          `http://localhost:3001/lead-generation-industry/${editingEntry.id}`;
           
         response = await fetch(endpoint, {
           method: 'PUT',
@@ -950,8 +950,8 @@ export default function RolesPage() {
       } else {
         // Create new entry
         const endpoint = formType === 'jobs' ? 
-          '/api/lead-generation-job' : 
-          '/api/lead-generation-industry';
+          'http://localhost:3001/lead-generation-job' : 
+          'http://localhost:3001/lead-generation-industry';
           
         response = await fetch(endpoint, {
           method: 'POST',
@@ -1004,8 +1004,8 @@ export default function RolesPage() {
       setLoading(true);
       
       const endpoint = entryToDelete.type === 'jobs' ? 
-        `/api/lead-generation-job/${entryToDelete.id}` : 
-        `/api/lead-generation-industry/${entryToDelete.id}`;
+        `http://localhost:3001/lead-generation-job/${entryToDelete.id}` : 
+        `http://localhost:3001/lead-generation-industry/${entryToDelete.id}`;
         
       const response = await fetch(endpoint, {
         method: 'DELETE',

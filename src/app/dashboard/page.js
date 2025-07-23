@@ -346,7 +346,7 @@ export default function DashboardPage() {
               <FiTarget className="text-[#1a84de]" />
               Quick Actions
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               <Button 
                 className={`h-20 flex flex-col items-center justify-center gap-2 shadow-lg transition-all duration-300 ${
                   (userSubscription === 'CV Sourcing' || userSubscription === 'Free Trial')
@@ -396,7 +396,22 @@ export default function DashboardPage() {
                 )}
               </Button>
               <Button 
-                className="h-20 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] hover:from-[#1a84de] hover:to-[#06398e] text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                className={`h-20 flex flex-col items-center justify-center gap-2 shadow-lg transition-all duration-300 ${
+                  userSubscription === 'Lead Generation'
+                    ? 'bg-gradient-to-br from-[#8b5cf6] to-[#7c3aed] hover:from-[#1a84de] hover:to-[#06398e] text-white hover:shadow-xl cursor-pointer'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-50'
+                }`}
+                onClick={() => userSubscription === 'Lead Generation' && (window.location.href = '/roles/leadsGeneration')}
+                disabled={userSubscription !== 'Lead Generation'}
+              >
+                <FiUsers size={20} />
+                <span className="text-sm">Lead Generation</span>
+                {userSubscription !== 'Lead Generation' && (
+                  <span className="text-xs mt-1">Not subscribed</span>
+                )}
+              </Button>
+              <Button 
+                className="h-20 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#16a34a] to-[#15803d] hover:from-[#1a84de] hover:to-[#06398e] text-white shadow-lg hover:shadow-xl transition-all duration-300"
                 onClick={() => window.location.href = '/subscription-info'}
               >
                 <FiSettings size={20} />
