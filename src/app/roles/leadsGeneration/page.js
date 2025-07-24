@@ -194,7 +194,10 @@ const IndustryForm = ({ onSubmit, editingData, onCancel, onError }) => {
                 name="industryType"
                 value={formData.industryType}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 hover:border-[#1a84de]/50 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiAjsfk0JyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93biI+PHBhdGggZD0ibTYgOSA2IDYgNi02Ii8+PC9zdmc+')] bg-no-repeat bg-[center_right_1rem] pr-10"
+                disabled={!!editingData} // Make read-only when editing
+                className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 hover:border-[#1a84de]/50 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiAjsfk0JyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93biI+PHBhdGggZD0ibTYgOSA2IDYgNi02Ii8+PC9zdmc+')] bg-no-repeat bg-[center_right_1rem] pr-10 ${
+                  editingData ? 'bg-gray-100 cursor-not-allowed' : ''
+                }`}
               >
                 <option value="">Select Industry Type</option>
                 <option value="technology">Technology</option>
@@ -524,7 +527,10 @@ const JobsForm = ({ onSubmit, editingData, onCancel, onError }) => {
                 name="industryType"
                 value={formData.industryType}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 hover:border-[#1a84de]/50 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiAjsfk0JyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93biI+PHBhdGggZD0ibTYgOSA2IDYgNi02Ii8+PC9zdmc+')] bg-no-repeat bg-[center_right_1rem] pr-10"
+                disabled={!!editingData} // Make read-only when editing
+                className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 hover:border-[#1a84de]/50 appearance-none bg-white bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiAjsfk0JyIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93biI+PHBhdGggZD0ibTYgOSA2IDYgNi02Ci8+PC9zdmc+')] bg-no-repeat bg-[center_right_1rem] pr-10 ${
+                  editingData ? 'bg-gray-100 cursor-not-allowed' : ''
+                }`}
               >
                 <option value="">Select Industry Type</option>
                 <option value="technology">Technology</option>
@@ -691,8 +697,11 @@ const JobsForm = ({ onSubmit, editingData, onCancel, onError }) => {
               name="jobTitle"
               value={formData.jobTitle}
               onChange={handleChange}
+              disabled={!!editingData} // Make read-only when editing
               placeholder="e.g., Senior Frontend Developer"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 placeholder-gray-400 hover:border-[#1a84de]/50"
+              className={`w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 placeholder-gray-400 hover:border-[#1a84de]/50 ${
+                editingData ? 'bg-gray-100 cursor-not-allowed' : ''
+              }`}
             />
           </div>
 
@@ -843,6 +852,18 @@ export default function LeadsGenerationPage() {
       }
     }
   }, [user, isAuthenticated]);
+
+  // Listen for credits updates
+  useEffect(() => {
+    const handleCreditsUpdate = () => {
+      fetchCredits();
+    };
+
+    window.addEventListener('creditsUpdated', handleCreditsUpdate);
+    return () => {
+      window.removeEventListener('creditsUpdated', handleCreditsUpdate);
+    };
+  }, [fetchCredits]);
 
   useEffect(() => {
     fetchCredits();
@@ -1005,14 +1026,10 @@ export default function LeadsGenerationPage() {
 
   // Function to handle edit
   const handleEdit = useCallback((entry) => {
-    if (credits <= 0) {
-      showErrorMessage("You don't have enough credits to edit entries. Please purchase more credits.");
-      return;
-    }
     setEditingEntry(entry);
     setSelected(entry.type);
     setShowForm(true);
-  }, [credits, showErrorMessage]);
+  }, [showErrorMessage]);
 
   // Function to handle delete
   const handleDelete = useCallback(async (entry) => {
@@ -1277,6 +1294,7 @@ export default function LeadsGenerationPage() {
                 return;
               }
               setShowForm(true);
+              setEditingEntry(null); // Clear editing state when adding new entry
             }}
             className={`px-6 py-3 bg-[#1a84de] hover:bg-[#24AC4A] text-white font-semibold rounded-xl focus:outline-none transition-all duration-300 ${credits === 0 ? 'opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400' : ''}`}
             disabled={credits === 0}

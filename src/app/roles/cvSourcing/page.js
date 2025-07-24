@@ -29,19 +29,33 @@ export default function CVSourcingPage() {
   const [credits, setCredits] = useState(0)
 
   // Fetch credits from subscription
-  useEffect(() => {
-    const fetchCredits = async () => {
-      if (user && isAuthenticated) {
-        try {
-          const sub = await import("@/lib/subscription");
-          const subData = await sub.getCurrentSubscription(user.id);
-          setCredits(subData?.credits?.total || 0);
-        } catch (error) {
-          console.error('Error fetching credits:', error);
-          setCredits(0);
-        }
+  const fetchCredits = async () => {
+    if (user && isAuthenticated) {
+      try {
+        const sub = await import("@/lib/subscription");
+        const subData = await sub.getCurrentSubscription(user.id);
+        setCredits(subData?.credits?.total || 0);
+      } catch (error) {
+        console.error('Error fetching credits:', error);
+        setCredits(0);
       }
+    }
+  };
+
+  // Listen for credits updates
+  useEffect(() => {
+    const handleCreditsUpdate = () => {
+      fetchCredits();
     };
+
+    window.addEventListener('creditsUpdated', handleCreditsUpdate);
+    return () => {
+      window.removeEventListener('creditsUpdated', handleCreditsUpdate);
+    };
+  }, [user, isAuthenticated]);
+
+  // Initial credits fetch
+  useEffect(() => {
     fetchCredits();
   }, [user, isAuthenticated]);
 
@@ -117,14 +131,6 @@ export default function CVSourcingPage() {
   }
 
   const handleEdit = (role) => {
-    if (credits <= 0) {
-      setMessage("You don't have enough credits to edit roles. Please purchase more credits.")
-      setMessageType('error')
-      setTimeout(() => {
-        setMessage('')
-      }, 5000)
-      return
-    }
     setEditingRole(role)
     setIsSheetOpen(true)
   }
@@ -196,6 +202,18 @@ export default function CVSourcingPage() {
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
               <button 
+                onClick={() => {
+                  if (credits === 0) {
+                    setMessage("You don't have enough credits to add new roles. Please purchase more credits.")
+                    setMessageType('error')
+                    setTimeout(() => {
+                      setMessage('')
+                    }, 5000)
+                    return
+                  }
+                  setEditingRole(null) // Clear editing state when adding new role
+                  setIsSheetOpen(true)
+                }}
                 className={`rounded-lg bg-[#0958d9] px-6 py-2 font-semibold text-white transition-colors hover:bg-[#24AC4A] ${credits === 0 ? 'opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400' : ''}`}
                 disabled={credits === 0}
               >

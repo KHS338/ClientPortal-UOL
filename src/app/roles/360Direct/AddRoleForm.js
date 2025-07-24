@@ -248,6 +248,35 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
         // Dispatch credits updated event
         window.dispatchEvent(new CustomEvent('creditsUpdated'));
 
+        // Dispatch role activity event for dashboard update
+        window.dispatchEvent(new CustomEvent(editingRole ? 'roleUpdated' : 'roleCreated', {
+          detail: {
+            service: '360/Direct',
+            roleTitle: roleData.roleTitle,
+            action: editingRole ? 'updated' : 'created'
+          }
+        }));
+
+        // Store activity in localStorage for dashboard
+        try {
+          const activity = {
+            id: `direct-${Date.now()}`,
+            action: editingRole ? "Direct role updated" : "Direct role created",
+            service: "360/Direct",
+            role: roleData.roleTitle,
+            time: "Just now",
+            status: "active",
+            createdAt: new Date()
+          };
+
+          const existingActivities = JSON.parse(localStorage.getItem('recentRoleActivity') || '[]');
+          const updatedActivities = [activity, ...existingActivities].slice(0, 10);
+          localStorage.setItem('recentRoleActivity', JSON.stringify(updatedActivities));
+          console.log('360 Direct - Stored activity in localStorage:', activity);
+        } catch (error) {
+          console.log('360 Direct - Error storing activity in localStorage:', error);
+        }
+
         // Reset form only if creating new role
         if (!editingRole) {
           setRoleData({
@@ -315,7 +344,10 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
                 required
                 value={roleData.roleTitle}
                 onChange={(e) => handleInputChange('roleTitle', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                disabled={!!editingRole} // Make read-only when editing
+                className={`w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                  editingRole ? 'bg-gray-100 cursor-not-allowed' : ''
+                }`}
                 placeholder="e.g., Senior Frontend Developer"
               />
             </div>

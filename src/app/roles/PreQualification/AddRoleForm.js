@@ -163,6 +163,35 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
         // Dispatch credits updated event
         window.dispatchEvent(new CustomEvent('creditsUpdated'));
 
+        // Dispatch role activity event for dashboard update
+        window.dispatchEvent(new CustomEvent(editingRole ? 'roleUpdated' : 'roleCreated', {
+          detail: {
+            service: 'Prequalification',
+            roleTitle: roleData.roleTitle,
+            action: editingRole ? 'updated' : 'created'
+          }
+        }));
+
+        // Store activity in localStorage for dashboard
+        try {
+          const activity = {
+            id: `prequal-${Date.now()}`,
+            action: editingRole ? "Assessment updated" : "Assessment created",
+            service: "Prequalification",
+            role: roleData.roleTitle,
+            time: "Just now",
+            status: "active",
+            createdAt: new Date()
+          };
+
+          const existingActivities = JSON.parse(localStorage.getItem('recentRoleActivity') || '[]');
+          const updatedActivities = [activity, ...existingActivities].slice(0, 10);
+          localStorage.setItem('recentRoleActivity', JSON.stringify(updatedActivities));
+          console.log('Prequalification - Stored activity in localStorage:', activity);
+        } catch (error) {
+          console.log('Prequalification - Error storing activity in localStorage:', error);
+        }
+
         // Reset form only if creating new role
         if (!editingRole) {
           setRoleData({
@@ -229,7 +258,10 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
                 required
                 value={roleData.roleTitle}
                 onChange={(e) => handleInputChange('roleTitle', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                disabled={!!editingRole} // Make read-only when editing
+                className={`w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                  editingRole ? 'bg-gray-100 cursor-not-allowed' : ''
+                }`}
                 placeholder="e.g., Senior Frontend Developer"
               />
             </div>
@@ -257,53 +289,14 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Location <span className="text-red-500">*</span>
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  required
-                  value={showLocationDropdown ? locationSearch : (roleData.location || '')}
-                  onChange={(e) => {
-                    setLocationSearch(e.target.value)
-                    setShowLocationDropdown(true)
-                  }}
-                  onFocus={() => {
-                    setShowLocationDropdown(true)
-                    setLocationSearch('')
-                  }}
-                  onBlur={() => {
-                    setTimeout(() => {
-                      setShowLocationDropdown(false)
-                      if (!roleData.location) {
-                        setLocationSearch('')
-                      }
-                    }, 200)
-                  }}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  placeholder="Search for a location..."
-                />
-                
-                {showLocationDropdown && (
-                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    {filteredLocations.length > 0 ? (
-                      filteredLocations.map((location) => (
-                        <div
-                          key={location}
-                          onClick={() => {
-                            handleInputChange('location', location)
-                            setShowLocationDropdown(false)
-                            setLocationSearch('')
-                          }}
-                          className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm"
-                        >
-                          {location}
-                        </div>
-                      ))
-                    ) : (
-                      <div className="px-4 py-2 text-gray-500 text-sm">No locations found</div>
-                    )}
-                  </div>
-                )}
-              </div>
+              <input
+                type="text"
+                required
+                value={roleData.location}
+                onChange={(e) => handleInputChange('location', e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="e.g., London, New York"
+              />
             </div>
 
             {/* Postal Code */}

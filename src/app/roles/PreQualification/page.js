@@ -26,6 +26,40 @@ export default function PreQualificationPage() {
   const [editingRole, setEditingRole] = useState(null)
   const [message, setMessage] = useState('')
   const [messageType, setMessageType] = useState('success')
+  const [credits, setCredits] = useState(0)
+
+  // Fetch credits from subscription
+  const fetchCredits = async () => {
+    if (user && isAuthenticated) {
+      try {
+        const sub = await import("@/lib/subscription");
+        const subData = await sub.getCurrentSubscription(user.id);
+        setCredits(subData?.credits?.total || 0);
+      } catch (error) {
+        console.error('Error fetching credits:', error);
+        setCredits(0);
+      }
+    }
+  };
+
+  // Listen for credits updates
+  useEffect(() => {
+    const handleCreditsUpdate = () => {
+      fetchCredits();
+    };
+
+    window.addEventListener('creditsUpdated', handleCreditsUpdate);
+    return () => {
+      window.removeEventListener('creditsUpdated', handleCreditsUpdate);
+    };
+  }, [user, isAuthenticated]);
+
+  // Initial credits fetch
+  useEffect(() => {
+    if (isAuthenticated && user && !authLoading) {
+      fetchCredits();
+    }
+  }, [isAuthenticated, user, authLoading]);
 
   // Fetch prequalification data from API
   const fetchData = async () => {
@@ -78,14 +112,6 @@ export default function PreQualificationPage() {
 
   // Handle editing a role
   const handleEdit = (role) => {
-    if (credits <= 0) {
-      setMessage("You don't have enough credits to edit roles. Please purchase more credits.")
-      setMessageType('error')
-      setTimeout(() => {
-        setMessage('')
-      }, 5000)
-      return
-    }
     setEditingRole(role)
     setIsSheetOpen(true)
   }
@@ -130,13 +156,31 @@ export default function PreQualificationPage() {
       )}
 
       <div className="container mx-auto px-4 py-8 flex flex-col items-center">
+        <div className="mb-2 text-lg font-semibold text-gray-700">
+          Credits Remaining: <span className={credits === 0 ? "text-red-600" : "text-green-600"}>{credits}</span>
+        </div>
         <h1 className="mb-4 text-center text-4xl font-bold text-gray-900">
           Manage Your Prequalification Roles
         </h1>
 
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
           <SheetTrigger asChild>
-            <button className="rounded-lg bg-[#0958d9] px-6 py-2 font-semibold text-white transition-colors hover:bg-[#24AC4A]">
+            <button 
+              onClick={() => {
+                if (credits === 0) {
+                  setMessage("You don't have enough credits to add new roles. Please purchase more credits.")
+                  setMessageType('error')
+                  setTimeout(() => {
+                    setMessage('')
+                  }, 5000)
+                  return
+                }
+                setEditingRole(null) // Clear editing state when adding new role
+                setIsSheetOpen(true)
+              }}
+              className={`rounded-lg bg-[#0958d9] px-6 py-2 font-semibold text-white transition-colors hover:bg-[#24AC4A] ${credits === 0 ? 'opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400' : ''}`}
+              disabled={credits === 0}
+            >
               Add Prequalification Role
             </button>
           </SheetTrigger>

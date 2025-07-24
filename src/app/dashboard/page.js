@@ -19,6 +19,8 @@ export default function DashboardPage() {
   const [userSubscription, setUserSubscription] = useState(null);
   const [totalRemainingCredits, setTotalRemainingCredits] = useState(0);
   const [userCredits, setUserCredits] = useState([]);
+  const [recentRoleActivity, setRecentRoleActivity] = useState([]);
+  const [isLoadingActivity, setIsLoadingActivity] = useState(true);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -27,6 +29,251 @@ export default function DashboardPage() {
 
     return () => clearInterval(timer);
   }, []);
+
+  // Function to fetch recent role activities from all services
+  const fetchRecentRoleActivity = async () => {
+    try {
+      setIsLoadingActivity(true);
+      const userId = 1; // TODO: Get from auth context
+      const activities = [];
+
+      console.log('Dashboard - Fetching recent role activity for user:', userId);
+
+      // Fetch from CV Sourcing
+      try {
+        console.log('Dashboard - Fetching CV Sourcing data...');
+        const cvResponse = await fetch(`http://localhost:3001/cv-sourcing/user/${userId}`);
+        console.log('Dashboard - CV Sourcing response status:', cvResponse.status);
+        
+        if (cvResponse.ok) {
+          const cvRoles = await cvResponse.json();
+          console.log('Dashboard - CV Sourcing roles:', cvRoles);
+          
+          if (Array.isArray(cvRoles) && cvRoles.length > 0) {
+            const cvActivities = cvRoles.slice(0, 3).map(role => ({
+              id: `cv-${role.id}`,
+              action: "Role posted",
+              service: "CV Sourcing",
+              role: role.roleTitle,
+              time: formatTimeAgo(new Date(role.createdAt || role.created_at || Date.now())),
+              status: "active",
+              createdAt: new Date(role.createdAt || role.created_at || Date.now())
+            }));
+            activities.push(...cvActivities);
+            console.log('Dashboard - Added CV activities:', cvActivities.length);
+          }
+        }
+      } catch (error) {
+        console.log('Dashboard - CV Sourcing data not available:', error.message);
+      }
+
+      // Fetch from Prequalification
+      try {
+        console.log('Dashboard - Fetching Prequalification data...');
+        const prequalResponse = await fetch(`http://localhost:3001/prequalification/user/${userId}`);
+        console.log('Dashboard - Prequalification response status:', prequalResponse.status);
+        
+        if (prequalResponse.ok) {
+          const prequalRoles = await prequalResponse.json();
+          console.log('Dashboard - Prequalification roles:', prequalRoles);
+          
+          if (Array.isArray(prequalRoles) && prequalRoles.length > 0) {
+            const prequalActivities = prequalRoles.slice(0, 3).map(role => ({
+              id: `prequal-${role.id}`,
+              action: "Assessment created",
+              service: "Prequalification",
+              role: role.roleTitle,
+              time: formatTimeAgo(new Date(role.createdAt || role.created_at || Date.now())),
+              status: "active",
+              createdAt: new Date(role.createdAt || role.created_at || Date.now())
+            }));
+            activities.push(...prequalActivities);
+            console.log('Dashboard - Added Prequalification activities:', prequalActivities.length);
+          }
+        }
+      } catch (error) {
+        console.log('Dashboard - Prequalification data not available:', error.message);
+      }
+
+      // Fetch from 360 Direct
+      try {
+        console.log('Dashboard - Fetching 360 Direct data...');
+        const directResponse = await fetch(`http://localhost:3001/direct/user/${userId}`);
+        console.log('Dashboard - 360 Direct response status:', directResponse.status);
+        
+        if (directResponse.ok) {
+          const directRoles = await directResponse.json();
+          console.log('Dashboard - 360 Direct roles:', directRoles);
+          
+          if (Array.isArray(directRoles) && directRoles.length > 0) {
+            const directActivities = directRoles.slice(0, 3).map(role => ({
+              id: `direct-${role.id}`,
+              action: "Direct role created",
+              service: "360/Direct",
+              role: role.roleTitle,
+              time: formatTimeAgo(new Date(role.createdAt || role.created_at || Date.now())),
+              status: "active",
+              createdAt: new Date(role.createdAt || role.created_at || Date.now())
+            }));
+            activities.push(...directActivities);
+            console.log('Dashboard - Added 360 Direct activities:', directActivities.length);
+          }
+        }
+      } catch (error) {
+        console.log('Dashboard - 360 Direct data not available:', error.message);
+      }
+
+      // Fetch from Lead Generation Jobs
+      try {
+        console.log('Dashboard - Fetching Lead Generation Jobs data...');
+        const leadJobsResponse = await fetch(`http://localhost:3001/lead-generation-job/user/${userId}`);
+        console.log('Dashboard - Lead Generation Jobs response status:', leadJobsResponse.status);
+        
+        if (leadJobsResponse.ok) {
+          const leadJobs = await leadJobsResponse.json();
+          console.log('Dashboard - Lead Generation Jobs:', leadJobs);
+          
+          if (Array.isArray(leadJobs) && leadJobs.length > 0) {
+            const leadJobActivities = leadJobs.slice(0, 2).map(job => ({
+              id: `leadjob-${job.id}`,
+              action: "Job lead created",
+              service: "Lead Generation",
+              role: job.jobTitle || job.title,
+              time: formatTimeAgo(new Date(job.createdAt || job.created_at || Date.now())),
+              status: "active",
+              createdAt: new Date(job.createdAt || job.created_at || Date.now())
+            }));
+            activities.push(...leadJobActivities);
+            console.log('Dashboard - Added Lead Generation Job activities:', leadJobActivities.length);
+          }
+        }
+      } catch (error) {
+        console.log('Dashboard - Lead Generation Jobs data not available:', error.message);
+      }
+
+      // Fetch from Lead Generation Industry
+      try {
+        console.log('Dashboard - Fetching Lead Generation Industry data...');
+        const leadIndustryResponse = await fetch(`http://localhost:3001/lead-generation-industry/user/${userId}`);
+        console.log('Dashboard - Lead Generation Industry response status:', leadIndustryResponse.status);
+        
+        if (leadIndustryResponse.ok) {
+          const leadIndustries = await leadIndustryResponse.json();
+          console.log('Dashboard - Lead Generation Industries:', leadIndustries);
+          
+          if (Array.isArray(leadIndustries) && leadIndustries.length > 0) {
+            const leadIndustryActivities = leadIndustries.slice(0, 2).map(industry => ({
+              id: `leadind-${industry.id}`,
+              action: "Industry lead created",
+              service: "Lead Generation",
+              role: industry.industryType || industry.type,
+              time: formatTimeAgo(new Date(industry.createdAt || industry.created_at || Date.now())),
+              status: "active",
+              createdAt: new Date(industry.createdAt || industry.created_at || Date.now())
+            }));
+            activities.push(...leadIndustryActivities);
+            console.log('Dashboard - Added Lead Generation Industry activities:', leadIndustryActivities.length);
+          }
+        }
+      } catch (error) {
+        console.log('Dashboard - Lead Generation Industry data not available:', error.message);
+      }
+
+      console.log('Dashboard - Total activities found:', activities.length);
+
+      // Sort activities by creation date (most recent first) and take top 5
+      const sortedActivities = activities
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .slice(0, 5);
+
+      console.log('Dashboard - Final sorted activities:', sortedActivities);
+      setRecentRoleActivity(sortedActivities);
+
+      // If no activities found, add some mock data for testing
+      if (sortedActivities.length === 0) {
+        console.log('Dashboard - No activities found, checking localStorage and adding mock data');
+        
+        // Check if there are any roles stored in localStorage from the role pages
+        const localStorageActivities = [];
+        
+        try {
+          // Check for recently created roles in localStorage
+          const recentRoles = localStorage.getItem('recentRoleActivity');
+          if (recentRoles) {
+            const parsed = JSON.parse(recentRoles);
+            if (Array.isArray(parsed)) {
+              localStorageActivities.push(...parsed);
+            }
+          }
+        } catch (error) {
+          console.log('Dashboard - Error reading localStorage:', error);
+        }
+        
+        if (localStorageActivities.length > 0) {
+          console.log('Dashboard - Found activities in localStorage:', localStorageActivities);
+          setRecentRoleActivity(localStorageActivities.slice(0, 5));
+        } else {
+          // Add mock data for demonstration
+          const mockActivities = [
+            {
+              id: 'mock-1',
+              action: "Role posted",
+              service: "CV Sourcing",
+              role: "Senior Software Engineer",
+              time: "2 hours ago",
+              status: "active",
+              createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000)
+            },
+            {
+              id: 'mock-2',
+              action: "Assessment created",
+              service: "Prequalification",
+              role: "Frontend Developer",
+              time: "4 hours ago",
+              status: "active",
+              createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000)
+            },
+            {
+              id: 'mock-3',
+              action: "Direct role created",
+              service: "360/Direct",
+              role: "Product Manager",
+              time: "1 day ago",
+              status: "active",
+              createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000)
+            }
+          ];
+          setRecentRoleActivity(mockActivities);
+          console.log('Dashboard - Added mock activities for demonstration');
+        }
+      }
+
+    } catch (error) {
+      console.error('Dashboard - Error fetching recent role activity:', error);
+      setRecentRoleActivity([]);
+    } finally {
+      setIsLoadingActivity(false);
+    }
+  };
+
+  // Helper function to format time ago
+  const formatTimeAgo = (date) => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    
+    if (diffInSeconds < 60) {
+      return 'Just now';
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else {
+      const days = Math.floor(diffInSeconds / 86400);
+      return `${days} day${days > 1 ? 's' : ''} ago`;
+    }
+  };
 
   // Load subscription data from backend (prioritize backend over localStorage)
   useEffect(() => {
@@ -83,10 +330,19 @@ export default function DashboardPage() {
     // Load initial subscription data
     loadSubscription();
 
+    // Load initial recent role activity
+    fetchRecentRoleActivity();
+
     // Listen for custom event when subscription is updated
     const handleSubscriptionUpdate = () => {
       console.log('Dashboard - Subscription update event detected');
       loadSubscription();
+    };
+
+    // Listen for role updates to refresh activity
+    const handleRoleUpdate = () => {
+      console.log('Dashboard - Role update event detected');
+      fetchRecentRoleActivity();
     };
 
     // Listen for user logout event to reset state
@@ -105,10 +361,18 @@ export default function DashboardPage() {
 
     window.addEventListener('subscriptionUpdated', handleSubscriptionUpdate);
     window.addEventListener('userLoggedOut', handleUserLogout);
+    window.addEventListener('roleCreated', handleRoleUpdate);
+    window.addEventListener('roleUpdated', handleRoleUpdate);
+
+    // Set up periodic refresh for recent activity (every 30 seconds)
+    const activityRefreshInterval = setInterval(fetchRecentRoleActivity, 30000);
 
     return () => {
       window.removeEventListener('subscriptionUpdated', handleSubscriptionUpdate);
       window.removeEventListener('userLoggedOut', handleUserLogout);
+      window.removeEventListener('roleCreated', handleRoleUpdate);
+      window.removeEventListener('roleUpdated', handleRoleUpdate);
+      clearInterval(activityRefreshInterval);
     };
   }, []);
 
@@ -120,11 +384,6 @@ export default function DashboardPage() {
     interviewsScheduled: 8,
     placementsThisMonth: 3
   };
-
-  const recentRoleActivity = [
-    { id: 1, action: "New role posted", service: "CV Sourcing", role: "Senior Developer", time: "2 hours ago", status: "active" },
-   
-  ];
 
   const subscriptionServices = [
     { 
@@ -272,27 +531,55 @@ export default function DashboardPage() {
                 <h3 className="text-xl font-bold text-gray-800 flex items-center gap-3">
                   <FiBriefcase className="text-[#1a84de]" />
                   Recent Role Activity
+                  {isLoadingActivity && (
+                    <div className="w-4 h-4 border-2 border-[#1a84de] border-t-transparent rounded-full animate-spin"></div>
+                  )}
                 </h3>
-               
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={fetchRecentRoleActivity}
+                  disabled={isLoadingActivity}
+                  className="text-[#1a84de] border-[#1a84de] hover:bg-[#1a84de] hover:text-white"
+                >
+                  {isLoadingActivity ? 'Refreshing...' : 'Refresh'}
+                </Button>
               </div>
               <div className="space-y-4">
-                {recentRoleActivity.map((activity) => (
-                  <div key={activity.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-3 h-3 rounded-full ${
-                        activity.status === 'completed' ? 'bg-green-500' : 
-                        activity.status === 'active' ? 'bg-blue-500' : 'bg-yellow-500'
-                      }`}></div>
-                      <div>
-                        <p className="font-medium text-gray-800">{activity.action}</p>
-                        <p className="text-sm text-gray-600">{activity.role} • {activity.service}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-500">{activity.time}</p>
+                {isLoadingActivity && recentRoleActivity.length === 0 ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="text-center">
+                      <div className="w-8 h-8 border-2 border-[#1a84de] border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                      <p className="text-gray-500">Loading recent activities...</p>
                     </div>
                   </div>
-                ))}
+                ) : recentRoleActivity.length > 0 ? (
+                  recentRoleActivity.map((activity) => (
+                    <div key={activity.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-3 h-3 rounded-full ${
+                          activity.status === 'completed' ? 'bg-green-500' : 
+                          activity.status === 'active' ? 'bg-blue-500' : 'bg-yellow-500'
+                        }`}></div>
+                        <div>
+                          <p className="font-medium text-gray-800">{activity.action}</p>
+                          <p className="text-sm text-gray-600">{activity.role} • {activity.service}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">{activity.time}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="text-center">
+                      <FiBriefcase className="w-12 h-12 text-gray-300 mx-auto mb-2" />
+                      <p className="text-gray-500 mb-2">No recent role activity</p>
+                      <p className="text-sm text-gray-400">Create your first role to see activity here</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </Card>
 

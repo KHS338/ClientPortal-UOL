@@ -95,6 +95,35 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
         onSuccess(message)
       }
       
+      // Dispatch role activity event for dashboard update
+      window.dispatchEvent(new CustomEvent(editingRole ? 'roleUpdated' : 'roleCreated', {
+        detail: {
+          service: 'Lead Generation',
+          roleTitle: roleData.roleTitle,
+          action: editingRole ? 'updated' : 'created'
+        }
+      }));
+
+      // Store activity in localStorage for dashboard
+      try {
+        const activity = {
+          id: `lead-${Date.now()}`,
+          action: editingRole ? "Lead updated" : "Lead created",
+          service: "Lead Generation",
+          role: roleData.roleTitle,
+          time: "Just now",
+          status: "active",
+          createdAt: new Date()
+        };
+
+        const existingActivities = JSON.parse(localStorage.getItem('recentRoleActivity') || '[]');
+        const updatedActivities = [activity, ...existingActivities].slice(0, 10);
+        localStorage.setItem('recentRoleActivity', JSON.stringify(updatedActivities));
+        console.log('Lead Generation - Stored activity in localStorage:', activity);
+      } catch (error) {
+        console.log('Lead Generation - Error storing activity in localStorage:', error);
+      }
+      
       // Reset form
       setRoleData({
         roleTitle: '',

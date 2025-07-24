@@ -40,17 +40,7 @@ export const jobsColumns = [
           >
             Edit
           </button>
-          <button
-            onClick={() => {
-              if (window.handleDeleteRole) {
-                window.handleDeleteRole(role)
-              }
-            }}
-            className="rounded bg-red-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-red-700"
-            title="Delete Entry"
-          >
-            Delete
-          </button>
+          
         </div>
       );
     },
@@ -83,17 +73,7 @@ export const industryColumns = [
           >
             Edit
           </button>
-          <button
-            onClick={() => {
-              if (window.handleDeleteRole) {
-                window.handleDeleteRole(role)
-              }
-            }}
-            className="rounded bg-red-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-red-700"
-            title="Delete Entry"
-          >
-            Delete
-          </button>
+          
         </div>
       );
     },
