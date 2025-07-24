@@ -14,7 +14,6 @@ export const columns = [
   { accessorKey: "industry", header: "Industry" },
   { accessorKey: "experienceRequired", header: "Required EXP" },
   { accessorKey: "searchRadius", header: "Search Radius" },
-  { accessorKey: "acmCategory", header: "ACM Category" },
   {
     id: "actions",
     header: "Actions",

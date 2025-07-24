@@ -126,19 +126,19 @@ export default function DashboardPage() {
       // Fetch from Lead Generation Jobs
       try {
         console.log('Dashboard - Fetching Lead Generation Jobs data...');
-        const leadJobsResponse = await fetch(`http://localhost:3001/lead-generation-job/user/${userId}`);
+        const leadJobsResponse = await fetch(`http://localhost:3001/lead-generation-job?userId=${userId}`);
         console.log('Dashboard - Lead Generation Jobs response status:', leadJobsResponse.status);
         
         if (leadJobsResponse.ok) {
-          const leadJobs = await leadJobsResponse.json();
-          console.log('Dashboard - Lead Generation Jobs:', leadJobs);
+          const leadJobsData = await leadJobsResponse.json();
+          console.log('Dashboard - Lead Generation Jobs data:', leadJobsData);
           
-          if (Array.isArray(leadJobs) && leadJobs.length > 0) {
-            const leadJobActivities = leadJobs.slice(0, 2).map(job => ({
+          if (leadJobsData.success && Array.isArray(leadJobsData.data) && leadJobsData.data.length > 0) {
+            const leadJobActivities = leadJobsData.data.slice(0, 2).map(job => ({
               id: `leadjob-${job.id}`,
               action: "Job lead created",
               service: "Lead Generation",
-              role: job.jobTitle || job.title,
+              role: job.jobTitle || job.title || job.roleTitle,
               time: formatTimeAgo(new Date(job.createdAt || job.created_at || Date.now())),
               status: "active",
               createdAt: new Date(job.createdAt || job.created_at || Date.now())
@@ -154,19 +154,19 @@ export default function DashboardPage() {
       // Fetch from Lead Generation Industry
       try {
         console.log('Dashboard - Fetching Lead Generation Industry data...');
-        const leadIndustryResponse = await fetch(`http://localhost:3001/lead-generation-industry/user/${userId}`);
+        const leadIndustryResponse = await fetch(`http://localhost:3001/lead-generation-industry?userId=${userId}`);
         console.log('Dashboard - Lead Generation Industry response status:', leadIndustryResponse.status);
         
         if (leadIndustryResponse.ok) {
-          const leadIndustries = await leadIndustryResponse.json();
-          console.log('Dashboard - Lead Generation Industries:', leadIndustries);
+          const leadIndustryData = await leadIndustryResponse.json();
+          console.log('Dashboard - Lead Generation Industry data:', leadIndustryData);
           
-          if (Array.isArray(leadIndustries) && leadIndustries.length > 0) {
-            const leadIndustryActivities = leadIndustries.slice(0, 2).map(industry => ({
+          if (leadIndustryData.success && Array.isArray(leadIndustryData.data) && leadIndustryData.data.length > 0) {
+            const leadIndustryActivities = leadIndustryData.data.slice(0, 2).map(industry => ({
               id: `leadind-${industry.id}`,
               action: "Industry lead created",
               service: "Lead Generation",
-              role: industry.industryType || industry.type,
+              role: industry.industryType || industry.type || industry.roleTitle,
               time: formatTimeAgo(new Date(industry.createdAt || industry.created_at || Date.now())),
               status: "active",
               createdAt: new Date(industry.createdAt || industry.created_at || Date.now())
@@ -181,72 +181,28 @@ export default function DashboardPage() {
 
       console.log('Dashboard - Total activities found:', activities.length);
 
-      // Sort activities by creation date (most recent first) and take top 5
+      // Also check localStorage for recently created activities
+      try {
+        const recentRoles = localStorage.getItem('recentRoleActivity');
+        if (recentRoles) {
+          const parsed = JSON.parse(recentRoles);
+          if (Array.isArray(parsed)) {
+            console.log('Dashboard - Found activities in localStorage:', parsed.length);
+            // Add localStorage activities to the main activities array
+            activities.push(...parsed);
+          }
+        }
+      } catch (error) {
+        console.log('Dashboard - Error reading localStorage:', error);
+      }
+
+      // Sort all activities (API + localStorage) by creation date (most recent first) and take top 5
       const sortedActivities = activities
-        .sort((a, b) => b.createdAt - a.createdAt)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .slice(0, 5);
 
-      console.log('Dashboard - Final sorted activities:', sortedActivities);
+      console.log('Dashboard - Final sorted activities (API + localStorage):', sortedActivities);
       setRecentRoleActivity(sortedActivities);
-
-      // If no activities found, add some mock data for testing
-      if (sortedActivities.length === 0) {
-        console.log('Dashboard - No activities found, checking localStorage and adding mock data');
-        
-        // Check if there are any roles stored in localStorage from the role pages
-        const localStorageActivities = [];
-        
-        try {
-          // Check for recently created roles in localStorage
-          const recentRoles = localStorage.getItem('recentRoleActivity');
-          if (recentRoles) {
-            const parsed = JSON.parse(recentRoles);
-            if (Array.isArray(parsed)) {
-              localStorageActivities.push(...parsed);
-            }
-          }
-        } catch (error) {
-          console.log('Dashboard - Error reading localStorage:', error);
-        }
-        
-        if (localStorageActivities.length > 0) {
-          console.log('Dashboard - Found activities in localStorage:', localStorageActivities);
-          setRecentRoleActivity(localStorageActivities.slice(0, 5));
-        } else {
-          // Add mock data for demonstration
-          const mockActivities = [
-            {
-              id: 'mock-1',
-              action: "Role posted",
-              service: "CV Sourcing",
-              role: "Senior Software Engineer",
-              time: "2 hours ago",
-              status: "active",
-              createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000)
-            },
-            {
-              id: 'mock-2',
-              action: "Assessment created",
-              service: "Prequalification",
-              role: "Frontend Developer",
-              time: "4 hours ago",
-              status: "active",
-              createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000)
-            },
-            {
-              id: 'mock-3',
-              action: "Direct role created",
-              service: "360/Direct",
-              role: "Product Manager",
-              time: "1 day ago",
-              status: "active",
-              createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000)
-            }
-          ];
-          setRecentRoleActivity(mockActivities);
-          console.log('Dashboard - Added mock activities for demonstration');
-        }
-      }
 
     } catch (error) {
       console.error('Dashboard - Error fetching recent role activity:', error);
@@ -336,7 +292,17 @@ export default function DashboardPage() {
     // Listen for custom event when subscription is updated
     const handleSubscriptionUpdate = () => {
       console.log('Dashboard - Subscription update event detected');
-      loadSubscription();
+      // Clear recent role activity when subscription changes
+      setRecentRoleActivity([]);
+      localStorage.removeItem('recentRoleActivity');
+      console.log('Dashboard - Cleared recent role activity due to subscription change');
+      
+      // Force reload subscription and activities after a brief delay
+      setTimeout(() => {
+        console.log('Dashboard - Refreshing subscription and activity data after subscription change');
+        loadSubscription();
+        fetchRecentRoleActivity();
+      }, 500);
     };
 
     // Listen for role updates to refresh activity
@@ -351,6 +317,8 @@ export default function DashboardPage() {
       setUserSubscription(null);
       setUserCredits([]);
       setTotalRemainingCredits(0);
+      setRecentRoleActivity([]);
+      localStorage.removeItem('recentRoleActivity');
       setSubscriptionInfo({
         currentPlan: "No Active Plan",
         billingCycle: "N/A",

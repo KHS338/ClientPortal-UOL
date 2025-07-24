@@ -140,8 +140,7 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
     salaryType: '',
     industry: '',
     experienceRequired: '',
-    searchRadius: '',
-    acmCategory: ''
+    searchRadius: ''
   })
 
   // Populate form when editing
@@ -159,8 +158,7 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
         salaryType: editingRole.salaryType || '',
         industry: editingRole.industry || '',
         experienceRequired: editingRole.experienceRequired || '',
-        searchRadius: editingRole.searchRadius || '',
-        acmCategory: editingRole.acmCategory || ''
+        searchRadius: editingRole.searchRadius || ''
       })
 
       // Set salary not defined if no salary values
@@ -203,7 +201,6 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
         industry: roleData.industry,
         experienceRequired: roleData.experienceRequired || null,
         searchRadius: roleData.searchRadius ? parseInt(roleData.searchRadius) : null,
-        acmCategory: roleData.acmCategory || null,
         userId: parseInt(user.id)
       }
 
@@ -291,8 +288,7 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
             salaryType: '',
             industry: '',
             experienceRequired: '',
-            searchRadius: '',
-            acmCategory: ''
+            searchRadius: ''
           })
           setSalaryNotDefined(false)
         }
@@ -533,21 +529,6 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
                   <option value="50">50 Miles</option>
                   <option value="100">100 Miles</option>
                   <option value="remote">Remote</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">ACM Category</label>
-                <select
-                  value={roleData.acmCategory}
-                  onChange={(e) => handleInputChange('acmCategory', e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                >
-                  <option value="">..</option>
-                  <option value="technical">Technical</option>
-                  <option value="management">Management</option>
-                  <option value="creative">Creative</option>
-                  <option value="sales">Sales</option>
                 </select>
               </div>
             </div>
