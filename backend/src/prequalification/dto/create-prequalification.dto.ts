@@ -51,10 +51,6 @@ export class CreatePrequalificationDto {
   @IsNumber()
   searchRadius?: number;
 
-  @IsOptional()
-  @IsString()
-  acmCategory?: string;
-
   @IsNumber()
   userId: number;
 }

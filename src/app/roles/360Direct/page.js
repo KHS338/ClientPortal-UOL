@@ -25,6 +25,24 @@ export default function DirectPage() {
   const [editingRole, setEditingRole] = useState(null)
   const [message, setMessage] = useState('')
   const [messageType, setMessageType] = useState('success')
+  const [credits, setCredits] = useState(0)
+
+  // Fetch credits from subscription
+  useEffect(() => {
+    const fetchCredits = async () => {
+      if (user && isAuthenticated) {
+        try {
+          const sub = await import("@/lib/subscription");
+          const subData = await sub.getCurrentSubscription(user.id);
+          setCredits(subData?.credits?.total || 0);
+        } catch (error) {
+          console.error('Error fetching credits:', error);
+          setCredits(0);
+        }
+      }
+    };
+    fetchCredits();
+  }, [user, isAuthenticated]);
 
   const countries = [
     "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina", "Armenia",
@@ -99,38 +117,16 @@ export default function DirectPage() {
   }
 
   const handleEdit = (role) => {
-    setEditingRole(role)
-    setIsSheetOpen(true)
-  }
-
-  const handleDeleteRole = async (role) => {
-    if (!confirm('Are you sure you want to delete this 360 direct role?')) {
+    if (credits <= 0) {
+      setMessage("You don't have enough credits to edit roles. Please purchase more credits.")
+      setMessageType('error')
+      setTimeout(() => {
+        setMessage('')
+      }, 5000)
       return
     }
-
-    try {
-      const response = await fetch(`http://localhost:3001/direct/${role.id}`, {
-        method: 'DELETE'
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        setMessage('360 Direct role deleted successfully! 🗑️')
-        setMessageType('success')
-        fetchData()
-        setTimeout(() => {
-          setMessage('')
-        }, 5000)
-      } else {
-        setMessage('Error deleting 360 direct role: ' + result.message)
-        setMessageType('error')
-      }
-    } catch (error) {
-      console.error('Error deleting 360 direct role:', error)
-      setMessage('Error deleting 360 direct role')
-      setMessageType('error')
-    }
+    setEditingRole(role)
+    setIsSheetOpen(true)
   }
 
   const closeMessage = () => {
@@ -139,13 +135,11 @@ export default function DirectPage() {
 
   useEffect(() => {
     window.handleEditRole = handleEdit
-    window.handleDeleteRole = handleDeleteRole
 
     return () => {
       delete window.handleEditRole
-      delete window.handleDeleteRole
     }
-  }, [handleEdit, handleDeleteRole])
+  }, [handleEdit])
 
   return (
     <ProtectedRoute>
@@ -173,13 +167,19 @@ export default function DirectPage() {
         )}
 
         <div className="container mx-auto px-4 py-8 flex flex-col items-center">
+          <div className="mb-2 text-lg font-semibold text-gray-700">
+            Credits Remaining: <span className={credits === 0 ? "text-red-600" : "text-green-600"}>{credits}</span>
+          </div>
           <h1 className="mb-4 text-center text-4xl font-bold text-gray-900">
             Manage Your 360 Direct Roles
           </h1>
 
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
-              <button className="rounded-lg bg-[#0958d9] px-6 py-2 font-semibold text-white transition-colors hover:bg-[#24AC4A]">
+              <button 
+                className={`rounded-lg bg-[#0958d9] px-6 py-2 font-semibold text-white transition-colors hover:bg-[#24AC4A] ${credits === 0 ? 'opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400' : ''}`}
+                disabled={credits === 0}
+              >
                 Add 360 Direct Role
               </button>
             </SheetTrigger>

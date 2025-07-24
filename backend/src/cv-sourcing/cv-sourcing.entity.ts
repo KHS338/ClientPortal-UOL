@@ -46,9 +46,6 @@ export class CvSourcingRole {
   @Column({ name: 'search_radius', type: 'int', nullable: true })
   searchRadius: number;
 
-  @Column({ name: 'acm_category', length: 100, nullable: true })
-  acmCategory: string;
-
   // Relationship with User
   @Column({ name: 'user_id' })
   userId: number;

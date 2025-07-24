@@ -26,6 +26,24 @@ export default function CVSourcingPage() {
   const [editingRole, setEditingRole] = useState(null)
   const [message, setMessage] = useState("")
   const [messageType, setMessageType] = useState("success")
+  const [credits, setCredits] = useState(0)
+
+  // Fetch credits from subscription
+  useEffect(() => {
+    const fetchCredits = async () => {
+      if (user && isAuthenticated) {
+        try {
+          const sub = await import("@/lib/subscription");
+          const subData = await sub.getCurrentSubscription(user.id);
+          setCredits(subData?.credits?.total || 0);
+        } catch (error) {
+          console.error('Error fetching credits:', error);
+          setCredits(0);
+        }
+      }
+    };
+    fetchCredits();
+  }, [user, isAuthenticated]);
 
   const fetchCvSourcingRoles = async () => {
 
@@ -52,7 +70,6 @@ export default function CVSourcingPage() {
           industry: role.industry,
           experienceRequired: role.experienceRequired || '',
           searchRadius: role.searchRadius || '',
-          acmCategory: role.acmCategory || '',
           status: role.status,
           cvsCount: role.cvsCount || 0,
           lisCount: role.lisCount || 0,
@@ -100,37 +117,22 @@ export default function CVSourcingPage() {
   }
 
   const handleEdit = (role) => {
+    if (credits <= 0) {
+      setMessage("You don't have enough credits to edit roles. Please purchase more credits.")
+      setMessageType('error')
+      setTimeout(() => {
+        setMessage('')
+      }, 5000)
+      return
+    }
     setEditingRole(role)
     setIsSheetOpen(true)
   }
 
-  const handleDeleteRole = async (role) => {
-    if (!confirm("Are you sure you want to delete this role?")) return
-
-    try {
-      const response = await fetch(`http://localhost:3001/cv-sourcing/${role.id}`, {
-        method: "DELETE",
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        handleSuccess("Role deleted successfully!")
-      } else {
-        throw new Error(result.message || "Failed to delete role")
-      }
-    } catch (error) {
-      console.error("Error deleting role:", error)
-      handleSuccess("Error deleting role: " + error.message, "error")
-    }
-  }
-
   useEffect(() => {
     window.handleEditRole = handleEdit
-    window.handleDeleteRole = handleDeleteRole
     return () => {
       delete window.handleEditRole
-      delete window.handleDeleteRole
     }
   }, [])
 
@@ -184,13 +186,19 @@ export default function CVSourcingPage() {
         )}
 
         <div className="container mx-auto px-4 py-8 flex flex-col items-center">
+          <div className="mb-2 text-lg font-semibold text-gray-700">
+            Credits Remaining: <span className={credits === 0 ? "text-red-600" : "text-green-600"}>{credits}</span>
+          </div>
           <h1 className="mb-4 text-center text-4xl font-bold text-gray-900">
             Manage Your CV Sourcing Roles
           </h1>
 
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
-              <button className="rounded-lg bg-[#0958d9] px-6 py-2 font-semibold text-white transition-colors hover:bg-[#24AC4A]">
+              <button 
+                className={`rounded-lg bg-[#0958d9] px-6 py-2 font-semibold text-white transition-colors hover:bg-[#24AC4A] ${credits === 0 ? 'opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400' : ''}`}
+                disabled={credits === 0}
+              >
                 Add CV Sourcing Role
               </button>
             </SheetTrigger>

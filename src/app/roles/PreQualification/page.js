@@ -78,41 +78,16 @@ export default function PreQualificationPage() {
 
   // Handle editing a role
   const handleEdit = (role) => {
-    setEditingRole(role)
-    setIsSheetOpen(true)
-  }
-
-  // Handle deleting a role
-  const handleDeleteRole = async (role) => {
-    if (!confirm('Are you sure you want to delete this prequalification role?')) {
+    if (credits <= 0) {
+      setMessage("You don't have enough credits to edit roles. Please purchase more credits.")
+      setMessageType('error')
+      setTimeout(() => {
+        setMessage('')
+      }, 5000)
       return
     }
-
-    try {
-      const response = await fetch(`http://localhost:3001/prequalification/${role.id}`, {
-        method: 'DELETE'
-      })
-      
-      const result = await response.json()
-      
-      if (result.success) {
-        setMessage('Prequalification role deleted successfully! 🗑️')
-        setMessageType('success')
-        fetchData() // Refresh data
-        
-        // Clear message after 5 seconds
-        setTimeout(() => {
-          setMessage('')
-        }, 5000)
-      } else {
-        setMessage('Error deleting prequalification role: ' + result.message)
-        setMessageType('error')
-      }
-    } catch (error) {
-      console.error('Error deleting prequalification role:', error)
-      setMessage('Error deleting prequalification role')
-      setMessageType('error')
-    }
+    setEditingRole(role)
+    setIsSheetOpen(true)
   }
 
   const closeMessage = () => {
@@ -122,13 +97,11 @@ export default function PreQualificationPage() {
   // Make handlers available globally for columns
   React.useEffect(() => {
     window.handleEditRole = handleEdit
-    window.handleDeleteRole = handleDeleteRole
 
     return () => {
       delete window.handleEditRole
-      delete window.handleDeleteRole
     }
-  }, [handleEdit, handleDeleteRole])
+  }, [handleEdit])
 
   return (
     <ProtectedRoute>

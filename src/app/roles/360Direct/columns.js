@@ -36,20 +36,6 @@ export const columns = [
           >
             Edit
           </button>
-          <button
-            onClick={() => {
-              console.log('Delete button clicked, role:', role) // Debug log
-              if (window.handleDeleteRole) {
-                window.handleDeleteRole(role)
-              } else {
-                console.error('handleDeleteRole not available on window')
-              }
-            }}
-            className="rounded bg-red-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-red-700"
-            title="Delete Role"
-          >
-            Delete
-          </button>
         </div>
       );
     },

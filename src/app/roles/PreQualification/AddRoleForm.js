@@ -9,6 +9,8 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [countrySearch, setCountrySearch] = useState("")
   const [showCountryDropdown, setShowCountryDropdown] = useState(false)
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false)
+  const [locationSearch, setLocationSearch] = useState("")
   
   const countries = [
     "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina", "Armenia",
@@ -43,6 +45,10 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
     country.toLowerCase().includes(countrySearch.toLowerCase())
   )
 
+  const filteredLocations = countries.filter((country) =>
+    country.toLowerCase().includes(locationSearch.toLowerCase())
+  )
+
   const [roleData, setRoleData] = useState({
     roleTitle: '',
     rolePriority: '',
@@ -55,8 +61,7 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
     salaryType: '',
     industry: '',
     experienceRequired: '',
-    searchRadius: '',
-    acmCategory: ''
+    searchRadius: ''
   })
 
   // Populate form when editing
@@ -74,8 +79,7 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
         salaryType: editingRole.salaryType || '',
         industry: editingRole.industry || '',
         experienceRequired: editingRole.experienceRequired || '',
-        searchRadius: editingRole.searchRadius || '',
-        acmCategory: editingRole.acmCategory || ''
+        searchRadius: editingRole.searchRadius || ''
       })
 
       // Set salary not defined if no salary values
@@ -115,7 +119,6 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
         industry: roleData.industry,
         experienceRequired: roleData.experienceRequired || null,
         searchRadius: roleData.searchRadius ? parseInt(roleData.searchRadius) : null,
-        acmCategory: roleData.acmCategory || null,
         userId: parseInt(user.id)
       }
 
@@ -174,8 +177,7 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
             salaryType: '',
             industry: '',
             experienceRequired: '',
-            searchRadius: '',
-            acmCategory: ''
+            searchRadius: ''
           })
           setSalaryNotDefined(false)
         }
@@ -255,14 +257,53 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Location <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                required
-                value={roleData.location}
-                onChange={(e) => handleInputChange('location', e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                placeholder="e.g., London, New York"
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  required
+                  value={showLocationDropdown ? locationSearch : (roleData.location || '')}
+                  onChange={(e) => {
+                    setLocationSearch(e.target.value)
+                    setShowLocationDropdown(true)
+                  }}
+                  onFocus={() => {
+                    setShowLocationDropdown(true)
+                    setLocationSearch('')
+                  }}
+                  onBlur={() => {
+                    setTimeout(() => {
+                      setShowLocationDropdown(false)
+                      if (!roleData.location) {
+                        setLocationSearch('')
+                      }
+                    }, 200)
+                  }}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="Search for a location..."
+                />
+                
+                {showLocationDropdown && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {filteredLocations.length > 0 ? (
+                      filteredLocations.map((location) => (
+                        <div
+                          key={location}
+                          onClick={() => {
+                            handleInputChange('location', location)
+                            setShowLocationDropdown(false)
+                            setLocationSearch('')
+                          }}
+                          className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm"
+                        >
+                          {location}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-4 py-2 text-gray-500 text-sm">No locations found</div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Postal Code */}
@@ -475,22 +516,6 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
                   <option value="50">50 Miles</option>
                   <option value="100">100 Miles</option>
                   <option value="remote">Remote</option>
-                </select>
-              </div>
-
-              {/* ACM */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">ACM Category</label>
-                <select
-                  value={roleData.acmCategory}
-                  onChange={(e) => handleInputChange('acmCategory', e.target.value)}
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                >
-                  <option value="">..</option>
-                  <option value="technical">Technical</option>
-                  <option value="management">Management</option>
-                  <option value="creative">Creative</option>
-                  <option value="sales">Sales</option>
                 </select>
               </div>
             </div>

@@ -823,11 +823,30 @@ const JobsForm = ({ onSubmit, editingData, onCancel, onError }) => {
 };
 
 // Main Component
-export default function RolesPage() {
+export default function LeadsGenerationPage() {
   const { isAuthenticated, isLoading: authLoading, user } = useAuth()
   const [data, setData] = useState([]);
   const [selected, setSelected] = useState("jobs");
   const [submittedData, setSubmittedData] = useState([]);
+  const [credits, setCredits] = useState(0);
+
+  // Fetch credits from subscription
+  const fetchCredits = useCallback(async () => {
+    if (user && isAuthenticated) {
+      try {
+        const sub = await import("@/lib/subscription");
+        const subData = await sub.getCurrentSubscription(user.id);
+        setCredits(subData?.credits?.total || 0);
+      } catch (error) {
+        console.error('Error fetching credits:', error);
+        setCredits(0);
+      }
+    }
+  }, [user, isAuthenticated]);
+
+  useEffect(() => {
+    fetchCredits();
+  }, [fetchCredits]);
   const [showForm, setShowForm] = useState(false); // Changed to false - show data table first
   const [editingEntry, setEditingEntry] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -972,6 +991,7 @@ export default function RolesPage() {
         setShowForm(false);
         setEditingEntry(null);
         await loadData(); // Reload data from backend
+        await fetchCredits(); // Immediately update credits after successful add/edit
       } else {
         showErrorMessage(result.message || 'Failed to save entry');
       }
@@ -981,14 +1001,18 @@ export default function RolesPage() {
     } finally {
       setLoading(false);
     }
-  }, [user, editingEntry, showSuccessMessage, showErrorMessage, loadData]);
+  }, [user, editingEntry, showSuccessMessage, showErrorMessage, loadData, fetchCredits]);
 
   // Function to handle edit
   const handleEdit = useCallback((entry) => {
+    if (credits <= 0) {
+      showErrorMessage("You don't have enough credits to edit entries. Please purchase more credits.");
+      return;
+    }
     setEditingEntry(entry);
     setSelected(entry.type);
     setShowForm(true);
-  }, []);
+  }, [credits, showErrorMessage]);
 
   // Function to handle delete
   const handleDelete = useCallback(async (entry) => {
@@ -1099,14 +1123,24 @@ export default function RolesPage() {
 
       {/* Header with Add Button */}
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <h1 className="text-3xl font-bold text-gray-800">Lead Generation</h1>
+        <div className="text-center sm:text-left">
+          <h1 className="text-3xl font-bold text-gray-800">Lead Generation</h1>
+          <div className="mt-2 text-lg font-semibold text-gray-700">
+            Credits Remaining: <span className={credits === 0 ? "text-red-600" : "text-green-600"}>{credits}</span>
+          </div>
+        </div>
         {user && (
           <button
             onClick={() => {
+              if (credits <= 0) {
+                showErrorMessage("You don't have enough credits to add new leads. Please purchase more credits.");
+                return;
+              }
               setShowForm(true);
               setEditingEntry(null);
             }}
-            className="px-6 py-3 bg-[#1a84de] hover:bg-[#24AC4A] text-white font-semibold rounded-xl focus:outline-none transition-all duration-300 flex items-center gap-2"
+            className={`px-6 py-3 bg-[#1a84de] hover:bg-[#24AC4A] text-white font-semibold rounded-xl focus:outline-none transition-all duration-300 flex items-center gap-2 ${credits === 0 ? 'opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400' : ''}`}
+            disabled={credits === 0}
           >
             <span>Add New Lead</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1232,10 +1266,20 @@ export default function RolesPage() {
 
       {submittedData.length === 0 && !showForm && user && (
         <div className="text-center py-12">
+          <div className="mb-2 text-lg font-semibold text-gray-700">
+            Credits Remaining: <span className={credits === 0 ? "text-red-600" : "text-green-600"}>{credits}</span>
+          </div>
           <div className="text-gray-500 text-lg mb-4">No submissions yet</div>
           <button
-            onClick={() => setShowForm(true)}
-            className="px-6 py-3 bg-[#1a84de] hover:bg-[#24AC4A] text-white font-semibold rounded-xl focus:outline-none transition-all duration-300"
+            onClick={() => {
+              if (credits <= 0) {
+                showErrorMessage("You don't have enough credits to create leads. Please purchase more credits.");
+                return;
+              }
+              setShowForm(true);
+            }}
+            className={`px-6 py-3 bg-[#1a84de] hover:bg-[#24AC4A] text-white font-semibold rounded-xl focus:outline-none transition-all duration-300 ${credits === 0 ? 'opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400' : ''}`}
+            disabled={credits === 0}
           >
             Create Your First Lead
           </button>

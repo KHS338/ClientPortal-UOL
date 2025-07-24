@@ -51,10 +51,6 @@ export class CreateCvSourcingDto {
   @IsNumber()
   searchRadius?: number;
 
-  @IsOptional()
-  @IsString()
-  acmCategory?: string;
-
   @IsNumber()
   userId: number;
 }
