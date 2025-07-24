@@ -199,12 +199,27 @@ export default function SubscriptionInfoPage() {
     const planDetails = service[cycle];
     const price = planDetails?.price || "N/A";
 
-    // Check if it's a free plan or if switching to the same plan
-    if (price === "Free" || serviceTitle === currentService) {
-      // For free plans or same plan, proceed directly without payment
+    // Determine if switching between monthly/annual for the same service
+    const isSameService = serviceTitle === currentService;
+    const isSameCycle = cycle === currentBillingCycle;
+    const isFree = price === "Free";
+
+    // Always show payment modal for paid plans if:
+    // - Switching between monthly/annual for the same service
+    // - Switching to a different paid service
+    // Only skip payment if switching to a free plan
+    if (isFree) {
+      // For free plans, proceed directly without payment
       completePlanChange(serviceTitle, cycle, price, null);
+    } else if (isSameService && isSameCycle) {
+      // If already on this paid plan/cycle, do nothing
+      setToast({
+        isOpen: true,
+        message: `You are already subscribed to ${serviceTitle} (${cycle})`,
+        type: "info"
+      });
     } else {
-      // For paid plans, show Stripe payment modal
+      // For paid plans, always show Stripe payment modal
       setIsProcessing(true);
       setTimeout(() => {
         setIsProcessing(false);
