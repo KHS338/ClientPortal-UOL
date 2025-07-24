@@ -110,16 +110,86 @@ export class UserSubscriptionService {
   }
 
   async useCredits(userId: number, creditsToUse: number): Promise<boolean> {
-    const activeSubscription = await this.findActiveByUserId(userId);
+    // Get all active subscriptions ordered by priority (newest first)
+    const activeSubscriptions = await this.userSubscriptionRepository.find({
+      where: { userId, status: 'active' },
+      relations: ['subscription'],
+      order: { createdAt: 'DESC' }
+    });
     
-    if (!activeSubscription || activeSubscription.remainingCredits < creditsToUse) {
+    // Calculate total available credits
+    const totalCredits = activeSubscriptions.reduce((sum, sub) => sum + sub.remainingCredits, 0);
+    
+    if (totalCredits < creditsToUse) {
       return false; // Insufficient credits
     }
 
-    activeSubscription.usedCredits += creditsToUse;
-    activeSubscription.remainingCredits -= creditsToUse;
+    // Deduct credits from subscriptions (FIFO - First In, First Out)
+    let creditsRemaining = creditsToUse;
+    
+    for (const subscription of activeSubscriptions) {
+      if (creditsRemaining <= 0) break;
+      
+      const creditsToDeduct = Math.min(subscription.remainingCredits, creditsRemaining);
+      
+      if (creditsToDeduct > 0) {
+        subscription.usedCredits += creditsToDeduct;
+        subscription.remainingCredits -= creditsToDeduct;
+        creditsRemaining -= creditsToDeduct;
+        
+        await this.userSubscriptionRepository.save(subscription);
+      }
+    }
 
-    await this.userSubscriptionRepository.save(activeSubscription);
+    return true;
+  }
+
+  /**
+   * Use credits for a specific subscription type
+   */
+  async useCreditsForService(userId: number, subscriptionTitle: string, creditsToUse: number): Promise<boolean> {
+    const activeSubscriptions = await this.userSubscriptionRepository.find({
+      where: { 
+        userId, 
+        status: 'active'
+      },
+      relations: ['subscription'],
+      order: { createdAt: 'DESC' }
+    });
+    
+    // Find subscriptions matching the service type
+    const matchingSubscriptions = activeSubscriptions.filter(sub => 
+      sub.subscription?.title === subscriptionTitle && sub.remainingCredits > 0
+    );
+    
+    if (matchingSubscriptions.length === 0) {
+      return false; // No matching subscription
+    }
+
+    // Calculate total available credits for this service
+    const totalCredits = matchingSubscriptions.reduce((sum, sub) => sum + sub.remainingCredits, 0);
+    
+    if (totalCredits < creditsToUse) {
+      return false; // Insufficient credits for this service
+    }
+
+    // Deduct credits from matching subscriptions (FIFO)
+    let creditsRemaining = creditsToUse;
+    
+    for (const subscription of matchingSubscriptions) {
+      if (creditsRemaining <= 0) break;
+      
+      const creditsToDeduct = Math.min(subscription.remainingCredits, creditsRemaining);
+      
+      if (creditsToDeduct > 0) {
+        subscription.usedCredits += creditsToDeduct;
+        subscription.remainingCredits -= creditsToDeduct;
+        creditsRemaining -= creditsToDeduct;
+        
+        await this.userSubscriptionRepository.save(subscription);
+      }
+    }
+
     return true;
   }
 

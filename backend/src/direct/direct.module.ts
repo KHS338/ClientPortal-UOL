@@ -5,11 +5,13 @@ import { DirectService } from './direct.service';
 import { DirectController } from './direct.controller';
 import { DirectRole } from './direct.entity';
 import { RoleModule } from '../roles/role.module';
+import { CommonModule } from '../common/common.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([DirectRole]),
-    forwardRef(() => RoleModule)
+    forwardRef(() => RoleModule),
+    CommonModule
   ],
   controllers: [DirectController],
   providers: [DirectService],

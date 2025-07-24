@@ -5,11 +5,13 @@ import { PrequalificationController } from './prequalification.controller';
 import { PrequalificationService } from './prequalification.service';
 import { PrequalificationRole } from './prequalification.entity';
 import { RoleModule } from '../roles/role.module';
+import { CommonModule } from '../common/common.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([PrequalificationRole]),
-    forwardRef(() => RoleModule)
+    forwardRef(() => RoleModule),
+    CommonModule
   ],
   controllers: [PrequalificationController],
   providers: [PrequalificationService],

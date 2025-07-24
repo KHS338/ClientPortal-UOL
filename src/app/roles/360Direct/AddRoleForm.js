@@ -233,11 +233,20 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
       if (result.success) {
         // Call success callback to close sheet and show message
         if (onSuccess) {
-          const message = editingRole
+          let message = editingRole
             ? '360 Direct Role Updated Successfully! 🎉'
             : '360 Direct Role Created Successfully! 🎉'
+          
+          // Add credit information if available
+          if (result.remainingCredits !== undefined) {
+            message += ` You have ${result.remainingCredits} credits remaining.`
+          }
+          
           onSuccess(message)
         }
+
+        // Dispatch credits updated event
+        window.dispatchEvent(new CustomEvent('creditsUpdated'));
 
         // Reset form only if creating new role
         if (!editingRole) {
@@ -259,7 +268,14 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
           setSalaryNotDefined(false)
         }
       } else {
-        throw new Error(result.message || 'Failed to save 360 direct role')
+        // Handle insufficient credits error specifically
+        if (result.error === 'INSUFFICIENT_CREDITS') {
+          if (onSuccess) {
+            onSuccess(`❌ ${result.message}`, 'error')
+          }
+        } else {
+          throw new Error(result.message || 'Failed to save 360 direct role')
+        }
       }
 
     } catch (error) {

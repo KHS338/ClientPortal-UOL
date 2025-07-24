@@ -2,20 +2,39 @@
 import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { LeadGenerationJobService } from './lead-generation-job.service';
 import { CreateLeadGenerationJobDto } from './dto/create-lead-generation-job.dto';
+import { CreditDeductionUtil } from '../common/utils/credit-deduction.util';
 
 @Controller('lead-generation-job')
 export class LeadGenerationJobController {
-  constructor(private readonly leadGenerationJobService: LeadGenerationJobService) {}
+  constructor(
+    private readonly leadGenerationJobService: LeadGenerationJobService,
+    private readonly creditDeductionUtil: CreditDeductionUtil
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createLeadGenerationJobDto: CreateLeadGenerationJobDto) {
     try {
+      // Check and deduct credit before creating the role
+      const creditResult = await this.creditDeductionUtil.checkAndDeductCredit(
+        createLeadGenerationJobDto.userId, 
+        'lead-generation-job'
+      );
+
+      if (!creditResult.success) {
+        return {
+          success: false,
+          message: creditResult.message,
+          error: 'INSUFFICIENT_CREDITS'
+        };
+      }
+
       const leadGenerationJob = await this.leadGenerationJobService.create(createLeadGenerationJobDto);
       return {
         success: true,
-        message: 'Lead generation job created successfully',
-        data: leadGenerationJob
+        message: 'Lead generation job created successfully. ' + creditResult.message,
+        data: leadGenerationJob,
+        remainingCredits: creditResult.remainingCredits
       };
     } catch (error) {
       return {

@@ -2,19 +2,38 @@
 import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { PrequalificationService } from './prequalification.service';
 import { CreatePrequalificationDto } from './dto/create-prequalification.dto';
+import { CreditDeductionUtil } from '../common/utils/credit-deduction.util';
 
 @Controller('prequalification')
 export class PrequalificationController {
-  constructor(private readonly prequalificationService: PrequalificationService) {}
+  constructor(
+    private readonly prequalificationService: PrequalificationService,
+    private readonly creditDeductionUtil: CreditDeductionUtil
+  ) {}
 
   @Post()
   async create(@Body() createPrequalificationDto: CreatePrequalificationDto) {
     try {
+      // Check and deduct credit before creating the role
+      const creditResult = await this.creditDeductionUtil.checkAndDeductCredit(
+        createPrequalificationDto.userId, 
+        'prequalification'
+      );
+
+      if (!creditResult.success) {
+        return {
+          success: false,
+          message: creditResult.message,
+          error: 'INSUFFICIENT_CREDITS'
+        };
+      }
+
       const prequalificationRole = await this.prequalificationService.create(createPrequalificationDto);
       return {
         success: true,
-        message: 'Pre-qualification role created successfully',
-        data: prequalificationRole
+        message: 'Pre-qualification role created successfully. ' + creditResult.message,
+        data: prequalificationRole,
+        remainingCredits: creditResult.remainingCredits
       };
     } catch (error) {
       return {

@@ -64,9 +64,24 @@ export class UserSubscriptionController {
   @Post('user/:userId/use-credits')
   useCredits(
     @Param('userId', ParseIntPipe) userId: number,
-    @Body() body: { creditsToUse: number }
+    @Body() body: { creditsToUse: number; serviceType?: string }
   ) {
-    return this.userSubscriptionService.useCredits(userId, body.creditsToUse);
+    if (body.serviceType) {
+      // Use service-specific credit deduction
+      const serviceMapping = {
+        'cv-sourcing': 'CV Sourcing',
+        'prequalification': 'Prequalification',
+        'direct': '360/Direct',
+        'lead-generation-job': 'Lead Generation',
+        'lead-generation-industry': 'Lead Generation'
+      };
+      
+      const subscriptionTitle = serviceMapping[body.serviceType] || body.serviceType;
+      return this.userSubscriptionService.useCreditsForService(userId, subscriptionTitle, body.creditsToUse);
+    } else {
+      // Use general credit deduction
+      return this.userSubscriptionService.useCredits(userId, body.creditsToUse);
+    }
   }
 
   @Post('user/:userId/add-adhoc-credits')
@@ -91,6 +106,53 @@ export class UserSubscriptionController {
   @Post('check-expired')
   checkExpiredSubscriptions() {
     return this.userSubscriptionService.checkExpiredSubscriptions();
+  }
+
+  @Post('user/:userId/check-credits')
+  async checkCreditsForService(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() body: { serviceType: string }
+  ) {
+    try {
+      const userSubscriptions = await this.userSubscriptionService.findByUserId(userId);
+      
+      // Map service type to subscription title
+      const serviceMapping = {
+        'cv-sourcing': 'CV Sourcing',
+        'prequalification': 'Prequalification',
+        'direct': '360/Direct',
+        'lead-generation-job': 'Lead Generation',
+        'lead-generation-industry': 'Lead Generation'
+      };
+      
+      const subscriptionTitle = serviceMapping[body.serviceType] || body.serviceType;
+      
+      // Calculate remaining credits for this service
+      const remainingCredits = userSubscriptions
+        .filter(sub => 
+          sub.subscription?.title === subscriptionTitle && 
+          sub.status === 'active'
+        )
+        .reduce((sum, sub) => sum + sub.remainingCredits, 0);
+      
+      const hasCredits = remainingCredits > 0;
+      
+      return {
+        success: true,
+        hasCredits,
+        remainingCredits,
+        serviceType: body.serviceType,
+        subscriptionTitle,
+        message: hasCredits 
+          ? `You have ${remainingCredits} credits available for ${subscriptionTitle}`
+          : `No credits available for ${subscriptionTitle}. Please purchase more credits or upgrade your plan.`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Error checking credits: ' + error.message
+      };
+    }
   }
 
   @Post('user/:userId/cancel')

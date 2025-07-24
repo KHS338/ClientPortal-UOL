@@ -5,11 +5,13 @@ import { CvSourcingController } from './cv-sourcing.controller';
 import { CvSourcingService } from './cv-sourcing.service';
 import { CvSourcingRole } from './cv-sourcing.entity';
 import { RoleModule } from '../roles/role.module';
+import { CommonModule } from '../common/common.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([CvSourcingRole]),
-    forwardRef(() => RoleModule)
+    forwardRef(() => RoleModule),
+    CommonModule
   ],
   controllers: [CvSourcingController],
   providers: [CvSourcingService],

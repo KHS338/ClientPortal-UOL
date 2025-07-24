@@ -5,11 +5,13 @@ import { LeadGenerationJobController } from './lead-generation-job.controller';
 import { LeadGenerationJobService } from './lead-generation-job.service';
 import { LeadGenerationJob } from './lead-generation-job.entity';
 import { RoleModule } from '../roles/role.module';
+import { CommonModule } from '../common/common.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([LeadGenerationJob]),
-    forwardRef(() => RoleModule)
+    forwardRef(() => RoleModule),
+    CommonModule
   ],
   controllers: [LeadGenerationJobController],
   providers: [LeadGenerationJobService],

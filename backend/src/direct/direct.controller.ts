@@ -2,19 +2,38 @@
 import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { DirectService } from './direct.service';
 import { CreateDirectDto } from './dto/create-direct.dto';
+import { CreditDeductionUtil } from '../common/utils/credit-deduction.util';
 
 @Controller('direct')
 export class DirectController {
-  constructor(private readonly directService: DirectService) {}
+  constructor(
+    private readonly directService: DirectService,
+    private readonly creditDeductionUtil: CreditDeductionUtil
+  ) {}
 
   @Post()
   async create(@Body() createDirectDto: CreateDirectDto) {
     try {
+      // Check and deduct credit before creating the role
+      const creditResult = await this.creditDeductionUtil.checkAndDeductCredit(
+        createDirectDto.userId, 
+        'direct'
+      );
+
+      if (!creditResult.success) {
+        return {
+          success: false,
+          message: creditResult.message,
+          error: 'INSUFFICIENT_CREDITS'
+        };
+      }
+
       const directRole = await this.directService.create(createDirectDto);
       return {
         success: true,
-        message: '360 Direct role created successfully',
-        data: directRole
+        message: '360 Direct role created successfully. ' + creditResult.message,
+        data: directRole,
+        remainingCredits: creditResult.remainingCredits
       };
     } catch (error) {
       return {

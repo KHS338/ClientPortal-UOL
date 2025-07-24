@@ -2,20 +2,39 @@
 import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { CvSourcingService } from './cv-sourcing.service';
 import { CreateCvSourcingDto } from './dto/create-cv-sourcing.dto';
+import { CreditDeductionUtil } from '../common/utils/credit-deduction.util';
 
 @Controller('cv-sourcing')
 export class CvSourcingController {
-  constructor(private readonly cvSourcingService: CvSourcingService) {}
+  constructor(
+    private readonly cvSourcingService: CvSourcingService,
+    private readonly creditDeductionUtil: CreditDeductionUtil
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createCvSourcingDto: CreateCvSourcingDto) {
     try {
+      // Check and deduct credit before creating the role
+      const creditResult = await this.creditDeductionUtil.checkAndDeductCredit(
+        createCvSourcingDto.userId, 
+        'cv-sourcing'
+      );
+
+      if (!creditResult.success) {
+        return {
+          success: false,
+          message: creditResult.message,
+          error: 'INSUFFICIENT_CREDITS'
+        };
+      }
+
       const cvSourcingRole = await this.cvSourcingService.create(createCvSourcingDto);
       return {
         success: true,
-        message: 'CV sourcing role created successfully',
-        data: cvSourcingRole
+        message: 'CV sourcing role created successfully. ' + creditResult.message,
+        data: cvSourcingRole,
+        remainingCredits: creditResult.remainingCredits
       };
     } catch (error) {
       return {

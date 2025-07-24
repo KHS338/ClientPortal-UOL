@@ -5,11 +5,13 @@ import { LeadGenerationIndustryController } from './lead-generation-industry.con
 import { LeadGenerationIndustryService } from './lead-generation-industry.service';
 import { LeadGenerationIndustry } from './lead-generation-industry.entity';
 import { RoleModule } from '../roles/role.module';
+import { CommonModule } from '../common/common.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([LeadGenerationIndustry]),
-    forwardRef(() => RoleModule)
+    forwardRef(() => RoleModule),
+    CommonModule
   ],
   controllers: [LeadGenerationIndustryController],
   providers: [LeadGenerationIndustryService],

@@ -112,10 +112,26 @@ export default function SubscriptionInfoPage() {
       setTotalRemainingCredits(0);
     };
 
+    // Listen for subscription updates to refresh credits
+    const handleSubscriptionUpdate = () => {
+      console.log('Subscription-info - Subscription update detected, refreshing data');
+      loadData();
+    };
+
+    // Listen for credit usage updates
+    const handleCreditsUpdate = () => {
+      console.log('Subscription-info - Credits update detected, refreshing data');
+      loadData();
+    };
+
     window.addEventListener('userLoggedOut', handleUserLogout);
+    window.addEventListener('subscriptionUpdated', handleSubscriptionUpdate);
+    window.addEventListener('creditsUpdated', handleCreditsUpdate);
 
     return () => {
       window.removeEventListener('userLoggedOut', handleUserLogout);
+      window.removeEventListener('subscriptionUpdated', handleSubscriptionUpdate);
+      window.removeEventListener('creditsUpdated', handleCreditsUpdate);
     };
   }, []);
 
@@ -585,28 +601,28 @@ export default function SubscriptionInfoPage() {
                 <p className="text-blue-100 text-sm">Active subscription</p>
               </Card>
 
-              <Card className="p-6 bg-white border border-gray-200">
+              <Card className="p-6 bg-gradient-to-br from-[#1a84de] to-[#06398e] text-white">
                 <div className="flex items-center gap-3 mb-2">
-                  <FiCalendar size={24} className="text-[#1a84de]" />
-                  <h3 className="text-lg font-semibold text-gray-800">Billing Cycle</h3>
+                  <FiCalendar size={24}  />
+                  <h3 className="text-lg font-semibold ">Billing Cycle</h3>
                 </div>
-                <p className="text-2xl font-bold text-gray-800">
+                <p className="text-2xl font-bold">
                   {currentBillingCycle === "monthly" ? "Monthly" : currentBillingCycle === "annual" ? "Annual" : currentBillingCycle === "adhoc" ? "Adhoc" : "Enterprise"}
                 </p>
-                <p className="text-gray-600 text-sm">
+                <p className="text-sm">
                   {currentBillingCycle === "monthly" ? "Billed monthly" : currentBillingCycle === "annual" ? "Billed annually" : currentBillingCycle === "adhoc" ? "Pay per use" : "Custom billing"}
                 </p>
               </Card>
 
-              <Card className="p-6 bg-white border border-gray-200">
+              <Card className="p-6 bg-gradient-to-br from-[#1a84de] to-[#06398e] text-white">
                 <div className="flex items-center gap-3 mb-2">
-                  <FiCreditCard size={24} className="text-[#1a84de]" />
-                  <h3 className="text-lg font-semibold text-gray-800">Next Payment</h3>
+                  <FiCreditCard size={24}  />
+                  <h3 className="text-lg font-semibold ">Next Payment</h3>
                 </div>
-                <p className="text-2xl font-bold text-gray-800">
+                <p className="text-2xl font-bold">
                   {subscriptionData?.nextPayment || "Not Available"}
                 </p>
-                <p className="text-gray-600 text-sm">Auto-renewal enabled</p>
+                <p className="text-sm">Auto-renewal enabled</p>
               </Card>
 
               <Card className="p-6 bg-gradient-to-br from-[#24AC4A] to-[#19AF1A] text-white">

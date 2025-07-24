@@ -2,20 +2,39 @@
 import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { LeadGenerationIndustryService } from './lead-generation-industry.service';
 import { CreateLeadGenerationIndustryDto } from './dto/create-lead-generation-industry.dto';
+import { CreditDeductionUtil } from '../common/utils/credit-deduction.util';
 
 @Controller('lead-generation-industry')
 export class LeadGenerationIndustryController {
-  constructor(private readonly leadGenerationIndustryService: LeadGenerationIndustryService) {}
+  constructor(
+    private readonly leadGenerationIndustryService: LeadGenerationIndustryService,
+    private readonly creditDeductionUtil: CreditDeductionUtil
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createLeadGenerationIndustryDto: CreateLeadGenerationIndustryDto) {
     try {
+      // Check and deduct credit before creating the role
+      const creditResult = await this.creditDeductionUtil.checkAndDeductCredit(
+        createLeadGenerationIndustryDto.userId, 
+        'lead-generation-industry'
+      );
+
+      if (!creditResult.success) {
+        return {
+          success: false,
+          message: creditResult.message,
+          error: 'INSUFFICIENT_CREDITS'
+        };
+      }
+
       const leadGenerationIndustry = await this.leadGenerationIndustryService.create(createLeadGenerationIndustryDto);
       return {
         success: true,
-        message: 'Lead generation industry created successfully',
-        data: leadGenerationIndustry
+        message: 'Lead generation industry created successfully. ' + creditResult.message,
+        data: leadGenerationIndustry,
+        remainingCredits: creditResult.remainingCredits
       };
     } catch (error) {
       return {
