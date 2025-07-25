@@ -32,12 +32,23 @@ export default function ClientRegistrationPage() {
  
   const handleChange = (e) => {
     const { name, value, files, type } = e.target;
-    
     // Clear error when user starts typing
     if (error) {
       setError(null);
     }
-    
+    // Phone validation: no alphabets, at least 10 digits
+    if (name === 'phone' && type !== 'file') {
+      if (/[a-zA-Z]/.test(value)) {
+        setError('Phone number must not contain letters');
+      } else {
+        const digits = value.replace(/\D/g, '');
+        if (digits.length > 0 && digits.length < 10) {
+          setError('Phone number must be at least 10 digits');
+        } else {
+          setError(null);
+        }
+      }
+    }
     setForm((f) => ({
       ...f,
       [name]: type === "file" ? files[0] : value,
@@ -49,12 +60,23 @@ export default function ClientRegistrationPage() {
     setIsLoading(true);
     
     // Basic validation
+    // Phone validation: no alphabets, at least 10 digits
+    if (/[a-zA-Z]/.test(form.phone)) {
+      setError('Phone number must not contain letters');
+      setIsLoading(false);
+      return;
+    }
+    const digits = form.phone.replace(/\D/g, '');
+    if (digits.length < 10) {
+      setError('Phone number must be at least 10 digits');
+      setIsLoading(false);
+      return;
+    }
     if (form.password !== form.confirmPassword) {
       setError("Passwords don't match!");
       setIsLoading(false);
       return;
     }
-    
     // Clear any previous errors
     setError(null);
     

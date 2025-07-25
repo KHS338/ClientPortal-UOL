@@ -194,7 +194,7 @@ export default function LoginPage() {
                 transition={{ duration: 0.5, delay: 1 }}
                 className="flex items-center justify-between"
               >
-                <label className="flex items-center">
+                {/* <label className="flex items-center">
                   <input
                     type="checkbox"
                     checked={rememberMe}
@@ -202,7 +202,7 @@ export default function LoginPage() {
                     className="w-4 h-4 text-[#24AC4A] bg-gray-100 border-gray-300 rounded focus:ring-[#0958d9] focus:ring-1"
                   />
                   <span className="ml-2 text-sm text-gray-600">Remember me</span>
-                </label>
+                </label> */}
                 <Link
                   href="/forgot-password"
                   className="text-sm text-[#0958d9] hover:text-[#24AC4A] font-medium transition-colors duration-300 hover:underline"
