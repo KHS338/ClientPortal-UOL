@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useAuth } from "@/contexts/AuthContext"
+import { setUserItem, getUserItem } from "@/lib/userStorage"
 
 export default function AddRoleForm({ onSuccess, editingRole = null }) {
   const { user, isAuthenticated } = useAuth()
@@ -116,12 +117,12 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
           createdAt: new Date()
         };
 
-        const existingActivities = JSON.parse(localStorage.getItem('recentRoleActivity') || '[]');
+        const existingActivities = getUserItem('recentRoleActivity', user.id, []);
         const updatedActivities = [activity, ...existingActivities].slice(0, 10);
-        localStorage.setItem('recentRoleActivity', JSON.stringify(updatedActivities));
-        console.log('Lead Generation - Stored activity in localStorage:', activity);
+        setUserItem('recentRoleActivity', user.id, updatedActivities);
+        console.log('Lead Generation - Stored activity in user-specific localStorage:', activity);
       } catch (error) {
-        console.log('Lead Generation - Error storing activity in localStorage:', error);
+        console.log('Lead Generation - Error storing activity in user-specific localStorage:', error);
       }
       
       // Reset form

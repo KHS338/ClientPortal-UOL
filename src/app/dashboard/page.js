@@ -5,10 +5,13 @@ import { FiUser, FiDollarSign, FiCalendar, FiBriefcase, FiClock, FiCheckCircle, 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
 import { authUtils } from "@/lib/auth";
 import { getCurrentSubscription } from "@/lib/subscription";
+import { getUserItem, removeUserItem } from "@/lib/userStorage";
 
 export default function DashboardPage() {
+  const { user, isAuthenticated } = useAuth();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [subscriptionInfo, setSubscriptionInfo] = useState({
     currentPlan: "No Active Plan",
@@ -34,7 +37,15 @@ export default function DashboardPage() {
   const fetchRecentRoleActivity = useCallback(async () => {
     try {
       setIsLoadingActivity(true);
-      const userId = 1; // TODO: Get from auth context
+      
+      // Check if user is authenticated
+      if (!isAuthenticated || !user?.id) {
+        console.log('Dashboard - User not authenticated or no user ID');
+        setIsLoadingActivity(false);
+        return;
+      }
+      
+      const userId = parseInt(user.id);
       const activities = [];
 
       console.log('Dashboard - Fetching recent role activity for user:', userId);
@@ -181,19 +192,16 @@ export default function DashboardPage() {
 
       console.log('Dashboard - Total activities found:', activities.length);
 
-      // Also check localStorage for recently created activities
+      // Also check user-specific localStorage for recently created activities
       try {
-        const recentRoles = localStorage.getItem('recentRoleActivity');
-        if (recentRoles) {
-          const parsed = JSON.parse(recentRoles);
-          if (Array.isArray(parsed)) {
-            console.log('Dashboard - Found activities in localStorage:', parsed.length);
-            // Add localStorage activities to the main activities array
-            activities.push(...parsed);
-          }
+        const recentRoles = getUserItem('recentRoleActivity', userId, []);
+        if (Array.isArray(recentRoles) && recentRoles.length > 0) {
+          console.log('Dashboard - Found activities in user-specific localStorage:', recentRoles.length);
+          // Add localStorage activities to the main activities array
+          activities.push(...recentRoles);
         }
       } catch (error) {
-        console.log('Dashboard - Error reading localStorage:', error);
+        console.log('Dashboard - Error reading user-specific localStorage:', error);
       }
 
       // Sort all activities (API + localStorage) by creation date (most recent first) and take top 5
@@ -210,7 +218,7 @@ export default function DashboardPage() {
     } finally {
       setIsLoadingActivity(false);
     }
-  }, [setRecentRoleActivity, setIsLoadingActivity]);
+  }, [setRecentRoleActivity, setIsLoadingActivity, user, isAuthenticated]); // Add user dependencies
 
   // Helper function to format time ago
   const formatTimeAgo = (date) => {
@@ -235,7 +243,13 @@ export default function DashboardPage() {
   useEffect(() => {
     const loadSubscription = async () => {
       try {
-        const userId = 1; // TODO: Get from auth context
+        // Check if user is authenticated
+        if (!isAuthenticated || !user?.id) {
+          console.log('Dashboard - User not authenticated for subscription load');
+          return;
+        }
+        
+        const userId = parseInt(user.id);
         const subscriptionData = await getCurrentSubscription(userId);
         
         if (subscriptionData) {
@@ -294,7 +308,11 @@ export default function DashboardPage() {
       console.log('Dashboard - Subscription update event detected');
       // Clear recent role activity when subscription changes
       setRecentRoleActivity([]);
+      // Clear both old localStorage and user-specific data
       localStorage.removeItem('recentRoleActivity');
+      if (user?.id) {
+        removeUserItem('recentRoleActivity', user.id);
+      }
       console.log('Dashboard - Cleared recent role activity due to subscription change');
       
       // Force reload subscription and activities after a brief delay
@@ -318,6 +336,7 @@ export default function DashboardPage() {
       setUserCredits([]);
       setTotalRemainingCredits(0);
       setRecentRoleActivity([]);
+      // Clear old localStorage for backward compatibility
       localStorage.removeItem('recentRoleActivity');
       setSubscriptionInfo({
         currentPlan: "No Active Plan",
@@ -342,7 +361,7 @@ export default function DashboardPage() {
       window.removeEventListener('roleUpdated', handleRoleUpdate);
       clearInterval(activityRefreshInterval);
     };
-  }, [fetchRecentRoleActivity]);
+  }, [fetchRecentRoleActivity, user, isAuthenticated]); // Add user dependencies
 
   // Mock data for dashboard metrics - focused on roles and subscription
 

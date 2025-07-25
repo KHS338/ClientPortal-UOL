@@ -1,4 +1,5 @@
 import { authUtils } from './auth';
+import { clearAllUserData } from './userStorage';
 
 /**
  * Subscription utility functions for managing subscription state
@@ -118,9 +119,19 @@ export const hasServiceAccess = (serviceName, userSubscription) => {
  * Clear subscription data (for logout)
  */
 export const clearSubscriptionData = () => {
+  // Clear all user-specific localStorage data
   localStorage.removeItem('userSubscription');
   localStorage.removeItem('userData');
   localStorage.removeItem('userEmail');
+  localStorage.removeItem('recentRoleActivity');
+  localStorage.removeItem('registeredUser');
+  
+  // Clear any cached credit data (if any)
+  localStorage.removeItem('userCredits');
+  localStorage.removeItem('totalRemainingCredits');
+  
+  // Clear all user-specific data from all users
+  clearAllUserData();
   
   // Dispatch event to notify components
   window.dispatchEvent(new CustomEvent('subscriptionCleared'));

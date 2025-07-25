@@ -187,6 +187,9 @@ export const AuthProvider = ({ children }) => {
           const user = getUserFromToken(authResult.access_token);
           
           if (user) {
+            // Clear any previous user's data before setting new auth
+            clearSubscriptionData();
+            
             // Store JWT token only
             authUtils.setAuth(authResult.access_token, user, rememberMe);
             

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useAuth } from "@/contexts/AuthContext"
+import { setUserItem, getUserItem } from "@/lib/userStorage"
 
 export default function AddRoleForm({ onSuccess, editingRole = null }) {
   const { user, isAuthenticated } = useAuth()
@@ -184,12 +185,12 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
             createdAt: new Date()
           };
 
-          const existingActivities = JSON.parse(localStorage.getItem('recentRoleActivity') || '[]');
+          const existingActivities = getUserItem('recentRoleActivity', user.id, []);
           const updatedActivities = [activity, ...existingActivities].slice(0, 10);
-          localStorage.setItem('recentRoleActivity', JSON.stringify(updatedActivities));
-          console.log('Prequalification - Stored activity in localStorage:', activity);
+          setUserItem('recentRoleActivity', user.id, updatedActivities);
+          console.log('Prequalification - Stored activity in user-specific localStorage:', activity);
         } catch (error) {
-          console.log('Prequalification - Error storing activity in localStorage:', error);
+          console.log('Prequalification - Error storing activity in user-specific localStorage:', error);
         }
 
         // Reset form only if creating new role
@@ -358,7 +359,13 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
                     {(countrySearch ? filteredCountries : countries).map((country) => (
                       <div
                         key={country}
-                        onClick={() => {
+                        onMouseDown={(e) => {
+                          // Prevent input blur before click is processed
+                          e.preventDefault();
+                        }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                           handleInputChange('country', country)
                           setCountrySearch('')
                           setShowCountryDropdown(false)
@@ -372,7 +379,7 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
                     ))}
                     {countrySearch && filteredCountries.length === 0 && (
                       <div className="px-4 py-2 text-gray-500 text-sm">
-                        No countries found
+                        No countries found matching "{countrySearch}"
                       </div>
                     )}
                   </div>

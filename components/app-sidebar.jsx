@@ -88,8 +88,9 @@ export function AppSidebar() {
   const [openMenu, setOpenMenu] = useState(null)
   const [mounted, setMounted] = useState(false)
   const [userSubscription, setUserSubscription] = useState(null)
+  const [isLoadingSubscription, setIsLoadingSubscription] = useState(true)
   const router = useRouter()
-  const { logout } = useAuth()
+  const { logout, user, isAuthenticated } = useAuth()
 
   // Handle logout
   const handleLogout = async () => {
@@ -113,11 +114,24 @@ export function AppSidebar() {
   useEffect(() => {
     const loadSubscription = async () => {
       try {
-        const userId = 1; // TODO: Get from auth context
+        setIsLoadingSubscription(true);
+        
+        // Check if user is authenticated
+        if (!isAuthenticated || !user?.id) {
+          console.log('Sidebar - User not authenticated');
+          setUserSubscription(null);
+          setIsLoadingSubscription(false);
+          return;
+        }
+        
+        const userId = parseInt(user.id);
         const subscriptionData = await getCurrentSubscription(userId);
         
         if (subscriptionData) {
-          console.log('Sidebar - Loaded subscription from backend:', subscriptionData.service);
+          console.log('Sidebar - Loaded subscription from backend:', {
+            service: subscriptionData.service,
+            fullData: subscriptionData
+          });
           setUserSubscription(subscriptionData.service);
         } else {
           console.log('Sidebar - No active subscription found');
@@ -126,6 +140,8 @@ export function AppSidebar() {
       } catch (error) {
         console.error('Error loading subscription from backend:', error);
         setUserSubscription(null);
+      } finally {
+        setIsLoadingSubscription(false);
       }
     };
 
@@ -143,7 +159,11 @@ export function AppSidebar() {
     // Listen for custom event (when localStorage is updated from same tab)
     const handleSubscriptionUpdate = () => {
       console.log('Sidebar - Custom subscription update event detected');
-      loadSubscription();
+      // Add a small delay to ensure backend data is updated
+      setTimeout(() => {
+        console.log('Sidebar - Refreshing subscription data after update event');
+        loadSubscription();
+      }, 1000); // 1 second delay
     };
 
     // Listen for user logout event to reset subscription state
@@ -161,7 +181,7 @@ export function AppSidebar() {
       window.removeEventListener('subscriptionUpdated', handleSubscriptionUpdate);
       window.removeEventListener('userLoggedOut', handleUserLogout);
     };
-  }, []);
+  }, [user, isAuthenticated]); // Add user dependencies
 
   // Ensure hydration consistency
   React.useEffect(() => {
@@ -175,15 +195,21 @@ export function AppSidebar() {
       return true;
     }
     
+    // If still loading subscription, show as not accessible for now
+    if (isLoadingSubscription) {
+      console.log(`Sidebar - Still loading subscription, ${roleTitle} temporarily not accessible`);
+      return false;
+    }
+    
     if (!userSubscription) {
       console.log(`Sidebar - No subscription, ${roleTitle} not accessible`);
       return false;
     }
     
-    // Map role titles to subscription services
+    // Map role titles to subscription services (exact match with backend)
     const roleToService = {
       "CV Sourcing": "CV Sourcing",
-      "PreQualification": "Prequalification", 
+      "PreQualification": "Prequalification", // Note: subscription uses "Prequalification" (no camel case)
       "360/Direct": "360/Direct",
       "Leads Generation": "Lead Generation"
     };
@@ -197,7 +223,7 @@ export function AppSidebar() {
     
     // For regular subscriptions, check exact match
     const isAccessible = roleToService[roleTitle] === userSubscription;
-    console.log(`Sidebar - Role: ${roleTitle}, User subscription: ${userSubscription}, Accessible: ${isAccessible}`);
+    console.log(`Sidebar - Role: ${roleTitle}, User subscription: ${userSubscription}, Expected service: ${roleToService[roleTitle]}, Accessible: ${isAccessible}`);
     return isAccessible;
   };
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useAuth } from "@/contexts/AuthContext"
+import { setUserItem, getUserItem } from "@/lib/userStorage"
 
 // Move countries array outside component to prevent re-creation on each render
 const COUNTRIES = [
@@ -62,12 +63,48 @@ function SearchableSelect({ value, onChange, options, placeholder, className }) 
     onChange(option);
     setIsOpen(false);
     setSearchTerm('');
+    // Blur the input to remove focus
+    if (inputRef.current) {
+      inputRef.current.blur();
+    }
   };
 
   // Handle input focus
   const handleInputFocus = () => {
     setIsOpen(true);
     setSearchTerm('');
+  };
+
+  // Handle input change
+  const handleInputChange = (e) => {
+    const newSearchTerm = e.target.value;
+    setSearchTerm(newSearchTerm);
+    setIsOpen(true);
+  };
+
+  // Handle dropdown toggle
+  const handleDropdownToggle = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsOpen(!isOpen);
+    setSearchTerm('');
+    if (!isOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
+  // Handle key navigation
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && filteredOptions.length > 0) {
+      e.preventDefault();
+      handleOptionSelect(filteredOptions[0]);
+    } else if (e.key === 'Escape') {
+      setIsOpen(false);
+      setSearchTerm('');
+      if (inputRef.current) {
+        inputRef.current.blur();
+      }
+    }
   };
 
   return (
@@ -77,15 +114,16 @@ function SearchableSelect({ value, onChange, options, placeholder, className }) 
           ref={inputRef}
           type="text"
           value={isOpen ? searchTerm : value}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={handleInputChange}
           onFocus={handleInputFocus}
+          onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className={className}
           autoComplete="off"
         />
         <div
-          className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none"
-          onClick={() => setIsOpen(!isOpen)}
+          className="absolute inset-y-0 right-0 flex items-center px-2 cursor-pointer"
+          onClick={handleDropdownToggle}
         >
           <svg
             className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
@@ -105,17 +143,27 @@ function SearchableSelect({ value, onChange, options, placeholder, className }) 
           {filteredOptions.length > 0 ? (
             filteredOptions.map((option, index) => (
               <div
-                key={index}
-                className={`px-4 py-2 cursor-pointer hover:bg-blue-50 ${
+                key={`${option}-${index}`}
+                className={`px-4 py-2 cursor-pointer hover:bg-blue-50 transition-colors ${
                   option === value ? 'bg-blue-100 text-blue-700' : 'text-gray-900'
                 }`}
-                onClick={() => handleOptionSelect(option)}
+                onMouseDown={(e) => {
+                  // Prevent input blur before click is processed
+                  e.preventDefault();
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleOptionSelect(option);
+                }}
               >
                 {option}
               </div>
             ))
           ) : (
-            <div className="px-4 py-2 text-gray-500 text-sm">No countries found</div>
+            <div className="px-4 py-2 text-gray-500 text-sm">
+              {searchTerm ? `No countries found matching "${searchTerm}"` : 'No countries found'}
+            </div>
           )}
         </div>
       )}
@@ -254,7 +302,7 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
           }
         }));
 
-        // Store activity in localStorage for dashboard
+        // Store activity in user-specific localStorage for dashboard
         try {
           const activity = {
             id: `direct-${Date.now()}`,
@@ -266,12 +314,12 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
             createdAt: new Date()
           };
 
-          const existingActivities = JSON.parse(localStorage.getItem('recentRoleActivity') || '[]');
+          const existingActivities = getUserItem('recentRoleActivity', user.id, []);
           const updatedActivities = [activity, ...existingActivities].slice(0, 10);
-          localStorage.setItem('recentRoleActivity', JSON.stringify(updatedActivities));
-          console.log('360 Direct - Stored activity in localStorage:', activity);
+          setUserItem('recentRoleActivity', user.id, updatedActivities);
+          console.log('360 Direct - Stored activity in user-specific localStorage:', activity);
         } catch (error) {
-          console.log('360 Direct - Error storing activity in localStorage:', error);
+          console.log('360 Direct - Error storing activity in user-specific localStorage:', error);
         }
 
         // Reset form only if creating new role

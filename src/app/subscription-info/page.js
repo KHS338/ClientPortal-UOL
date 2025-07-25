@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 import { AlertDialog, Toast } from "@/components/ui/alert-dialog";
 import StripePayment from "@/components/StripePayment";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
 import { authUtils } from "@/lib/auth";
 import { getCurrentSubscription, updateSubscriptionData } from "@/lib/subscription";
 import { generateInvoiceForSubscription } from "@/lib/invoice";
 
 export default function SubscriptionInfoPage() {
+  const { user, isAuthenticated } = useAuth();
   const [billingCycle, setBillingCycle] = useState("monthly");
   const [currentPlan, setCurrentPlan] = useState("");
   const [currentService, setCurrentService] = useState("");
@@ -35,8 +37,21 @@ export default function SubscriptionInfoPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Check if user is authenticated
+        if (!isAuthenticated || !user?.id) {
+          console.log('Subscription-info - User not authenticated');
+          setCurrentService("No Active Subscription");
+          setCurrentBillingCycle("monthly");
+          setCurrentPlan("");
+          setBillingCycle("monthly");
+          setSubscriptionData(null);
+          setUserCredits([]);
+          setTotalRemainingCredits(0);
+          return;
+        }
+        
         // Load user subscription and credits from backend first (source of truth)
-        const userId = 1; // TODO: Get from auth context
+        const userId = parseInt(user.id);
         const subscriptionData = await getCurrentSubscription(userId);
         
         if (subscriptionData) {
@@ -134,7 +149,7 @@ export default function SubscriptionInfoPage() {
       window.removeEventListener('subscriptionUpdated', handleSubscriptionUpdate);
       window.removeEventListener('creditsUpdated', handleCreditsUpdate);
     };
-  }, []);
+  }, [user, isAuthenticated]); // Add user dependencies
 
   // Fallback subscription data (same as before)
   const getDefaultSubscriptions = () => [
@@ -323,8 +338,13 @@ export default function SubscriptionInfoPage() {
     };
 
     try {
+      // Check if user is authenticated
+      if (!isAuthenticated || !user?.id) {
+        throw new Error('User not authenticated');
+      }
+      
       // Create user subscription entry in database
-      const userId = 1; // TODO: Get from auth context
+      const userId = parseInt(user.id);
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       
       // Find the subscription ID from the service title
@@ -479,8 +499,13 @@ export default function SubscriptionInfoPage() {
         console.log(`Unsubscribe requested for: ${serviceTitle}`);
         
         try {
+          // Check if user is authenticated
+          if (!isAuthenticated || !user?.id) {
+            throw new Error('User not authenticated');
+          }
+          
           // Call API to cancel subscription in database
-          const userId = 1; // TODO: Get from auth context
+          const userId = parseInt(user.id);
           const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
           
           const response = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/user/${userId}/cancel`, {
