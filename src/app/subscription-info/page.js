@@ -663,13 +663,13 @@ export default function SubscriptionInfoPage() {
                 <p className="text-sm">Auto-renewal enabled</p>
               </Card>
 
-              <Card className="p-6 bg-gradient-to-br from-[#24AC4A] to-[#19AF1A] text-white">
+              <Card className="p-6 bg-gradient-to-br from-[#1a84de] to-[#06398e] text-white">
                 <div className="flex items-center gap-3 mb-2">
                   <FiCheckCircle size={24} />
                   <h3 className="text-lg font-semibold">Credits</h3>
                 </div>
                 <p className="text-2xl font-bold">{totalRemainingCredits}</p>
-                <p className="text-green-100 text-sm">
+                <p className="text-blue-100 text-sm">
                   {userCredits && userCredits.length > 0 ? 
                     `${userCredits.filter(sub => sub.status === 'active').length} active subscription${userCredits.filter(sub => sub.status === 'active').length !== 1 ? 's' : ''}` : 
                     "No active subscriptions"}
@@ -795,7 +795,7 @@ export default function SubscriptionInfoPage() {
               <div className="max-w-4xl mx-auto px-4 sm:px-0">
                 <div className="relative p-4 sm:p-8 rounded-2xl border-2 border-[#0958d9] bg-white shadow-2xl group hover:border-[#24AC4A]/50 transition-all duration-300">
                   <div className="text-center">
-                    <h4 className="text-3xl font-bold text-transparent bg-gradient-to-r from-[#1a84de] to-[#1a84de] group-hover:from-[#24AC4A] group-hover:to-[#24AC4A] bg-clip-text mb-4 transition-all duration-300">
+                    <h4 className="text-3xl font-bold text-transparent bg-gradient-to-r from-[#0958d9] to-[#0958d9] group-hover:from-[#24AC4A] group-hover:to-[#24AC4A] bg-clip-text mb-4 transition-all duration-300">
                       Enterprise Plan
                     </h4>
                     <p className="text-lg text-gray-600 mb-6">
@@ -803,7 +803,7 @@ export default function SubscriptionInfoPage() {
                     </p>
 
                     <div className="mb-6 sm:mb-8">
-                      <p className="text-3xl sm:text-4xl font-bold text-transparent bg-gradient-to-r from-[#1a84de] to-[#1a84de] group-hover:from-[#24AC4A] group-hover:to-[#24AC4A] bg-clip-text mb-4 transition-all duration-300">
+                      <p className="text-3xl sm:text-4xl font-bold text-transparent bg-gradient-to-r from-[#0958d9] to-[#0958d9] group-hover:from-[#24AC4A] group-hover:to-[#24AC4A] bg-clip-text mb-4 transition-all duration-300">
                         Custom Pricing
                       </p>
                       <p className="text-base sm:text-lg text-gray-500 font-medium">Tailored to your organization&apos;s needs</p>
@@ -847,7 +847,7 @@ export default function SubscriptionInfoPage() {
                           }
                         });
                       }}
-                      className="w-full px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg bg-[#1a84de] group-hover:bg-[#24AC4A] hover:bg-[#1a84de] group-hover:hover:bg-[#24AC4A] text-white transition-all duration-300"
+                      className="w-full px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg bg-[#0958d9] group-hover:bg-[#24AC4A] hover:bg-[#0958d9] group-hover:hover:bg-[#24AC4A] text-white transition-all duration-300"
                     >
                       Get Custom Quote
                     </Button>
@@ -864,7 +864,7 @@ export default function SubscriptionInfoPage() {
             ) : billingCycle === "adhoc" ? (
               /* Adhoc Credit Purchase UI */
               <div className="max-w-2xl mx-auto">
-                <div className="bg-white rounded-2xl shadow-xl border border-[#0958d9]/20 p-8">
+                <div className="bg-white rounded-2xl shadow-xl border border-[#0958d9]/20 p-8 hover:border-[#24AC4A]/30 transition-all duration-300">
                   <div className="text-center mb-8">
                     <h4 className="text-2xl font-bold text-gray-800 mb-2">Adhoc Credit Purchase</h4>
                     <p className="text-gray-600">Pay as you go - prices vary by service</p>
@@ -879,7 +879,7 @@ export default function SubscriptionInfoPage() {
                       <select
                         value={selectedService}
                         onChange={(e) => setSelectedService(e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0958d9] focus:border-transparent transition-all duration-200"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0958d9] focus:border-[#0958d9] transition-all duration-200 hover:border-[#0958d9]/50"
                       >
                         <option value="">-- Select a service --</option>
                         {billingOptions.filter(service => !service.isEnterprise).map((service) => (
@@ -900,7 +900,7 @@ export default function SubscriptionInfoPage() {
                         min="1"
                         value={creditsCount}
                         onChange={(e) => setCreditsCount(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0958d9] focus:border-transparent transition-all duration-200"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0958d9] focus:border-[#0958d9] transition-all duration-200 hover:border-[#0958d9]/50"
                         placeholder="Enter number of credits"
                       />
                     </div>
@@ -946,7 +946,7 @@ export default function SubscriptionInfoPage() {
                     <Button
                       onClick={handleAdhocPayment}
                       disabled={!selectedService || creditsCount < 1 || isProcessing}
-                      className="w-full py-4 text-lg font-semibold bg-[#1a84de] hover:bg-[#24AC4A] text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full py-4 text-lg font-semibold bg-[#0958d9] hover:bg-[#24AC4A] text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isProcessing ? (
                         <div className="flex items-center justify-center gap-2">
@@ -1039,7 +1039,7 @@ export default function SubscriptionInfoPage() {
                           }}
                           className={`w-full transition-all duration-300 mt-auto py-3 text-lg font-semibold ${isCurrentPlan
                             ? "bg-red-500 hover:bg-red-600 text-white shadow-lg"
-                            : "bg-[#1a84de] hover:bg-[#24AC4A] text-white group-hover:bg-[#24AC4A] shadow-md"
+                            : "bg-[#0958d9] hover:bg-[#24AC4A] text-white group-hover:bg-[#24AC4A] shadow-md"
                             }`}
                           disabled={isProcessing}
                         >

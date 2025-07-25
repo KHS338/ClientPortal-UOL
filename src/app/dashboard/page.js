@@ -459,14 +459,14 @@ export default function DashboardPage() {
 
           {/* Credits Overview */}
           {userCredits.length > 0 && (
-            <Card className="p-6 bg-gradient-to-br from-[#24AC4A] to-[#19AF1A] text-white shadow-xl border-0">
+            <Card className="p-6 bg-gradient-to-br from-[#1a84de] to-[#06398e] text-white shadow-xl border-0">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold flex items-center gap-3">
                   <FiCheckCircle size={24} />
                   Credits Overview
                 </h3>
                 <Button 
-                  className="bg-white text-[#24AC4A] hover:bg-gray-100"
+                  className="bg-white text-[#1a84de] hover:bg-gray-100"
                   onClick={() => window.location.href = '/subscription-info'}
                 >
                   View Details
@@ -474,15 +474,15 @@ export default function DashboardPage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <p className="text-green-100 text-sm">Total Available</p>
+                  <p className="text-blue-100 text-sm">Total Available</p>
                   <p className="text-2xl font-bold">{totalRemainingCredits}</p>
                 </div>
                 <div>
-                  <p className="text-green-100 text-sm">Active Subscriptions</p>
+                  <p className="text-blue-100 text-sm">Active Subscriptions</p>
                   <p className="text-2xl font-bold">{userCredits.filter(sub => sub.status === 'active').length}</p>
                 </div>
                 <div>
-                  <p className="text-green-100 text-sm">Total Subscriptions</p>
+                  <p className="text-blue-100 text-sm">Total Subscriptions</p>
                   <p className="text-2xl font-bold">{userCredits.length}</p>
                 </div>
               </div>

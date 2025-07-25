@@ -517,29 +517,6 @@ export default function ClientInvoicePage() {
                   <FiFileText />
                   {invoices.length} {invoices.length === 1 ? 'invoice' : 'invoices'}
                 </div>
-                {/* Test PDF Button */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    console.log('Basic PDF test clicked');
-                    try {
-                      const pdf = new jsPDF();
-                      pdf.setFontSize(16);
-                      pdf.text('PDF Generation Test', 20, 20);
-                      pdf.text('This is a test PDF to verify jsPDF is working.', 20, 40);
-                      pdf.text(`Generated at: ${new Date().toLocaleString()}`, 20, 60);
-                      pdf.save('test-pdf.pdf');
-                      console.log('Basic PDF test completed successfully');
-                    } catch (error) {
-                      console.error('Basic PDF test failed:', error);
-                      alert('PDF library test failed: ' + error.message);
-                    }
-                  }}
-                  className="text-xs"
-                >
-                  Basic PDF Test
-                </Button>
               </div>
             )}
           </div>
