@@ -129,10 +129,12 @@ export const clearAllUserData = () => {
   }
 };
 
-export default {
+const userStorageUtils = {
   setUserItem,
   getUserItem,
   removeUserItem,
   clearUserData,
   clearAllUserData
 };
+
+export default userStorageUtils;

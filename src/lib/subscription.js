@@ -150,9 +150,11 @@ export const updateSubscriptionData = (subscriptionData) => {
   }));
 };
 
-export default {
+const subscriptionUtils = {
   getCurrentSubscription,
   hasServiceAccess,
   clearSubscriptionData,
   updateSubscriptionData
 };
+
+export default subscriptionUtils;

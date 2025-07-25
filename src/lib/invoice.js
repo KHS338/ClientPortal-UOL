@@ -310,7 +310,7 @@ export const convertSubscriptionToInvoice = (subscription, index = 0) => {
   };
 };
 
-export default {
+const invoiceUtils = {
   getUserInvoices,
   getInvoice,
   getInvoiceByNumber,
@@ -321,3 +321,5 @@ export default {
   getInvoiceStats,
   convertSubscriptionToInvoice
 };
+
+export default invoiceUtils;

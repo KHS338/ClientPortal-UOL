@@ -373,7 +373,7 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
                     ))}
                     {countrySearch && filteredCountries.length === 0 && (
                       <div className="px-4 py-2 text-gray-500 text-sm">
-                        No countries found matching "{countrySearch}"
+                        No countries found matching &quot;{countrySearch}&quot;
                       </div>
                     )}
                   </div>
