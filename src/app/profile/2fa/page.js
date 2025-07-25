@@ -288,7 +288,7 @@ export default function TwoFactorAuthSettings() {
               </Button>
             </div>
 
-            {/* Backup Codes */}
+            {/* Backup Codes
             <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-semibold text-yellow-800">Backup Codes</h4>
@@ -320,7 +320,7 @@ export default function TwoFactorAuthSettings() {
                   </div>
                 ))}
               </div>
-            </div>
+            </div> */}
           </div>
         )}
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { FiDownload, FiPrinter, FiMail, FiCalendar, FiDollarSign, FiFileText, FiUser, FiEye, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useReactToPrint } from "react-to-print";
 import { Card } from "@/components/ui/card";
@@ -8,10 +8,12 @@ import { Button } from "@/components/ui/button";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAuth } from "@/contexts/AuthContext";
 import { getCurrentSubscription } from "@/lib/subscription";
 import { getUserInvoices, convertSubscriptionToInvoice } from "@/lib/invoice";
 
 export default function ClientInvoicePage() {
+  const { user, isAuthenticated } = useAuth();
   const invoiceRef = useRef();
   const [invoices, setInvoices] = useState([]);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
@@ -26,18 +28,30 @@ export default function ClientInvoicePage() {
   };
 
   // Fetch user invoices from backend or subscription history
-  const fetchUserInvoices = async () => {
+  const fetchUserInvoices = useCallback(async () => {
     try {
       setIsLoading(true);
-      const userId = 1; // TODO: Get from auth context
+      
+      // Check if user is authenticated
+      if (!isAuthenticated || !user?.id) {
+        console.log('Invoice - User not authenticated:', { isAuthenticated, user: user?.id });
+        setInvoices([]);
+        setIsLoading(false);
+        return;
+      }
+      
+      const userId = parseInt(user.id);
+      console.log('Invoice - Fetching invoices for user:', userId);
       
       // First try to get invoices from the dedicated backend API
       let userInvoices = await getUserInvoices(userId);
+      console.log('Invoice - Backend API response:', userInvoices);
       
       // If no invoices found in backend, try to get from subscription history
       if (!userInvoices || userInvoices.length === 0) {
         console.log('No invoices found in backend, checking subscription history...');
         const subscriptionData = await getCurrentSubscription(userId);
+        console.log('Invoice - Subscription data:', subscriptionData);
         
         if (subscriptionData && subscriptionData.credits && subscriptionData.credits.history) {
           // Convert subscriptions to invoice format
@@ -108,7 +122,7 @@ export default function ClientInvoicePage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, isAuthenticated]); // Add useCallback dependencies
 
   // Load invoices on component mount
   useEffect(() => {
@@ -117,7 +131,7 @@ export default function ClientInvoicePage() {
     // Listen for subscription updates to refresh invoices
     const handleSubscriptionUpdate = () => {
       console.log('Invoices - Subscription update detected, refreshing invoices');
-      fetchUserInvoices();
+      setTimeout(() => fetchUserInvoices(), 500);
     };
 
     // Listen for payment completion to refresh invoices
@@ -129,12 +143,12 @@ export default function ClientInvoicePage() {
     // Listen for invoice-specific events
     const handleInvoiceGenerated = (event) => {
       console.log('Invoices - New invoice generated:', event.detail);
-      fetchUserInvoices();
+      setTimeout(() => fetchUserInvoices(), 2000); // Longer delay for invoice generation
     };
 
     const handleInvoiceUpdated = (event) => {
       console.log('Invoices - Invoice updated:', event.detail);
-      fetchUserInvoices();
+      setTimeout(() => fetchUserInvoices(), 1000);
     };
 
     // Add all event listeners
@@ -151,7 +165,7 @@ export default function ClientInvoicePage() {
       window.removeEventListener('invoiceCreated', handleInvoiceGenerated);
       window.removeEventListener('invoiceUpdated', handleInvoiceUpdated);
     };
-  }, []);
+  }, [user, isAuthenticated, fetchUserInvoices]); // Add fetchUserInvoices dependency
 
   // Function to generate invoice for a subscription purchase (can be called from payment flow)
   const generateInvoiceForSubscription = async (subscriptionDetails) => {
@@ -513,6 +527,17 @@ export default function ClientInvoicePage() {
             </div>
             {currentView === 'list' && (
               <div className="flex items-center gap-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    console.log('Manual refresh triggered');
+                    fetchUserInvoices();
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <FiFileText />
+                  Refresh
+                </Button>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <FiFileText />
                   {invoices.length} {invoices.length === 1 ? 'invoice' : 'invoices'}
