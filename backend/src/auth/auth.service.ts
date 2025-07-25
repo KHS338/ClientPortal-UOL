@@ -29,14 +29,22 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Check if 2FA is enabled - if so, don't issue token immediately
+    // Check if 2FA is enabled
     if (user.twoFactorEnabled) {
-      return {
-        success: false,
-        requiresTwoFactor: true,
-        userId: user.id,
-        message: 'Two-factor authentication required'
-      };
+      if (!loginDto.twoFactorToken) {
+        return {
+          success: false,
+          requiresTwoFactor: true,
+          userId: user.id,
+          message: 'Two-factor authentication required'
+        };
+      }
+
+      // Verify 2FA token
+      const is2FAValid = await this.usersService.verify2FAToken(user.id, loginDto.twoFactorToken);
+      if (!is2FAValid) {
+        throw new UnauthorizedException('Invalid two-factor authentication code');
+      }
     }
 
     // Update last login

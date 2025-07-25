@@ -155,8 +155,8 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      // First check credentials and 2FA with users/login
-      const userLoginResponse = await fetch(`${apiBaseUrl}/users/login`, {
+      // Use auth/login endpoint which now handles 2FA
+      const authResponse = await fetch(`${apiBaseUrl}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -168,57 +168,63 @@ export const AuthProvider = ({ children }) => {
         })
       });
 
-      const userResult = await userLoginResponse.json();
+      const authResult = await authResponse.json();
 
-      if (userResult.success) {
-        // Now get JWT token from auth/login
-        const authResponse = await fetch(`${apiBaseUrl}/auth/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password })
-        });
-
-        const authResult = await authResponse.json();
-
-        if (authResult.success && authResult.access_token) {
-          // Get user data from JWT token
-          const user = getUserFromToken(authResult.access_token);
+      if (authResult.success && authResult.access_token) {
+        // Get user data from JWT token
+        const user = getUserFromToken(authResult.access_token);
+        
+        if (user) {
+          // Clear any previous user's data before setting new auth
+          clearSubscriptionData();
           
-          if (user) {
-            // Clear any previous user's data before setting new auth
-            clearSubscriptionData();
-            
-            // Store JWT token only
-            authUtils.setAuth(authResult.access_token, user, rememberMe);
-            
-            dispatch({
-              type: AUTH_ACTIONS.LOGIN_SUCCESS,
-              payload: {
-                token: authResult.access_token,
-                user: user
-              }
-            });
+          // Store JWT token only
+          authUtils.setAuth(authResult.access_token, user, rememberMe);
+          
+          dispatch({
+            type: AUTH_ACTIONS.LOGIN_SUCCESS,
+            payload: {
+              token: authResult.access_token,
+              user: user
+            }
+          });
 
-            return { success: true, user: user };
+          // Fetch complete user profile after successful login
+          try {
+            const profileResponse = await authUtils.fetchWithAuth(`${apiBaseUrl}/auth/profile`);
+            const profileResult = await profileResponse.json();
+            
+            if (profileResult.success) {
+              // Merge JWT user data with profile data
+              const fullUser = { ...user, ...profileResult.user };
+              dispatch({
+                type: AUTH_ACTIONS.UPDATE_USER,
+                payload: fullUser
+              });
+              return { success: true, user: fullUser };
+            }
+          } catch (error) {
+            console.error('Error fetching profile after login:', error);
+            // Continue with JWT user data if profile fetch fails
           }
+
+          return { success: true, user: user };
         }
-      } else if (userResult.requiresTwoFactor) {
+      } else if (authResult.requiresTwoFactor) {
         // Return 2FA requirement
         dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
         return { 
           success: false, 
           requiresTwoFactor: true, 
-          userId: userResult.userId,
-          message: userResult.message 
+          userId: authResult.userId,
+          message: authResult.message 
         };
       } else {
         dispatch({
           type: AUTH_ACTIONS.SET_ERROR,
-          payload: userResult.message || 'Login failed'
+          payload: authResult.message || 'Login failed'
         });
-        return { success: false, message: userResult.message };
+        return { success: false, message: authResult.message };
       }
     } catch (error) {
       dispatch({
