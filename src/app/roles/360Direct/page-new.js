@@ -38,7 +38,7 @@ export default function DirectPage() {
       const user = JSON.parse(userData)
       
       // Fetch direct roles for this user
-      const response = await fetch(`http://localhost:3001/direct?userId=${user.id}`)
+      const response = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/direct?userId=${user.id}`)
       const result = await response.json()
       
       if (result.success) {
@@ -84,7 +84,7 @@ export default function DirectPage() {
   // Handle deleting a role
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`http://localhost:3001/direct/${id}`, {
+      const response = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/direct/${id}`, {
         method: 'DELETE'
       })
       

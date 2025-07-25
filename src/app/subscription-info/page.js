@@ -94,7 +94,7 @@ export default function SubscriptionInfoPage() {
 
       // Load subscription plans from API
       try {
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms';
         const response = await fetch(`${apiBaseUrl}/subscriptions`);
         const result = await response.json();
         
@@ -345,7 +345,7 @@ export default function SubscriptionInfoPage() {
       
       // Create user subscription entry in database
       const userId = parseInt(user.id);
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms';
       
       // Find the subscription ID from the service title
       const subscription = billingOptions.find(s => s.title === serviceTitle);
@@ -506,7 +506,7 @@ export default function SubscriptionInfoPage() {
           
           // Call API to cancel subscription in database
           const userId = parseInt(user.id);
-          const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+          const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms';
           
           const response = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/user/${userId}/cancel`, {
             method: 'POST',
