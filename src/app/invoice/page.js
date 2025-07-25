@@ -562,7 +562,7 @@ export default function ClientInvoicePage() {
                   <FiFileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No Invoices Found</h3>
                   <p className="text-gray-600 mb-4">
-                    You don't have any invoices yet. Invoices will appear here when you purchase subscriptions.
+                    You don&apos;t have any invoices yet. Invoices will appear here when you purchase subscriptions.
                   </p>
                   <Button 
                     onClick={() => window.location.href = '/subscription'}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FiUser, FiDollarSign, FiCalendar, FiBriefcase, FiClock, FiCheckCircle, FiSettings, FiTarget, FiUsers, FiFileText } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,7 @@ export default function DashboardPage() {
   }, []);
 
   // Function to fetch recent role activities from all services
-  const fetchRecentRoleActivity = async () => {
+  const fetchRecentRoleActivity = useCallback(async () => {
     try {
       setIsLoadingActivity(true);
       const userId = 1; // TODO: Get from auth context
@@ -210,7 +210,7 @@ export default function DashboardPage() {
     } finally {
       setIsLoadingActivity(false);
     }
-  };
+  }, [setRecentRoleActivity, setIsLoadingActivity]);
 
   // Helper function to format time ago
   const formatTimeAgo = (date) => {
@@ -342,7 +342,7 @@ export default function DashboardPage() {
       window.removeEventListener('roleUpdated', handleRoleUpdate);
       clearInterval(activityRefreshInterval);
     };
-  }, []);
+  }, [fetchRecentRoleActivity]);
 
   // Mock data for dashboard metrics - focused on roles and subscription
 
