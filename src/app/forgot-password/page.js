@@ -27,7 +27,7 @@ export default function ForgotPasswordPage() {
     setMessage("");
 
     try {
-      const response = await fetch("https://8w2mk49p-3001.inc1.devtunnels.ms/users/forgot-password", {
+      const response = await fetch("https://8w2mk49p-3001.inc1.devtunnels.ms//users/forgot-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

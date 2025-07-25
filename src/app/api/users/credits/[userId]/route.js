@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function GET(request, { params }) {
   try {
     const { userId } = params;
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms/';
     
     const response = await fetch(`${apiBaseUrl}/user-subscriptions/user/${userId}/summary`, {
       method: 'GET',
@@ -44,7 +44,7 @@ export async function POST(request, { params }) {
   try {
     const { userId } = params;
     const { creditsToUse } = await request.json();
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms/';
     
     const response = await fetch(`${apiBaseUrl}/user-subscriptions/user/${userId}/use-credits`, {
       method: 'POST',

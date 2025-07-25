@@ -12,7 +12,7 @@ import { clearAllUserData } from './userStorage';
  */
 export const getCurrentSubscription = async (userId) => {
   try {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms/';
     const response = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/user/${userId}/summary`);
     const result = await response.json();
     

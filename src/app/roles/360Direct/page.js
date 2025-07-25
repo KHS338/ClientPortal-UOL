@@ -96,7 +96,7 @@ export default function DirectPage() {
     try {
       setLoading(true)
 
-      const response = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/direct?userId=${user.id}`)
+      const response = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms//direct?userId=${user.id}`)
       const result = await response.json()
 
       if (result.success) {

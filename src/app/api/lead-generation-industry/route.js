@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms/';
 
 export async function GET(request) {
   try {
