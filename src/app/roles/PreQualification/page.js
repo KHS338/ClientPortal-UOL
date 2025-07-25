@@ -71,7 +71,7 @@ export default function PreQualificationPage() {
       setLoading(true)
       
       // Fetch prequalification roles for this user
-      const response = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms//prequalification?userId=${user.id}`)
+      const response = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/prequalification?userId=${user.id}`)
       const result = await response.json()
       
       if (result.success) {
