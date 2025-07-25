@@ -1,7 +1,7 @@
 "use client";
 //subscription page
 import { useState, useEffect } from "react";
-import { FiCheckCircle, FiCalendar, FiCreditCard } from "react-icons/fi";
+import { FiCheckCircle, FiCalendar, FiCreditCard, FiFileText } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, Toast } from "@/components/ui/alert-dialog";
@@ -9,6 +9,7 @@ import StripePayment from "@/components/StripePayment";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { authUtils } from "@/lib/auth";
 import { getCurrentSubscription, updateSubscriptionData } from "@/lib/subscription";
+import { generateInvoiceForSubscription } from "@/lib/invoice";
 
 export default function SubscriptionInfoPage() {
   const [billingCycle, setBillingCycle] = useState("monthly");
@@ -387,6 +388,28 @@ export default function SubscriptionInfoPage() {
       const result = await response.json();
       console.log('User subscription created:', result);
 
+      // Generate invoice for the new subscription
+      try {
+        if (result && result.id) {
+          console.log('Generating invoice for subscription ID:', result.id);
+          const invoice = await generateInvoiceForSubscription(result.id);
+          if (invoice) {
+            console.log('Invoice generated successfully:', invoice);
+            // Dispatch event to notify invoice page
+            window.dispatchEvent(new CustomEvent('invoiceGenerated', { 
+              detail: invoice 
+            }));
+          } else {
+            console.warn('Invoice generation returned null/undefined');
+          }
+        } else {
+          console.warn('No subscription ID found in result:', result);
+        }
+      } catch (invoiceError) {
+        console.error('Error generating invoice (non-blocking):', invoiceError);
+        // Don't fail the subscription if invoice generation fails
+      }
+
       // Reload credits data
       const subscriptionResponse = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/user/${userId}/summary`);
       const subscriptionResult = await subscriptionResponse.json();
@@ -543,14 +566,29 @@ export default function SubscriptionInfoPage() {
         <div className="space-y-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">
-              Subscription Information
-            </h1>
-            <p className="text-lg text-gray-600">
-              Manage your subscription plans and billing preferences
-            </p>
+            <div className="flex items-center justify-between mb-4">
+              <div></div> {/* Spacer for center alignment */}
+              <div>
+                <h1 className="text-4xl font-bold text-gray-800 mb-2">
+                  Subscription Information
+                </h1>
+                <p className="text-lg text-gray-600">
+                  Manage your subscription plans and billing preferences
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => window.location.href = '/invoice'}
+                  className="flex items-center gap-2 text-[#0958d9] border-[#0958d9] hover:bg-[#0958d9] hover:text-white"
+                >
+                  <FiFileText size={16} />
+                  View Invoices
+                </Button>
+              </div>
+            </div>
             
-            {/* Temporary seed button for development */}
+            {/* Temporary seed button for development
             {process.env.NODE_ENV === 'development' && (
               <div className="mt-4">
                 <button
@@ -586,7 +624,7 @@ export default function SubscriptionInfoPage() {
                   🌱 Seed Subscription Data (Dev Only)
                 </button>
               </div>
-            )}
+            )} */}
           </div>
 
           {/* Current Subscription Overview - Only show if user has an active subscription */}

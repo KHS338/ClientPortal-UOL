@@ -601,7 +601,7 @@ export default function DashboardPage() {
               <FiTarget className="text-[#1a84de]" />
               Quick Actions
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <Button 
                 className={`h-20 flex flex-col items-center justify-center gap-2 shadow-lg transition-all duration-300 ${
                   (userSubscription === 'CV Sourcing' || userSubscription === 'Free Trial')
@@ -671,6 +671,13 @@ export default function DashboardPage() {
               >
                 <FiSettings size={20} />
                 <span className="text-sm">Subscriptions</span>
+              </Button>
+              <Button 
+                className="h-20 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#6366f1] to-[#4f46e5] hover:from-[#1a84de] hover:to-[#06398e] text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                onClick={() => window.location.href = '/invoice'}
+              >
+                <FiFileText size={20} />
+                <span className="text-sm">Invoices</span>
               </Button>
             </div>
           </Card>

@@ -11,6 +11,7 @@ import { DirectModule } from './direct/direct.module';
 import { LeadGenerationIndustryModule } from './lead-generation-industry/lead-generation-industry.module';
 import { LeadGenerationJobModule } from './lead-generation-job/lead-generation-job.module';
 import { SubscriptionModule } from './subscriptions/subscription.module';
+import { InvoiceModule } from './invoices/invoice.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { SubscriptionModule } from './subscriptions/subscription.module';
     LeadGenerationIndustryModule, // Added LeadGenerationIndustryModule import
     LeadGenerationJobModule, // Added LeadGenerationJobModule import
     SubscriptionModule, // Added SubscriptionModule import
+    InvoiceModule, // Added InvoiceModule import
   ],
 })
 export class AppModule {}
