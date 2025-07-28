@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FiCreditCard, FiShoppingCart, FiUser, FiBriefcase, FiFileText, FiTarget, FiMinus, FiPlus, FiInfo, FiClock } from 'react-icons/fi';
-import { authUtils } from '../lib/auth';
+import { FiCreditCard, FiMinus, FiPlus, FiInfo, FiClock } from 'react-icons/fi';
 
-function CreditHistoryComponent({ userId, limit = 50, serviceType = null, className = '' }) {
+const CreditHistoryComponent = ({ userId, serviceType = null, className = "", limit = 50, showLatest = false }) => {
   const [creditHistory, setCreditHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,112 +13,25 @@ function CreditHistoryComponent({ userId, limit = 50, serviceType = null, classN
       setLoading(true);
       setError(null);
 
-      let url = `/api/users/credits/${userId}/history?limit=50`;
+      // For small limits with showLatest, fetch more data to ensure we get the latest entries
+      const fetchLimit = showLatest && limit < 50 ? Math.max(50, limit) : limit;
+      
+      let url = `/api/users/credits/${userId}/history?limit=${fetchLimit}`;
       if (serviceType) {
         url += `&serviceType=${serviceType}`;
       }
 
-      console.log('Fetching credit history from:', url);
-      const response = await authUtils.fetchWithAuth(url);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
+      const response = await fetch(url);
       const result = await response.json();
-      console.log('Credit history response:', result);
 
-      // Handle different response structures
-      if (result.success === true) {
-        // API route success response
+      if (result.success) {
         setCreditHistory(result.creditHistory || []);
-      } else if (result.success === false) {
-        // API route error response
-        if (result.error && result.error.includes('Backend URL not configured')) {
-          setError('Backend service not configured. Please ensure NEXT_PUBLIC_API_URL is set.');
-        } else {
-          setError(result.message || 'Failed to fetch credit history');
-        }
-        console.error('Credit history error:', result);
-      } else if (Array.isArray(result)) {
-        // Direct array response from backend
-        setCreditHistory(result);
-      } else if (result.data && Array.isArray(result.data)) {
-        // Backend response with data array
-        setCreditHistory(result.data);
       } else {
-        // Unknown response structure - show mock data for testing
-        console.warn('Unknown response structure, using mock data:', result);
-        setCreditHistory([
-          {
-            id: 1,
-            actionType: 'usage',
-            creditAmount: 1,
-            serviceType: 'cv-sourcing',
-            roleTitle: 'Software Engineer Position',
-            createdAt: new Date().toISOString(),
-            remainingCreditsAfter: 24
-          },
-          {
-            id: 2,
-            actionType: 'usage',
-            creditAmount: 1,
-            serviceType: 'prequalification',
-            roleTitle: 'Marketing Manager',
-            createdAt: new Date(Date.now() - 3600000).toISOString(),
-            remainingCreditsAfter: 25
-          },
-          {
-            id: 3,
-            actionType: 'purchase',
-            creditAmount: 25,
-            serviceType: null,
-            roleTitle: null,
-            createdAt: new Date(Date.now() - 86400000).toISOString(),
-            remainingCreditsAfter: 26
-          }
-        ]);
-        setError('Note: Showing sample data - backend may not be configured');
+        setError(result.message);
       }
     } catch (err) {
+      setError('Failed to fetch credit history');
       console.error('Error fetching credit history:', err);
-      
-      // If fetch fails completely, show mock data for testing
-      if (err.message.includes('fetch') || err.message.includes('HTTP error')) {
-        console.log('Backend not available, showing mock data for testing');
-        setCreditHistory([
-          {
-            id: 1,
-            actionType: 'usage',
-            creditAmount: 1,
-            serviceType: 'cv-sourcing',
-            roleTitle: 'Software Engineer Position',
-            createdAt: new Date().toISOString(),
-            remainingCreditsAfter: 24
-          },
-          {
-            id: 2,
-            actionType: 'usage',
-            creditAmount: 1,
-            serviceType: 'prequalification',
-            roleTitle: 'Marketing Manager',
-            createdAt: new Date(Date.now() - 3600000).toISOString(),
-            remainingCreditsAfter: 25
-          },
-          {
-            id: 3,
-            actionType: 'purchase',
-            creditAmount: 25,
-            serviceType: null,
-            roleTitle: null,
-            createdAt: new Date(Date.now() - 86400000).toISOString(),
-            remainingCreditsAfter: 26
-          }
-        ]);
-        setError('Note: Backend not available, showing sample data');
-      } else {
-        setError('Failed to fetch credit history: ' + err.message);
-      }
     } finally {
       setLoading(false);
     }
@@ -127,7 +39,7 @@ function CreditHistoryComponent({ userId, limit = 50, serviceType = null, classN
 
   useEffect(() => {
     fetchCreditHistory();
-  }, [userId, serviceType]);
+  }, [userId, serviceType, limit, showLatest]);
 
   const getActionIcon = (actionType) => {
     switch (actionType) {
@@ -201,43 +113,32 @@ function CreditHistoryComponent({ userId, limit = 50, serviceType = null, classN
       <div className={`p-8 text-center text-gray-500 ${className}`}>
         <FiCreditCard size={48} className="mx-auto mb-4 text-gray-300" />
         <h3 className="text-lg font-medium text-gray-900 mb-2">No Credit History</h3>
-        <p className="text-sm">
-          {error ? 
-            'Unable to load credit history. This feature requires the backend server to be running.' : 
-            'No credit transactions found for this account.'
-          }
-        </p>
-        {error && (
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-blue-800 text-sm">
-              <strong>Note:</strong> The credit history feature tracks when credits are used for creating roles. 
-              Once you start creating roles, your transaction history will appear here.
-            </p>
-          </div>
-        )}
+        <p className="text-sm">No credit transactions found for this account.</p>
       </div>
     );
   }
 
   return (
     <div className={`bg-white ${className}`}>
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-          <FiCreditCard size={20} />
-          Credit History
-          {serviceType && (
-            <span className="text-sm font-normal text-gray-500">
-              • {serviceType}
-            </span>
-          )}
-        </h3>
-        <p className="text-sm text-gray-600 mt-1">
-          Recent credit transactions and usage history
-        </p>
-      </div>
+      {limit >= 50 && (
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <FiCreditCard size={20} />
+            Credit History
+            {serviceType && (
+              <span className="text-sm font-normal text-gray-500">
+                • {serviceType}
+              </span>
+            )}
+          </h3>
+          <p className="text-sm text-gray-600 mt-1">
+            Recent credit transactions and usage history
+          </p>
+        </div>
+      )}
 
       <div className="space-y-3">
-        {creditHistory.map((transaction, index) => (
+        {(showLatest && limit < 50 ? creditHistory.slice(-limit) : creditHistory.slice(0, limit)).map((transaction, index) => (
           <div
             key={transaction.id || index}
             className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
@@ -285,10 +186,10 @@ function CreditHistoryComponent({ userId, limit = 50, serviceType = null, classN
         ))}
       </div>
 
-      {creditHistory.length >= 50 && (
+      {creditHistory.length > limit && (
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-500">
-            Showing latest 50 transactions
+            Showing {showLatest && limit < 50 ? 'latest' : 'first'} {Math.min(limit, creditHistory.length)} of {creditHistory.length} transactions
           </p>
         </div>
       )}

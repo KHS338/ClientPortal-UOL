@@ -731,12 +731,21 @@ export default function SubscriptionInfoPage() {
           {/* Credits Breakdown - Show if user has any subscriptions */}
           {userCredits && userCredits.length > 0 && (
             <Card className="p-6 mb-8 bg-white/90 backdrop-blur-sm shadow-lg border-0">
-              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-3">
-                <FiCreditCard className="text-[#0958d9]" />
-                Credits Breakdown
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-800 flex items-center gap-3">
+                  <FiCreditCard className="text-[#0958d9]" />
+                  Credits Breakdown
+                </h3>
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.location.href = '/credits-breakdown'}
+                  className="text-[#0958d9] border-[#0958d9] hover:bg-[#0958d9] hover:text-white"
+                >
+                  View All Credits
+                </Button>
+              </div>
               <div className="space-y-4">
-                {userCredits.map((subscription, index) => (
+                {userCredits.slice(-3).map((subscription, index) => (
                   <div key={subscription.id || index} className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
                     <div>
                       <h4 className="font-semibold text-gray-800">
@@ -759,6 +768,13 @@ export default function SubscriptionInfoPage() {
                     </div>
                   </div>
                 ))}
+                {userCredits.length > 3 && (
+                  <div className="text-center pt-2">
+                    <p className="text-sm text-gray-500">
+                      Showing latest 3 of {userCredits.length} subscriptions
+                    </p>
+                  </div>
+                )}
               </div>
             </Card>
           )}
@@ -783,6 +799,8 @@ export default function SubscriptionInfoPage() {
                 userId={user?.id} 
                 serviceType={null}
                 className=""
+                limit={3}
+                showLatest={true}
               />
             </Card>
           )}

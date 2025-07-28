@@ -85,42 +85,84 @@ export async function GET(request, { params }) {
     
     // If the backend is not available, return mock data for testing
     if (error.message.includes('fetch') || error.message.includes('ECONNREFUSED')) {
-      console.log('Backend not available, returning mock data');
+      console.log('Backend not available, returning mock data with limit:', limit);
+      
+      const fullMockData = [
+        {
+          id: 1,
+          actionType: 'used',
+          creditAmount: -1,
+          serviceTitle: 'CV Sourcing',
+          serviceType: 'cv-sourcing',
+          roleTitle: 'Senior Software Engineer',
+          createdAt: new Date().toISOString(),
+          remainingCreditsAfter: 24,
+          description: 'Credit used for CV Sourcing role posting'
+        },
+        {
+          id: 2,
+          actionType: 'used',
+          creditAmount: -1,
+          serviceTitle: 'Prequalification',
+          serviceType: 'prequalification',
+          roleTitle: 'Marketing Manager',
+          createdAt: new Date(Date.now() - 3600000).toISOString(),
+          remainingCreditsAfter: 25,
+          description: 'Credit used for Prequalification service'
+        },
+        {
+          id: 3,
+          actionType: 'purchased',
+          creditAmount: 50,
+          serviceTitle: 'CV Sourcing',
+          serviceType: 'cv-sourcing',
+          roleTitle: null,
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
+          remainingCreditsAfter: 26,
+          description: 'Credits purchased - Premium Plan'
+        },
+        {
+          id: 4,
+          actionType: 'used',
+          creditAmount: -2,
+          serviceTitle: '360/Direct',
+          serviceType: '360-direct',
+          roleTitle: 'Product Manager',
+          createdAt: new Date(Date.now() - 7200000).toISOString(),
+          remainingCreditsAfter: 23,
+          description: 'Credit used for 360/Direct assessment'
+        },
+        {
+          id: 5,
+          actionType: 'used',
+          creditAmount: -1,
+          serviceTitle: 'Lead Generation',
+          serviceType: 'lead-generation',
+          roleTitle: 'Sales Representative',
+          createdAt: new Date(Date.now() - 10800000).toISOString(),
+          remainingCreditsAfter: 22,
+          description: 'Credit used for Lead Generation'
+        },
+        {
+          id: 6,
+          actionType: 'refunded',
+          creditAmount: 3,
+          serviceTitle: 'Prequalification',
+          serviceType: 'prequalification',
+          roleTitle: 'Data Analyst',
+          createdAt: new Date(Date.now() - 172800000).toISOString(),
+          remainingCreditsAfter: 21,
+          description: 'Credit refunded - candidate withdrew'
+        }
+      ];
+
+      // Apply the limit to mock data
+      const limitedMockData = fullMockData.slice(0, parseInt(limit));
+      
       return NextResponse.json({
         success: true,
-        creditHistory: [
-          {
-            id: 1,
-            actionType: 'usage',
-            creditAmount: 1,
-            serviceType: 'cv-sourcing',
-            roleTitle: 'Senior Software Engineer',
-            createdAt: new Date().toISOString(),
-            remainingCreditsAfter: 24,
-            description: 'Credit used for CV Sourcing role posting'
-          },
-          {
-            id: 2,
-            actionType: 'usage',
-            creditAmount: 1,
-            serviceType: 'prequalification',
-            roleTitle: 'Marketing Manager',
-            createdAt: new Date(Date.now() - 3600000).toISOString(),
-            remainingCreditsAfter: 25,
-            description: 'Credit used for Prequalification service'
-          },
-          {
-            id: 3,
-            actionType: 'purchase',
-            creditAmount: 50,
-            serviceType: null,
-            roleTitle: null,
-            createdAt: new Date(Date.now() - 86400000).toISOString(),
-            remainingCreditsAfter: 26,
-            description: 'Credits purchased - Premium Plan'
-          }
-        ],
-        message: 'Mock credit history retrieved (backend not available)'
+        creditHistory: limitedMockData,
+        message: `Mock credit history retrieved (backend not available) - showing ${limitedMockData.length} of ${fullMockData.length} transactions`
       });
     }
     
