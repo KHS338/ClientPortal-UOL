@@ -1,3 +1,5 @@
+"use client"
+
 // Test file to check backend connectivity
 export default function TestConnection() {
   const testConnection = async () => {
