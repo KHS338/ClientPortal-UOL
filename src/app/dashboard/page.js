@@ -47,13 +47,14 @@ export default function DashboardPage() {
       
       const userId = parseInt(user.id);
       const activities = [];
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
       console.log('Dashboard - Fetching recent role activity for user:', userId);
 
       // Fetch from CV Sourcing
       try {
         console.log('Dashboard - Fetching CV Sourcing data...');
-        const cvResponse = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/cv-sourcing/user/${userId}`);
+        const cvResponse = await fetch(`${apiBaseUrl}/cv-sourcing/user/${userId}`);
         console.log('Dashboard - CV Sourcing response status:', cvResponse.status);
         
         if (cvResponse.ok) {
@@ -81,7 +82,7 @@ export default function DashboardPage() {
       // Fetch from Prequalification
       try {
         console.log('Dashboard - Fetching Prequalification data...');
-        const prequalResponse = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/prequalification/user/${userId}`);
+        const prequalResponse = await fetch(`${apiBaseUrl}/prequalification/user/${userId}`);
         console.log('Dashboard - Prequalification response status:', prequalResponse.status);
         
         if (prequalResponse.ok) {
@@ -109,7 +110,7 @@ export default function DashboardPage() {
       // Fetch from 360 Direct
       try {
         console.log('Dashboard - Fetching 360 Direct data...');
-        const directResponse = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/direct/user/${userId}`);
+        const directResponse = await fetch(`${apiBaseUrl}/direct/user/${userId}`);
         console.log('Dashboard - 360 Direct response status:', directResponse.status);
         
         if (directResponse.ok) {
@@ -137,7 +138,7 @@ export default function DashboardPage() {
       // Fetch from Lead Generation Jobs
       try {
         console.log('Dashboard - Fetching Lead Generation Jobs data...');
-        const leadJobsResponse = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/lead-generation-job?userId=${userId}`);
+        const leadJobsResponse = await fetch(`${apiBaseUrl}/lead-generation-job?userId=${userId}`);
         console.log('Dashboard - Lead Generation Jobs response status:', leadJobsResponse.status);
         
         if (leadJobsResponse.ok) {
@@ -165,7 +166,7 @@ export default function DashboardPage() {
       // Fetch from Lead Generation Industry
       try {
         console.log('Dashboard - Fetching Lead Generation Industry data...');
-        const leadIndustryResponse = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/lead-generation-industry?userId=${userId}`);
+        const leadIndustryResponse = await fetch(`${apiBaseUrl}/lead-generation-industry?userId=${userId}`);
         console.log('Dashboard - Lead Generation Industry response status:', leadIndustryResponse.status);
         
         if (leadIndustryResponse.ok) {

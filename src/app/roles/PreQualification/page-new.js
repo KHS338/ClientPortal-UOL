@@ -36,9 +36,10 @@ export default function PreQualificationPage() {
       }
       
       const user = JSON.parse(userData)
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       
       // Fetch prequalification roles for this user
-      const response = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/prequalification?userId=${user.id}`)
+      const response = await fetch(`${apiBaseUrl}/prequalification?userId=${user.id}`)
       const result = await response.json()
       
       if (result.success) {
@@ -84,7 +85,8 @@ export default function PreQualificationPage() {
   // Handle deleting a role
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/prequalification/${id}`, {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${apiBaseUrl}/prequalification/${id}`, {
         method: 'DELETE'
       })
       

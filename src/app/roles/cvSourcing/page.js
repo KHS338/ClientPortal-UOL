@@ -65,7 +65,8 @@ export default function CVSourcingPage() {
     setError(null)
 
     try {
-      const response = await fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/cv-sourcing?userId=${user.id}`)
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${apiBaseUrl}/cv-sourcing?userId=${user.id}`)
       const result = await response.json()
 
       if (result.success) {

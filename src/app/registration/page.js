@@ -97,9 +97,10 @@ export default function ClientRegistrationPage() {
       };
 
       console.log("Sending user data:", userData);
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
       // Call backend API
-      const response = await fetch('https://8w2mk49p-3001.inc1.devtunnels.ms/users/register', {
+      const response = await fetch(`${apiBaseUrl}/users/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

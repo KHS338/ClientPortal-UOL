@@ -35,7 +35,8 @@ function ResetPasswordForm() {
 
   const validateToken = async (resetToken) => {
     try {
-      const response = await fetch("https://8w2mk49p-3001.inc1.devtunnels.ms/users/validate-reset-token", {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${apiBaseUrl}/users/validate-reset-token`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -91,9 +92,10 @@ function ResetPasswordForm() {
 
     setIsLoading(true);
     setError("");
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
     try {
-      const response = await fetch("https://8w2mk49p-3001.inc1.devtunnels.ms/users/reset-password", {
+      const response = await fetch(`${apiBaseUrl}/users/reset-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

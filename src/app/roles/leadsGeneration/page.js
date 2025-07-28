@@ -894,11 +894,12 @@ export default function LeadsGenerationPage() {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       
       // Load both jobs and industry data
       const [jobsResponse, industryResponse] = await Promise.all([
-        fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/lead-generation-job?userId=${user.id}`),
-        fetch(`https://8w2mk49p-3001.inc1.devtunnels.ms/lead-generation-industry?userId=${user.id}`)
+        fetch(`${apiBaseUrl}/lead-generation-job?userId=${user.id}`),
+        fetch(`${apiBaseUrl}/lead-generation-industry?userId=${user.id}`)
       ]);
       
       const jobsData = await jobsResponse.json();
@@ -974,11 +975,13 @@ export default function LeadsGenerationPage() {
       }
 
       let response;
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      
       if (editingEntry) {
         // Update existing entry
         const endpoint = formType === 'jobs' ? 
-          `https://8w2mk49p-3001.inc1.devtunnels.ms/lead-generation-job/${editingEntry.id}` : 
-          `https://8w2mk49p-3001.inc1.devtunnels.ms/lead-generation-industry/${editingEntry.id}`;
+          `${apiBaseUrl}/lead-generation-job/${editingEntry.id}` : 
+          `${apiBaseUrl}/lead-generation-industry/${editingEntry.id}`;
           
         response = await fetch(endpoint, {
           method: 'PUT',
@@ -990,8 +993,8 @@ export default function LeadsGenerationPage() {
       } else {
         // Create new entry
         const endpoint = formType === 'jobs' ? 
-          'https://8w2mk49p-3001.inc1.devtunnels.ms/lead-generation-job' : 
-          'https://8w2mk49p-3001.inc1.devtunnels.ms/lead-generation-industry';
+          `${apiBaseUrl}/lead-generation-job` : 
+          `${apiBaseUrl}/lead-generation-industry`;
           
         response = await fetch(endpoint, {
           method: 'POST',
@@ -1043,10 +1046,11 @@ export default function LeadsGenerationPage() {
 
     try {
       setLoading(true);
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       
       const endpoint = entryToDelete.type === 'jobs' ? 
-        `https://8w2mk49p-3001.inc1.devtunnels.ms/lead-generation-job/${entryToDelete.id}` : 
-        `https://8w2mk49p-3001.inc1.devtunnels.ms/lead-generation-industry/${entryToDelete.id}`;
+        `${apiBaseUrl}/lead-generation-job/${entryToDelete.id}` : 
+        `${apiBaseUrl}/lead-generation-industry/${entryToDelete.id}`;
         
       const response = await fetch(endpoint, {
         method: 'DELETE',
