@@ -12,6 +12,8 @@ import { LeadGenerationIndustryModule } from './lead-generation-industry/lead-ge
 import { LeadGenerationJobModule } from './lead-generation-job/lead-generation-job.module';
 import { SubscriptionModule } from './subscriptions/subscription.module';
 import { InvoiceModule } from './invoices/invoice.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
@@ -31,8 +33,10 @@ import { InvoiceModule } from './invoices/invoice.module';
     DirectModule, // Added DirectModule import
     LeadGenerationIndustryModule, // Added LeadGenerationIndustryModule import
     LeadGenerationJobModule, // Added LeadGenerationJobModule import
-    SubscriptionModule, // Added SubscriptionModule import (includes CreditHistory)
+    SubscriptionModule, // Added SubscriptionModule import
     InvoiceModule, // Added InvoiceModule import
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

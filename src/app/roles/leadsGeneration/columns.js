@@ -22,21 +22,48 @@ export const jobsColumns = [
   },
   { accessorKey: "hiringUrgency", header: "Urgency" },
   { accessorKey: "submittedAt", header: "Submitted" },
+  { 
+    accessorKey: "status", 
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.original.status || "queued";
+      const statusColors = {
+        queued: "bg-gray-100 text-gray-800",
+        processing: "bg-yellow-100 text-yellow-800",
+        finished: "bg-green-100 text-green-800"
+      };
+      return (
+        <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${statusColors[status] || statusColors.queued}`}>
+          {status.charAt(0).toUpperCase() + status.slice(1)}
+        </span>
+      );
+    }
+  },
   {
     id: "actions",
     header: "Actions",
     cell: ({ row }) => {
       const role = row.original;
+      const status = role.status || "queued";
+      const isDisabled = status === "processing" || status === "finished";
+      
       return (
         <div className="flex gap-2">
           <button
             onClick={() => {
-              if (window.handleEditRole) {
-                window.handleEditRole(role)
+              if (!isDisabled) {
+                if (window.handleEditRole) {
+                  window.handleEditRole(role)
+                }
               }
             }}
-            className="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-700"
-            title="Edit Entry"
+            disabled={isDisabled}
+            className={`rounded px-3 py-1 text-xs font-medium transition-colors ${
+              isDisabled 
+                ? "bg-gray-400 text-gray-200 cursor-not-allowed" 
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+            title={isDisabled ? "Cannot edit while processing or finished" : "Edit Entry"}
           >
             Edit
           </button>
@@ -55,21 +82,48 @@ export const industryColumns = [
   { accessorKey: "cityCountry", header: "Location" },
   { accessorKey: "leadPriority", header: "Priority" },
   { accessorKey: "submittedAt", header: "Submitted" },
+  { 
+    accessorKey: "status", 
+    header: "Status",
+    cell: ({ row }) => {
+      const status = row.original.status || "queued";
+      const statusColors = {
+        queued: "bg-gray-100 text-gray-800",
+        processing: "bg-yellow-100 text-yellow-800",
+        finished: "bg-green-100 text-green-800"
+      };
+      return (
+        <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${statusColors[status] || statusColors.queued}`}>
+          {status.charAt(0).toUpperCase() + status.slice(1)}
+        </span>
+      );
+    }
+  },
   {
     id: "actions",
     header: "Actions",
     cell: ({ row }) => {
       const role = row.original;
+      const status = role.status || "queued";
+      const isDisabled = status === "processing" || status === "finished";
+      
       return (
         <div className="flex gap-2">
           <button
             onClick={() => {
-              if (window.handleEditRole) {
-                window.handleEditRole(role)
+              if (!isDisabled) {
+                if (window.handleEditRole) {
+                  window.handleEditRole(role)
+                }
               }
             }}
-            className="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-blue-700"
-            title="Edit Entry"
+            disabled={isDisabled}
+            className={`rounded px-3 py-1 text-xs font-medium transition-colors ${
+              isDisabled 
+                ? "bg-gray-400 text-gray-200 cursor-not-allowed" 
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+            title={isDisabled ? "Cannot edit while processing or finished" : "Edit Entry"}
           >
             Edit
           </button>
