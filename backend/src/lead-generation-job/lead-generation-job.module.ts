@@ -4,12 +4,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { LeadGenerationJobController } from './lead-generation-job.controller';
 import { LeadGenerationJobService } from './lead-generation-job.service';
 import { LeadGenerationJob } from './lead-generation-job.entity';
+import { LeadGenerationJobResult } from './lead-generation-job-result.entity';
 import { RoleModule } from '../roles/role.module';
 import { CommonModule } from '../common/common.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([LeadGenerationJob]),
+    TypeOrmModule.forFeature([LeadGenerationJob, LeadGenerationJobResult]),
     forwardRef(() => RoleModule),
     CommonModule
   ],

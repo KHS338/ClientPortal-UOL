@@ -62,6 +62,15 @@ export const columns = [
           >
             Edit
           </button>
+          <button
+            onClick={() => {
+              window.location.href = `/roles/360Direct/${role.id}`;
+            }}
+            className="rounded bg-green-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-green-700"
+            title="View Details"
+          >
+            Details
+          </button>
         </div>
       );
     },

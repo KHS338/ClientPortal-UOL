@@ -4,12 +4,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { LeadGenerationIndustryController } from './lead-generation-industry.controller';
 import { LeadGenerationIndustryService } from './lead-generation-industry.service';
 import { LeadGenerationIndustry } from './lead-generation-industry.entity';
+import { LeadGenerationResult } from './lead-generation-result.entity';
 import { RoleModule } from '../roles/role.module';
 import { CommonModule } from '../common/common.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([LeadGenerationIndustry]),
+    TypeOrmModule.forFeature([LeadGenerationIndustry, LeadGenerationResult]),
     forwardRef(() => RoleModule),
     CommonModule
   ],

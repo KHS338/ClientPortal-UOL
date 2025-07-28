@@ -67,6 +67,15 @@ export const jobsColumns = [
           >
             Edit
           </button>
+          <button
+            onClick={() => {
+              window.location.href = `/roles/leadsGeneration/jobs/${role.id}`;
+            }}
+            className="rounded bg-green-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-green-700"
+            title="View Job Details"
+          >
+            Details
+          </button>
           
         </div>
       );
@@ -126,6 +135,15 @@ export const industryColumns = [
             title={isDisabled ? "Cannot edit while processing or finished" : "Edit Entry"}
           >
             Edit
+          </button>
+          <button
+            onClick={() => {
+              window.location.href = `/roles/leadsGeneration/industry/${role.id}`;
+            }}
+            className="rounded bg-green-600 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-green-700"
+            title="View Industry Details"
+          >
+            Details
           </button>
           
         </div>

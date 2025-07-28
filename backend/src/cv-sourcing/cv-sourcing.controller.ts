@@ -206,4 +206,40 @@ export class CvSourcingController {
       };
     }
   }
+
+  // CV Results endpoints
+  @Get(':roleId/results')
+  async getResultsByRole(@Param('roleId') roleId: number) {
+    try {
+      const results = await this.cvSourcingService.getResultsByRole(roleId);
+      return {
+        success: true,
+        data: results
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message,
+        error: error.name
+      };
+    }
+  }
+
+  @Post(':roleId/results')
+  async addResult(@Param('roleId') roleId: number, @Body() resultData: any) {
+    try {
+      const result = await this.cvSourcingService.addResult(roleId, resultData);
+      return {
+        success: true,
+        data: result,
+        message: 'CV result added successfully'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message,
+        error: error.name
+      };
+    }
+  }
 }

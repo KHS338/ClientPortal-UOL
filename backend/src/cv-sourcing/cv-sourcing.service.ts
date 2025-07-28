@@ -3,6 +3,7 @@ import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef 
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CvSourcingRole } from './cv-sourcing.entity';
+import { CvResult } from './cv-result.entity';
 import { CreateCvSourcingDto } from './dto/create-cv-sourcing.dto';
 import { RoleService } from '../roles/role.service';
 import { Role } from '../roles/role.entity';
@@ -12,6 +13,8 @@ export class CvSourcingService {
   constructor(
     @InjectRepository(CvSourcingRole)
     private readonly cvSourcingRepository: Repository<CvSourcingRole>,
+    @InjectRepository(CvResult)
+    private readonly cvResultRepository: Repository<CvResult>,
     @Inject(forwardRef(() => RoleService))
     private readonly roleService: RoleService,
   ) {}
@@ -246,5 +249,21 @@ export class CvSourcingService {
       cvSourcingRole.ziCount;
     
     return await this.cvSourcingRepository.save(cvSourcingRole);
+  }
+
+  // CV Results methods
+  async getResultsByRole(roleId: number) {
+    return await this.cvResultRepository.find({
+      where: { roleId },
+      order: { createdAt: 'DESC' }
+    });
+  }
+
+  async addResult(roleId: number, resultData: any) {
+    const result = this.cvResultRepository.create({
+      ...resultData,
+      roleId
+    });
+    return await this.cvResultRepository.save(result);
   }
 }
