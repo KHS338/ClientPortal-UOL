@@ -56,6 +56,9 @@ export class User {
   @Column({ name: 'two_factor_backup_codes', nullable: true, type: 'text' })
   twoFactorBackupCodes: string;
 
+  @Column({ name: 'two_factor_last_used', nullable: true })
+  twoFactorLastUsed: Date;
+
   // Subscription Information
   @Column({ name: 'subscription_status', default: 'inactive', length: 50 })
   subscriptionStatus: string;

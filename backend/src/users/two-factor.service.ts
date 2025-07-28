@@ -27,13 +27,34 @@ export class TwoFactorService {
     }
   }
 
-  verifyToken(token: string, secret: string): boolean {
-    return speakeasy.totp.verify({
+  verifyToken(token: string, secret: string, lastUsedTimestamp?: Date): { isValid: boolean; currentTimestamp: number } {
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const tokenTimestamp = Math.floor(currentTimestamp / 30); // 30-second windows
+    
+    // Only check if the token is valid for the current time window (no clock drift tolerance)
+    const isValidCurrent = speakeasy.totp.verify({
       secret: secret,
       token: token,
-      window: 1, // Allow 1 step (30 seconds) of clock drift
+      window: 0, // Only allow current window, no tolerance
+      time: currentTimestamp,
       encoding: 'base32'
     });
+    
+    if (!isValidCurrent) {
+      return { isValid: false, currentTimestamp: tokenTimestamp };
+    }
+    
+    // Check if this exact token was already used in the current time window
+    if (lastUsedTimestamp) {
+      const lastUsedTokenTimestamp = Math.floor(lastUsedTimestamp.getTime() / 1000 / 30);
+      
+      // If the token was used in the same 30-second window, reject it
+      if (lastUsedTokenTimestamp === tokenTimestamp) {
+        return { isValid: false, currentTimestamp: tokenTimestamp };
+      }
+    }
+    
+    return { isValid: true, currentTimestamp: tokenTimestamp };
   }
 
   generateBackupCodes(): string[] {

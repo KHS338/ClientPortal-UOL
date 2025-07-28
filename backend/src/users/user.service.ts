@@ -167,14 +167,17 @@ export class UsersService {
       throw new BadRequestException('Two-factor authentication not set up. Please set it up first.');
     }
 
-    const isValid = this.twoFactorService.verifyToken(token, user.twoFactorSecret);
+    const tokenVerification = this.twoFactorService.verifyToken(token, user.twoFactorSecret, user.twoFactorLastUsed);
     
-    if (!isValid) {
+    if (!tokenVerification.isValid) {
       return { success: false, message: 'Invalid verification code' };
     }
 
-    // Enable 2FA for the user
-    await this.userRepo.update(userId, { twoFactorEnabled: true });
+    // Enable 2FA for the user and update last used timestamp
+    await this.userRepo.update(userId, { 
+      twoFactorEnabled: true,
+      twoFactorLastUsed: new Date()
+    });
     
     return { success: true, message: 'Two-factor authentication enabled successfully' };
   }
@@ -190,9 +193,9 @@ export class UsersService {
       return { success: false, message: 'Two-factor authentication is not enabled' };
     }
 
-    const isValid = this.twoFactorService.verifyToken(token, user.twoFactorSecret);
+    const tokenVerification = this.twoFactorService.verifyToken(token, user.twoFactorSecret, user.twoFactorLastUsed);
     
-    if (!isValid) {
+    if (!tokenVerification.isValid) {
       return { success: false, message: 'Invalid verification code' };
     }
 
@@ -200,7 +203,8 @@ export class UsersService {
     await this.userRepo.update(userId, { 
       twoFactorEnabled: false,
       twoFactorSecret: null,
-      twoFactorBackupCodes: null
+      twoFactorBackupCodes: null,
+      twoFactorLastUsed: new Date()
     });
     
     return { success: true, message: 'Two-factor authentication disabled successfully' };
@@ -214,8 +218,12 @@ export class UsersService {
     }
 
     // Check if it's a regular TOTP token
-    const isValidToken = this.twoFactorService.verifyToken(token, user.twoFactorSecret);
-    if (isValidToken) {
+    const tokenVerification = this.twoFactorService.verifyToken(token, user.twoFactorSecret, user.twoFactorLastUsed);
+    if (tokenVerification.isValid) {
+      // Update the last used timestamp to prevent token reuse
+      await this.userRepo.update(userId, { 
+        twoFactorLastUsed: new Date()
+      });
       return true;
     }
 
@@ -225,7 +233,8 @@ export class UsersService {
       // Remove the used backup code
       const updatedCodes = this.twoFactorService.removeUsedBackupCode(token, user);
       await this.userRepo.update(userId, { 
-        twoFactorBackupCodes: JSON.stringify(updatedCodes)
+        twoFactorBackupCodes: JSON.stringify(updatedCodes),
+        twoFactorLastUsed: new Date() // Also update timestamp for backup codes
       });
       return true;
     }
@@ -244,16 +253,17 @@ export class UsersService {
       return { success: false, message: 'Two-factor authentication is not enabled' };
     }
 
-    const isValid = this.twoFactorService.verifyToken(token, user.twoFactorSecret);
+    const tokenVerification = this.twoFactorService.verifyToken(token, user.twoFactorSecret, user.twoFactorLastUsed);
     
-    if (!isValid) {
+    if (!tokenVerification.isValid) {
       return { success: false, message: 'Invalid verification code' };
     }
 
     // Generate new backup codes
     const backupCodes = this.twoFactorService.generateBackupCodes();
     await this.userRepo.update(userId, { 
-      twoFactorBackupCodes: JSON.stringify(backupCodes)
+      twoFactorBackupCodes: JSON.stringify(backupCodes),
+      twoFactorLastUsed: new Date()
     });
     
     return { 
@@ -420,10 +430,12 @@ export class UsersService {
 
     // Verify 2FA code if 2FA is enabled
     if (user.twoFactorEnabled) {
-      const is2FAValid = this.twoFactorService.verifyToken(twoFactorCode, user.twoFactorSecret);
-      if (!is2FAValid) {
+      const tokenVerification = this.twoFactorService.verifyToken(twoFactorCode, user.twoFactorSecret, user.twoFactorLastUsed);
+      if (!tokenVerification.isValid) {
         throw new BadRequestException('Invalid two-factor authentication code');
       }
+      // Update last used timestamp for password change
+      await this.userRepo.update(user.id, { twoFactorLastUsed: new Date() });
     }
 
     // Validate new password (minimum 6 characters)
