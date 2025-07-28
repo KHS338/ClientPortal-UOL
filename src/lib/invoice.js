@@ -11,7 +11,7 @@ import { authUtils } from './auth';
  */
 export const getUserInvoices = async (userId) => {
   try {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
     const response = await authUtils.fetchWithAuth(`${apiBaseUrl}/invoices/user/${userId}`);
     
     if (!response.ok) {
@@ -33,7 +33,7 @@ export const getUserInvoices = async (userId) => {
  */
 export const getInvoice = async (invoiceId) => {
   try {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
     const response = await authUtils.fetchWithAuth(`${apiBaseUrl}/invoices/${invoiceId}`);
     
     if (!response.ok) {
@@ -54,7 +54,7 @@ export const getInvoice = async (invoiceId) => {
  */
 export const getInvoiceByNumber = async (invoiceNumber) => {
   try {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
     const response = await authUtils.fetchWithAuth(`${apiBaseUrl}/invoices/number/${invoiceNumber}`);
     
     if (!response.ok) {
@@ -75,7 +75,7 @@ export const getInvoiceByNumber = async (invoiceNumber) => {
  */
 export const generateInvoiceForSubscription = async (userSubscriptionId) => {
   try {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
     const response = await authUtils.fetchWithAuth(`${apiBaseUrl}/invoices/generate/${userSubscriptionId}`, {
       method: 'POST'
     });
@@ -106,7 +106,7 @@ export const generateInvoiceForSubscription = async (userSubscriptionId) => {
  */
 export const markInvoiceAsPaid = async (invoiceId, paymentMethod = 'Credit Card') => {
   try {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
     const response = await authUtils.fetchWithAuth(`${apiBaseUrl}/invoices/${invoiceId}/mark-paid`, {
       method: 'PATCH',
       headers: {
@@ -140,7 +140,7 @@ export const markInvoiceAsPaid = async (invoiceId, paymentMethod = 'Credit Card'
  */
 export const createInvoice = async (invoiceData) => {
   try {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
     const response = await authUtils.fetchWithAuth(`${apiBaseUrl}/invoices`, {
       method: 'POST',
       headers: {
@@ -175,7 +175,7 @@ export const createInvoice = async (invoiceData) => {
  */
 export const updateInvoice = async (invoiceId, updateData) => {
   try {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
     const response = await authUtils.fetchWithAuth(`${apiBaseUrl}/invoices/${invoiceId}`, {
       method: 'PATCH',
       headers: {
@@ -209,7 +209,7 @@ export const updateInvoice = async (invoiceId, updateData) => {
  */
 export const getInvoiceStats = async (userId = null) => {
   try {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
     const url = userId 
       ? `${apiBaseUrl}/invoices/stats?userId=${userId}`
       : `${apiBaseUrl}/invoices/stats`;

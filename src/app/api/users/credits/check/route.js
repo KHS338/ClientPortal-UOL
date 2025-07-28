@@ -12,7 +12,7 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://8w2mk49p-3001.inc1.devtunnels.ms';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
     
     const response = await fetch(`${apiBaseUrl}/user-subscriptions/user/${userId}/check-credits`, {
       method: 'POST',
