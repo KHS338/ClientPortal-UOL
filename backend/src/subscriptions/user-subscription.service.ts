@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserSubscription } from './user-subscription.entity';
 import { Subscription } from './subscription.entity';
+import { CreditHistoryService } from './credit-history.service';
 import { CreateUserSubscriptionDto } from './dto/create-user-subscription.dto';
 import { UpdateUserSubscriptionDto } from './dto/update-user-subscription.dto';
 
@@ -13,6 +14,7 @@ export class UserSubscriptionService {
     private userSubscriptionRepository: Repository<UserSubscription>,
     @InjectRepository(Subscription)
     private subscriptionRepository: Repository<Subscription>,
+    private creditHistoryService: CreditHistoryService,
   ) {}
 
   async create(createUserSubscriptionDto: CreateUserSubscriptionDto): Promise<UserSubscription> {
@@ -67,6 +69,24 @@ export class UserSubscriptionService {
 
     try {
       const savedSubscription = await this.userSubscriptionRepository.save(userSubscription);
+      
+      // Log credit purchase in history if credits were added
+      if (savedSubscription.totalCredits > 0) {
+        try {
+          await this.creditHistoryService.logCreditPurchase(
+            savedSubscription.userId,
+            savedSubscription.id,
+            savedSubscription.totalCredits,
+            savedSubscription.remainingCredits,
+            subscription.title,
+            savedSubscription.billingCycle
+          );
+        } catch (historyError) {
+          console.error('Error logging credit purchase history:', historyError);
+          // Don't fail the main operation if history logging fails
+        }
+      }
+      
       return savedSubscription;
     } catch (error) {
       console.error('Error saving user subscription:', error);
@@ -201,7 +221,8 @@ export class UserSubscriptionService {
         subscriptionId, 
         billingCycle: 'adhoc',
         status: 'active'
-      }
+      },
+      relations: ['subscription']
     });
 
     if (existingAdhoc) {
@@ -209,7 +230,23 @@ export class UserSubscriptionService {
       existingAdhoc.totalCredits += credits;
       existingAdhoc.remainingCredits += credits;
       existingAdhoc.paidAmount += paidAmount;
-      return this.userSubscriptionRepository.save(existingAdhoc);
+      const savedSubscription = await this.userSubscriptionRepository.save(existingAdhoc);
+      
+      // Log credit purchase in history
+      try {
+        await this.creditHistoryService.logCreditPurchase(
+          userId,
+          savedSubscription.id,
+          credits,
+          savedSubscription.remainingCredits,
+          existingAdhoc.subscription.title,
+          'adhoc'
+        );
+      } catch (historyError) {
+        console.error('Error logging adhoc credit purchase history:', historyError);
+      }
+      
+      return savedSubscription;
     } else {
       // Create new adhoc subscription
       return this.create({

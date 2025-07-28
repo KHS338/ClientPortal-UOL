@@ -9,4 +9,22 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+
+  @Get('test-connection')
+  testConnection() {
+    return { 
+      message: 'Backend connection successful', 
+      timestamp: new Date(),
+      status: 'OK' 
+    };
+  }
+
+  @Get('health')
+  healthCheck() {
+    return { 
+      status: 'healthy',
+      timestamp: new Date(),
+      service: 'client-portal-backend'
+    };
+  }
 }

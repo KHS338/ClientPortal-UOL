@@ -31,7 +31,7 @@ import { InvoiceModule } from './invoices/invoice.module';
     DirectModule, // Added DirectModule import
     LeadGenerationIndustryModule, // Added LeadGenerationIndustryModule import
     LeadGenerationJobModule, // Added LeadGenerationJobModule import
-    SubscriptionModule, // Added SubscriptionModule import
+    SubscriptionModule, // Added SubscriptionModule import (includes CreditHistory)
     InvoiceModule, // Added InvoiceModule import
   ],
 })

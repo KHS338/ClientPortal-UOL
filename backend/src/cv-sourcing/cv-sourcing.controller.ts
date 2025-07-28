@@ -18,7 +18,8 @@ export class CvSourcingController {
       // Check and deduct credit before creating the role
       const creditResult = await this.creditDeductionUtil.checkAndDeductCredit(
         createCvSourcingDto.userId, 
-        'cv-sourcing'
+        'cv-sourcing',
+        createCvSourcingDto.roleTitle
       );
 
       if (!creditResult.success) {
@@ -30,6 +31,10 @@ export class CvSourcingController {
       }
 
       const cvSourcingRole = await this.cvSourcingService.create(createCvSourcingDto);
+      
+      // Update the credit history with the actual role ID after creation
+      // This will be handled by a separate method if needed
+      
       return {
         success: true,
         message: 'CV sourcing role created successfully. ' + creditResult.message,

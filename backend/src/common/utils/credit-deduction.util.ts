@@ -1,11 +1,13 @@
 // backend/src/common/utils/credit-deduction.util.ts
 import { Injectable } from '@nestjs/common';
 import { UserSubscriptionService } from '../../subscriptions/user-subscription.service';
+import { CreditHistoryService } from '../../subscriptions/credit-history.service';
 
 @Injectable()
 export class CreditDeductionUtil {
   constructor(
-    private readonly userSubscriptionService: UserSubscriptionService
+    private readonly userSubscriptionService: UserSubscriptionService,
+    private readonly creditHistoryService: CreditHistoryService
   ) {}
 
   /**
@@ -27,9 +29,16 @@ export class CreditDeductionUtil {
    * Checks if user has sufficient credits for a service and deducts 1 credit if available
    * @param userId - The user ID
    * @param serviceType - The service type (cv-sourcing, prequalification, direct, etc.)
+   * @param roleTitle - Optional role title for history tracking
+   * @param roleId - Optional role ID for history tracking
    * @returns Promise<boolean> - true if credit was deducted, false if insufficient credits
    */
-  async checkAndDeductCredit(userId: number, serviceType: string): Promise<{
+  async checkAndDeductCredit(
+    userId: number, 
+    serviceType: string, 
+    roleTitle?: string, 
+    roleId?: number
+  ): Promise<{
     success: boolean;
     message?: string;
     remainingCredits?: number;
@@ -85,6 +94,22 @@ export class CreditDeductionUtil {
       if (creditDeducted) {
         // Get updated credits count
         const updatedCredits = await this.getRemainingCredits(userId, serviceType);
+        
+        // Log the credit usage in history
+        try {
+          await this.creditHistoryService.logCreditUsage(
+            userId,
+            matchingSubscription.id,
+            serviceType,
+            subscriptionTitle,
+            updatedCredits,
+            roleTitle,
+            roleId
+          );
+        } catch (historyError) {
+          console.error('Error logging credit history:', historyError);
+          // Don't fail the main operation if history logging fails
+        }
         
         return {
           success: true,

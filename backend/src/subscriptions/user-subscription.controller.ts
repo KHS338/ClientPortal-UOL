@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Query, ParseIntPipe, UseGuards, Request } from '@nestjs/common';
 import { UserSubscriptionService } from './user-subscription.service';
+import { CreditHistoryService } from './credit-history.service';
 import { CreateUserSubscriptionDto } from './dto/create-user-subscription.dto';
 import { UpdateUserSubscriptionDto } from './dto/update-user-subscription.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -7,7 +8,10 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 @Controller('user-subscriptions')
 @UseGuards(JwtAuthGuard)
 export class UserSubscriptionController {
-  constructor(private readonly userSubscriptionService: UserSubscriptionService) {}
+  constructor(
+    private readonly userSubscriptionService: UserSubscriptionService,
+    private readonly creditHistoryService: CreditHistoryService
+  ) {}
 
   @Post()
   async create(@Body() createUserSubscriptionDto: CreateUserSubscriptionDto, @Request() req: any) {
@@ -49,6 +53,38 @@ export class UserSubscriptionController {
   @Get('user/:userId/credits')
   getTotalCredits(@Param('userId', ParseIntPipe) userId: number) {
     return this.userSubscriptionService.getTotalRemainingCredits(userId);
+  }
+
+  @Get('user/:userId/credit-history')
+  async getCreditHistory(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Query('limit') limit?: string,
+    @Query('serviceType') serviceType?: string
+  ) {
+    try {
+      const limitNumber = limit ? parseInt(limit) : 50;
+      
+      if (serviceType) {
+        const history = await this.creditHistoryService.findByUserIdAndService(userId, serviceType, limitNumber);
+        return {
+          success: true,
+          data: history,
+          message: 'Credit history retrieved successfully'
+        };
+      } else {
+        const history = await this.creditHistoryService.findByUserId(userId, limitNumber);
+        return {
+          success: true,
+          data: history,
+          message: 'Credit history retrieved successfully'
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Error retrieving credit history: ' + error.message
+      };
+    }
   }
 
   @Get(':id')

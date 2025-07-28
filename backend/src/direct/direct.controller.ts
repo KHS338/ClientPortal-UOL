@@ -17,7 +17,8 @@ export class DirectController {
       // Check and deduct credit before creating the role
       const creditResult = await this.creditDeductionUtil.checkAndDeductCredit(
         createDirectDto.userId, 
-        'direct'
+        'direct',
+        createDirectDto.roleTitle
       );
 
       if (!creditResult.success) {

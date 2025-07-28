@@ -17,7 +17,8 @@ export class PrequalificationController {
       // Check and deduct credit before creating the role
       const creditResult = await this.creditDeductionUtil.checkAndDeductCredit(
         createPrequalificationDto.userId, 
-        'prequalification'
+        'prequalification',
+        createPrequalificationDto.roleTitle
       );
 
       if (!creditResult.success) {

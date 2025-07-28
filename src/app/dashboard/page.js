@@ -485,12 +485,20 @@ export default function DashboardPage() {
                   <FiCheckCircle size={24} />
                   Credits Overview
                 </h3>
-                <Button 
-                  className="bg-white text-[#1a84de] hover:bg-gray-100"
-                  onClick={() => window.location.href = '/subscription-info'}
-                >
-                  View Details
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    className="bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm"
+                    onClick={() => window.location.href = '/credit-history'}
+                  >
+                    View History
+                  </Button>
+                  <Button 
+                    className="bg-white text-[#1a84de] hover:bg-gray-100"
+                    onClick={() => window.location.href = '/subscription-info'}
+                  >
+                    View Details
+                  </Button>
+                </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>

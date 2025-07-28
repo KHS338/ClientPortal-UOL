@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { AlertDialog, Toast } from "@/components/ui/alert-dialog";
 import StripePayment from "@/components/StripePayment";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import CreditHistoryComponent from '../../components/CreditHistoryComponent';
 import { useAuth } from "@/contexts/AuthContext";
 import { authUtils } from "@/lib/auth";
 import { getCurrentSubscription, updateSubscriptionData } from "@/lib/subscription";
@@ -759,6 +760,30 @@ export default function SubscriptionInfoPage() {
                   </div>
                 ))}
               </div>
+            </Card>
+          )}
+
+          {/* Credit History - Show if user has any subscriptions */}
+          {userCredits && userCredits.length > 0 && (
+            <Card className="p-6 mb-8 bg-white/90 backdrop-blur-sm shadow-lg border-0">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-800 flex items-center gap-3">
+                  <FiFileText className="text-[#0958d9]" />
+                  Recent Credit Activity
+                </h3>
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.location.href = '/credit-history'}
+                  className="text-[#0958d9] border-[#0958d9] hover:bg-[#0958d9] hover:text-white"
+                >
+                  View Full History
+                </Button>
+              </div>
+              <CreditHistoryComponent 
+                userId={user?.id} 
+                serviceType={null}
+                className=""
+              />
             </Card>
           )}
 
