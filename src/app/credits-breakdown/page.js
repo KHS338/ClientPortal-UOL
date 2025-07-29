@@ -13,6 +13,11 @@ export default function CreditsBreakdownPage() {
   const [totalRemainingCredits, setTotalRemainingCredits] = useState(0);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('');
+  const [selectedService, setSelectedService] = useState('');
+  const [serviceOptions, setServiceOptions] = useState([
+    { value: '', label: 'All Services' } // Default option while loading
+  ]);
+  const [optionsLoading, setOptionsLoading] = useState(true);
 
   const statusOptions = [
     { value: '', label: 'All Statuses' },
@@ -20,6 +25,30 @@ export default function CreditsBreakdownPage() {
     { value: 'expired', label: 'Expired' },
     { value: 'cancelled', label: 'Cancelled' },
   ];
+
+  // Fetch service options from backend
+  useEffect(() => {
+    const fetchServiceOptions = async () => {
+      try {
+        const response = await fetch('/api/service-options');
+        const result = await response.json();
+        
+        if (result.success) {
+          setServiceOptions(result.serviceOptions);
+        } else {
+          console.error('Failed to fetch service options:', result.message);
+          // Keep default options if fetch fails
+        }
+      } catch (error) {
+        console.error('Error fetching service options:', error);
+        // Keep default options if fetch fails
+      } finally {
+        setOptionsLoading(false);
+      }
+    };
+
+    fetchServiceOptions();
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -31,7 +60,11 @@ export default function CreditsBreakdownPage() {
         }
         
         const userId = parseInt(user.id);
-        const subscriptionData = await getCurrentSubscription(userId);
+        const subscriptionData = await getCurrentSubscription(
+          userId, 
+          filterStatus || null, 
+          selectedService || null
+        );
         
         if (subscriptionData) {
           setUserCredits(subscriptionData.credits.history);
@@ -50,7 +83,7 @@ export default function CreditsBreakdownPage() {
     };
 
     loadData();
-  }, [user, isAuthenticated]);
+  }, [user, isAuthenticated, filterStatus, selectedService]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -78,10 +111,7 @@ export default function CreditsBreakdownPage() {
     }
   };
 
-  // Filter credits based on status
-  const filteredCredits = filterStatus ? 
-    userCredits.filter(credit => credit.status === filterStatus) : 
-    userCredits;
+  // Credits are already filtered by backend based on filterStatus
 
   if (!isAuthenticated || !user) {
     return (
@@ -147,6 +177,25 @@ export default function CreditsBreakdownPage() {
                     ))}
                   </select>
                 </div>
+                <div className="flex items-center gap-2">
+                  <FiFilter size={16} className="text-gray-400" />
+                  <select
+                    value={selectedService}
+                    onChange={(e) => setSelectedService(e.target.value)}
+                    disabled={optionsLoading}
+                    className="text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {optionsLoading ? (
+                      <option value="">Loading services...</option>
+                    ) : (
+                      serviceOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </div>
               </div>
             </div>
           </div>
@@ -210,7 +259,7 @@ export default function CreditsBreakdownPage() {
             </div>
 
             {/* Credits Breakdown */}
-            {filteredCredits.length === 0 ? (
+            {userCredits.length === 0 ? (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
                 <div className="text-center">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
@@ -241,12 +290,12 @@ export default function CreditsBreakdownPage() {
                   <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                     <FiCreditCard size={20} />
                     {filterStatus ? `${filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)} Credits` : 'All Credits'} 
-                    ({filteredCredits.length})
+                    ({userCredits.length})
                   </h3>
                 </div>
                 
                 <div className="space-y-4">
-                  {filteredCredits.map((subscription, index) => (
+                  {userCredits.map((subscription, index) => (
                     <div key={subscription.id || index} className="border border-gray-200 rounded-lg p-6 hover:border-gray-300 transition-colors">
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex-1">

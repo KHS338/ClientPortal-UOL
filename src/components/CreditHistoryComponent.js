@@ -16,6 +16,7 @@ const CreditHistoryComponent = ({ userId, serviceType = null, className = "", li
       // For small limits with showLatest, fetch more data to ensure we get the latest entries
       const fetchLimit = showLatest && limit < 50 ? Math.max(50, limit) : limit;
       
+      // Use the API endpoint that forwards to backend
       let url = `/api/users/credits/${userId}/history?limit=${fetchLimit}`;
       if (serviceType) {
         url += `&serviceType=${serviceType}`;
@@ -25,7 +26,8 @@ const CreditHistoryComponent = ({ userId, serviceType = null, className = "", li
       const result = await response.json();
 
       if (result.success) {
-        setCreditHistory(result.creditHistory || []);
+        // The backend returns data.data, but we want to maintain compatibility
+        setCreditHistory(result.creditHistory || result.data || []);
       } else {
         setError(result.message);
       }

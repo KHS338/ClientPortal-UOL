@@ -79,6 +79,61 @@ export class SubscriptionController {
     }
   }
 
+  @Get('service-options')
+  async getServiceOptions() {
+    try {
+      const subscriptions = await this.subscriptionService.findAll();
+      
+      // Map subscription titles to service filter options
+      const serviceOptions = subscriptions.map(sub => {
+        // Convert title to service type format
+        let serviceType = '';
+        switch (sub.title) {
+          case 'CV Sourcing':
+            serviceType = 'cv-sourcing';
+            break;
+          case 'Prequalification':
+            serviceType = 'prequalification';
+            break;
+          case '360/Direct':
+            serviceType = 'direct';
+            break;
+          case 'Lead Generation':
+            serviceType = 'lead-generation';
+            break;
+          default:
+            serviceType = sub.title.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        }
+        
+        return {
+          value: serviceType,
+          label: sub.title
+        };
+      });
+
+      // Add "All Services" option at the beginning
+      const options = [
+        { value: '', label: 'All Services' },
+        ...serviceOptions
+      ];
+
+      return {
+        success: true,
+        message: 'Service options retrieved successfully',
+        data: options
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: 'Failed to retrieve service options',
+          error: error.message
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     try {

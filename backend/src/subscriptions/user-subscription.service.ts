@@ -94,12 +94,50 @@ export class UserSubscriptionService {
     }
   }
 
-  async findByUserId(userId: number): Promise<UserSubscription[]> {
-    return this.userSubscriptionRepository.find({
-      where: { userId },
-      relations: ['subscription'],
-      order: { createdAt: 'DESC' }
-    });
+  async findByUserId(userId: number, status?: string, service?: string): Promise<UserSubscription[]> {
+    const whereCondition: any = { userId };
+    
+    if (status) {
+      whereCondition.status = status;
+    }
+
+    const queryBuilder = this.userSubscriptionRepository
+      .createQueryBuilder('userSubscription')
+      .leftJoinAndSelect('userSubscription.subscription', 'subscription')
+      .where('userSubscription.userId = :userId', { userId });
+
+    if (status) {
+      queryBuilder.andWhere('userSubscription.status = :status', { status });
+    }
+
+    if (service) {
+      // Convert service parameter to subscription title
+      let subscriptionTitle = '';
+      switch (service) {
+        case 'cv-sourcing':
+          subscriptionTitle = 'CV Sourcing';
+          break;
+        case 'prequalification':
+          subscriptionTitle = 'Prequalification';
+          break;
+        case 'direct':
+          subscriptionTitle = '360/Direct';
+          break;
+        case 'lead-generation':
+        case 'lead-generation-job':
+        case 'lead-generation-industry':
+          subscriptionTitle = 'Lead Generation';
+          break;
+        default:
+          subscriptionTitle = service;
+      }
+      
+      queryBuilder.andWhere('subscription.title = :title', { title: subscriptionTitle });
+    }
+
+    return queryBuilder
+      .orderBy('userSubscription.createdAt', 'DESC')
+      .getMany();
   }
 
   async findActiveByUserId(userId: number): Promise<UserSubscription | null> {
@@ -270,15 +308,19 @@ export class UserSubscriptionService {
     return subscriptions.reduce((total, sub) => total + sub.remainingCredits, 0);
   }
 
-  async getSubscriptionSummary(userId: number) {
+  async getSubscriptionSummary(userId: number, status?: string, service?: string) {
     const activeSubscription = await this.findActiveByUserId(userId);
     const totalCredits = await this.getTotalRemainingCredits(userId);
-    const allSubscriptions = await this.findByUserId(userId);
+    const allSubscriptions = await this.findByUserId(userId, status, service);
 
     return {
       activeSubscription,
       totalRemainingCredits: totalCredits,
-      subscriptionHistory: allSubscriptions
+      subscriptionHistory: allSubscriptions,
+      credits: {
+        total: totalCredits,
+        history: allSubscriptions
+      }
     };
   }
 

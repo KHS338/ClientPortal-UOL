@@ -9,14 +9,34 @@ import Link from 'next/link';
 export default function CreditHistoryPage() {
   const { user, isAuthenticated } = useAuth();
   const [selectedService, setSelectedService] = useState('');
+  const [serviceOptions, setServiceOptions] = useState([
+    { value: '', label: 'All Services' } // Default option while loading
+  ]);
+  const [loading, setLoading] = useState(true);
 
-  const serviceOptions = [
-    { value: '', label: 'All Services' },
-    { value: 'cv-sourcing', label: 'CV Sourcing' },
-    { value: 'prequalification', label: 'Prequalification' },
-    { value: 'direct', label: '360/Direct' },
-    { value: 'lead-generation-job', label: 'Lead Generation' },
-  ];
+  // Fetch service options from backend
+  useEffect(() => {
+    const fetchServiceOptions = async () => {
+      try {
+        const response = await fetch('/api/service-options');
+        const result = await response.json();
+        
+        if (result.success) {
+          setServiceOptions(result.serviceOptions);
+        } else {
+          console.error('Failed to fetch service options:', result.message);
+          // Keep default options if fetch fails
+        }
+      } catch (error) {
+        console.error('Error fetching service options:', error);
+        // Keep default options if fetch fails
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServiceOptions();
+  }, []);
 
   if (!isAuthenticated || !user) {
     return (
@@ -55,13 +75,18 @@ export default function CreditHistoryPage() {
               <select
                 value={selectedService}
                 onChange={(e) => setSelectedService(e.target.value)}
-                className="text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                disabled={loading}
+                className="text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {serviceOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
+                {loading ? (
+                  <option value="">Loading services...</option>
+                ) : (
+                  serviceOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))
+                )}
               </select>
             </div>
           </div>

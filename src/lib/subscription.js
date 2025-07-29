@@ -8,12 +8,24 @@ import { clearAllUserData } from './userStorage';
 /**
  * Get current user subscription from backend (prioritizes backend over localStorage)
  * @param {number} userId - The user ID
+ * @param {string} status - Optional status filter
+ * @param {string} service - Optional service filter
  * @returns {Promise<Object|null>} The subscription data or null if none found
  */
-export const getCurrentSubscription = async (userId) => {
+export const getCurrentSubscription = async (userId, status = null, service = null) => {
   try {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
-    const response = await authUtils.fetchWithAuth(`${apiBaseUrl}/user-subscriptions/user/${userId}/summary`);
+    let url = `${apiBaseUrl}/user-subscriptions/user/${userId}/summary`;
+    
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    if (service) params.append('service', service);
+    
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+    
+    const response = await authUtils.fetchWithAuth(url);
     const result = await response.json();
     
     if (result && result.activeSubscription) {

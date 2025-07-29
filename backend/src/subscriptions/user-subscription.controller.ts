@@ -36,8 +36,12 @@ export class UserSubscriptionController {
   }
 
   @Get('user/:userId')
-  findByUserId(@Param('userId', ParseIntPipe) userId: number) {
-    return this.userSubscriptionService.findByUserId(userId);
+  findByUserId(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Query('status') status?: string,
+    @Query('service') service?: string
+  ) {
+    return this.userSubscriptionService.findByUserId(userId, status, service);
   }
 
   @Get('user/:userId/active')
@@ -46,8 +50,12 @@ export class UserSubscriptionController {
   }
 
   @Get('user/:userId/summary')
-  getSubscriptionSummary(@Param('userId', ParseIntPipe) userId: number) {
-    return this.userSubscriptionService.getSubscriptionSummary(userId);
+  getSubscriptionSummary(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Query('status') status?: string,
+    @Query('service') service?: string
+  ) {
+    return this.userSubscriptionService.getSubscriptionSummary(userId, status, service);
   }
 
   @Get('user/:userId/credits')
