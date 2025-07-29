@@ -104,12 +104,16 @@ const IndustryForm = ({ onSubmit, editingData, onCancel, onError }) => {
     industryType: "",
     companySize: "",
     cityCountry: [],
-    leadPriority: ""
+    leadPriority: "",
+    isRecruitmentAgency: "",
+    specialInstructions: "",
+    uploadedFile: null
   });
   
   const [isCountryListOpen, setIsCountryListOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [currentCountryInput, setCurrentCountryInput] = useState("");
+  const [fileInputRef, setFileInputRef] = useState(null);
   
   // Load editing data if provided
   useEffect(() => {
@@ -118,7 +122,10 @@ const IndustryForm = ({ onSubmit, editingData, onCancel, onError }) => {
         industryType: editingData.industryType || "",
         companySize: editingData.companySize || "",
         cityCountry: Array.isArray(editingData.cityCountry) ? editingData.cityCountry : (editingData.cityCountry ? editingData.cityCountry.split(',') : []),
-        leadPriority: editingData.leadPriority || ""
+        leadPriority: editingData.leadPriority || "",
+        isRecruitmentAgency: editingData.isRecruitmentAgency || "",
+        specialInstructions: editingData.specialInstructions || "",
+        uploadedFile: null // Reset file when editing
       });
     }
   }, [editingData]);
@@ -142,6 +149,19 @@ const IndustryForm = ({ onSubmit, editingData, onCancel, onError }) => {
     });
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === 'application/pdf') {
+      setFormData({
+        ...formData,
+        uploadedFile: file
+      });
+    } else if (file) {
+      onError('Please select a PDF file only');
+      e.target.value = '';
+    }
+  };
+
   const handleAddCountry = (country) => {
     if (country && !formData.cityCountry.includes(country)) {
       setFormData({
@@ -162,7 +182,7 @@ const IndustryForm = ({ onSubmit, editingData, onCancel, onError }) => {
   };
 
   const handleSubmit = () => {
-    if (!formData.industryType || !formData.companySize || formData.cityCountry.length === 0 || !formData.leadPriority) {
+    if (!formData.industryType || !formData.companySize || formData.cityCountry.length === 0 || !formData.leadPriority || !formData.isRecruitmentAgency) {
       onError('Please fill in all required fields and select at least one country');
       return;
     }
@@ -172,9 +192,15 @@ const IndustryForm = ({ onSubmit, editingData, onCancel, onError }) => {
       industryType: "",
       companySize: "",
       cityCountry: [],
-      leadPriority: ""
+      leadPriority: "",
+      isRecruitmentAgency: "",
+      specialInstructions: "",
+      uploadedFile: null
     });
     setCurrentCountryInput("");
+    if (fileInputRef) {
+      fileInputRef.value = '';
+    }
   };
 
   return (
@@ -183,6 +209,33 @@ const IndustryForm = ({ onSubmit, editingData, onCancel, onError }) => {
         Industry Information
       </h2>
       <div className="space-y-6">
+        {/* Recruitment Agency Question - First Question */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Are you a recruitment agency? *
+          </label>
+          <div className="grid grid-cols-2 gap-4">
+            {["Yes", "No"].map((option) => (
+              <label key={option} className="flex items-center space-x-2 cursor-pointer group">
+                <div className={`w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all duration-300 group-hover:border-[#1a84de] ${formData.isRecruitmentAgency === option.toLowerCase() ? 'border-[#1a84de] bg-[#1a84de]' : ''}`}>
+                  {formData.isRecruitmentAgency === option.toLowerCase() && (
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  )}
+                </div>
+                <input
+                  type="radio"
+                  name="isRecruitmentAgency"
+                  value={option.toLowerCase()}
+                  checked={formData.isRecruitmentAgency === option.toLowerCase()}
+                  onChange={handleChange}
+                  className="hidden"
+                />
+                <span className="text-sm font-medium text-gray-700 group-hover:text-[#1a84de]">{option}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Industry Type */}
           <div className="space-y-2">
@@ -367,6 +420,45 @@ const IndustryForm = ({ onSubmit, editingData, onCancel, onError }) => {
           </div>
         </div>
 
+        {/* PDF Upload */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Upload Supporting Document (PDF only)
+          </label>
+          <div className="relative">
+            <input
+              type="file"
+              accept=".pdf"
+              onChange={handleFileChange}
+              ref={setFileInputRef}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 hover:border-[#1a84de]/50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#1a84de] file:text-white hover:file:bg-[#24AC4A]"
+            />
+            {formData.uploadedFile && (
+              <div className="mt-2 flex items-center gap-2 text-sm text-green-600">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                File selected: {formData.uploadedFile.name}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Special Instructions */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Special Instructions
+          </label>
+          <textarea
+            name="specialInstructions"
+            value={formData.specialInstructions}
+            onChange={handleChange}
+            rows={4}
+            placeholder="Any additional instructions or requirements..."
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 placeholder-gray-400 hover:border-[#1a84de]/50 resize-vertical"
+          />
+        </div>
+
         {/* Submit Buttons */}
         <div className="flex justify-end gap-4 pt-4">
           <button
@@ -403,13 +495,16 @@ const JobsForm = ({ onSubmit, editingData, onCancel, onError }) => {
     hiringUrgency: "",
     skills: [],
     experience: "",
-    jobTitle: ""
+    jobTitle: "",
+    specialInstructions: "",
+    uploadedFile: null
   });
 
   const [currentSkill, setCurrentSkill] = useState("");
   const [isCountryListOpen, setIsCountryListOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [currentLocationInput, setCurrentLocationInput] = useState("");
+  const [fileInputRef, setFileInputRef] = useState(null);
   
   // Load editing data if provided
   useEffect(() => {
@@ -422,7 +517,9 @@ const JobsForm = ({ onSubmit, editingData, onCancel, onError }) => {
         hiringUrgency: editingData.hiringUrgency || "",
         skills: Array.isArray(editingData.skills) ? editingData.skills : (editingData.skills ? editingData.skills.split(',') : []),
         experience: editingData.experience || "",
-        jobTitle: editingData.jobTitle || ""
+        jobTitle: editingData.jobTitle || "",
+        specialInstructions: editingData.specialInstructions || "",
+        uploadedFile: null // Reset file when editing
       });
     }
   }, [editingData]);
@@ -444,6 +541,19 @@ const JobsForm = ({ onSubmit, editingData, onCancel, onError }) => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === 'application/pdf') {
+      setFormData({
+        ...formData,
+        uploadedFile: file
+      });
+    } else if (file) {
+      onError('Please select a PDF file only');
+      e.target.value = '';
+    }
   };
 
   const handleAddLocation = (location) => {
@@ -504,10 +614,15 @@ const JobsForm = ({ onSubmit, editingData, onCancel, onError }) => {
       hiringUrgency: "",
       skills: [],
       experience: "",
-      jobTitle: ""
+      jobTitle: "",
+      specialInstructions: "",
+      uploadedFile: null
     });
     setCurrentSkill("");
     setCurrentLocationInput("");
+    if (fileInputRef) {
+      fileInputRef.value = '';
+    }
   };
 
   return (
@@ -805,6 +920,45 @@ const JobsForm = ({ onSubmit, editingData, onCancel, onError }) => {
           </div>
         </div>
 
+        {/* PDF Upload */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Upload Supporting Document (PDF only)
+          </label>
+          <div className="relative">
+            <input
+              type="file"
+              accept=".pdf"
+              onChange={handleFileChange}
+              ref={setFileInputRef}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 hover:border-[#1a84de]/50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#1a84de] file:text-white hover:file:bg-[#24AC4A]"
+            />
+            {formData.uploadedFile && (
+              <div className="mt-2 flex items-center gap-2 text-sm text-green-600">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                File selected: {formData.uploadedFile.name}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Special Instructions */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Special Instructions
+          </label>
+          <textarea
+            name="specialInstructions"
+            value={formData.specialInstructions}
+            onChange={handleChange}
+            rows={4}
+            placeholder="Any additional instructions or requirements..."
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#1a84de] focus:border-[#1a84de] outline-none transition-all duration-300 placeholder-gray-400 hover:border-[#1a84de]/50 resize-vertical"
+          />
+        </div>
+
         {/* Submit Buttons */}
         <div className="flex justify-end gap-4 pt-4">
           <button
@@ -962,17 +1116,32 @@ export default function LeadsGenerationPage() {
     try {
       setLoading(true);
       
-      const dataToSubmit = {
-        ...formData,
-        userId: user.id
-      };
-
-      // Convert arrays to strings for backend storage
-      if (formType === 'jobs') {
-        dataToSubmit.location = Array.isArray(formData.location) ? formData.location.join(',') : formData.location;
-      } else if (formType === 'industry') {
-        dataToSubmit.cityCountry = Array.isArray(formData.cityCountry) ? formData.cityCountry.join(',') : formData.cityCountry;
-      }
+      const dataToSubmit = new FormData();
+      
+      // Add form fields
+      Object.keys(formData).forEach(key => {
+        if (key === 'uploadedFile') {
+          if (formData[key]) {
+            dataToSubmit.append('file', formData[key]);
+          }
+        } else if (key === 'location' || key === 'cityCountry') {
+          // Convert arrays to strings for backend storage
+          const value = Array.isArray(formData[key]) ? formData[key].join(',') : formData[key];
+          dataToSubmit.append(key, value);
+        } else if (key === 'skills') {
+          // Handle skills array - convert to string for backend processing
+          const value = Array.isArray(formData[key]) ? formData[key].join(',') : formData[key];
+          dataToSubmit.append(key, value);
+        } else if (key === 'userId') {
+          // Ensure userId is handled as string for backend conversion
+          dataToSubmit.append(key, String(formData[key]));
+        } else {
+          dataToSubmit.append(key, formData[key]);
+        }
+      });
+      
+      // Convert userId to number for backend validation
+      dataToSubmit.append('userId', parseInt(user.id));
 
       let response;
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -985,10 +1154,7 @@ export default function LeadsGenerationPage() {
           
         response = await fetch(endpoint, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(dataToSubmit),
+          body: dataToSubmit,
         });
       } else {
         // Create new entry
@@ -998,10 +1164,7 @@ export default function LeadsGenerationPage() {
           
         response = await fetch(endpoint, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(dataToSubmit),
+          body: dataToSubmit,
         });
       }
 

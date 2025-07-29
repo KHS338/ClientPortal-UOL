@@ -1,5 +1,6 @@
 // backend/src/direct/dto/update-direct.dto.ts
 import { IsString, IsNumber, IsBoolean, IsOptional } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 
 export class UpdateDirectDto {
   @IsOptional()
@@ -23,10 +24,12 @@ export class UpdateDirectDto {
   country?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   salaryFrom?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   salaryTo?: number;
 
@@ -39,6 +42,12 @@ export class UpdateDirectDto {
   salaryType?: string;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value === 'true' || value === '1';
+    }
+    return Boolean(value);
+  })
   @IsBoolean()
   salaryNotDefined?: boolean;
 
@@ -51,6 +60,7 @@ export class UpdateDirectDto {
   experienceRequired?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   searchRadius?: number;
 

@@ -188,8 +188,12 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
     salaryType: '',
     industry: '',
     experienceRequired: '',
-    searchRadius: ''
+    searchRadius: '',
+    specialInstructions: ''
   })
+
+  // File upload state
+  const [selectedFile, setSelectedFile] = useState(null)
 
   // Populate form when editing
   useEffect(() => {
@@ -206,7 +210,8 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
         salaryType: editingRole.salaryType || '',
         industry: editingRole.industry || '',
         experienceRequired: editingRole.experienceRequired || '',
-        searchRadius: editingRole.searchRadius || ''
+        searchRadius: editingRole.searchRadius || '',
+        specialInstructions: editingRole.specialInstructions || ''
       })
 
       // Set salary not defined if no salary values
@@ -234,22 +239,29 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
 
       console.log('User authenticated successfully:', user.id)
 
-      // Prepare API data with proper type conversions
-      const apiData = {
-        roleTitle: roleData.roleTitle,
-        rolePriority: roleData.rolePriority,
-        location: roleData.location,
-        postalCode: roleData.postalCode || null,
-        country: roleData.country || null,
-        salaryFrom: roleData.salaryFrom ? parseFloat(roleData.salaryFrom) : null,
-        salaryTo: roleData.salaryTo ? parseFloat(roleData.salaryTo) : null,
-        salaryCurrency: roleData.salaryCurrency || null,
-        salaryType: roleData.salaryType || null,
-        salaryNotDefined: salaryNotDefined,
-        industry: roleData.industry,
-        experienceRequired: roleData.experienceRequired || null,
-        searchRadius: roleData.searchRadius ? parseInt(roleData.searchRadius) : null,
-        userId: parseInt(user.id)
+      // Create FormData for file upload
+      const formData = new FormData()
+      
+      // Add form fields to FormData
+      formData.append('roleTitle', roleData.roleTitle)
+      formData.append('rolePriority', roleData.rolePriority)
+      formData.append('location', roleData.location)
+      if (roleData.postalCode) formData.append('postalCode', roleData.postalCode)
+      if (roleData.country) formData.append('country', roleData.country)
+      if (roleData.salaryFrom) formData.append('salaryFrom', parseFloat(roleData.salaryFrom))
+      if (roleData.salaryTo) formData.append('salaryTo', parseFloat(roleData.salaryTo))
+      if (roleData.salaryCurrency) formData.append('salaryCurrency', roleData.salaryCurrency)
+      if (roleData.salaryType) formData.append('salaryType', roleData.salaryType)
+      formData.append('salaryNotDefined', salaryNotDefined)
+      if (roleData.industry) formData.append('industry', roleData.industry)
+      if (roleData.experienceRequired) formData.append('experienceRequired', roleData.experienceRequired)
+      if (roleData.searchRadius) formData.append('searchRadius', parseInt(roleData.searchRadius))
+      if (roleData.specialInstructions) formData.append('specialInstructions', roleData.specialInstructions)
+      formData.append('userId', parseInt(user.id))
+
+      // Add file if selected
+      if (selectedFile) {
+        formData.append('file', selectedFile)
       }
 
       // If editing, use PUT request
@@ -259,19 +271,13 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
       if (editingRole) {
         response = await fetch(`${apiBaseUrl}/direct/${editingRole.id}`, {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(apiData)
+          body: formData
         })
       } else {
         // Creating new role, use POST request
         response = await fetch(`${apiBaseUrl}/direct`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(apiData)
+          body: formData
         })
       }
 
@@ -338,8 +344,10 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
             salaryType: '',
             industry: '',
             experienceRequired: '',
-            searchRadius: ''
+            searchRadius: '',
+            specialInstructions: ''
           })
+          setSelectedFile(null)
           setSalaryNotDefined(false)
         }
       } else {
@@ -580,6 +588,39 @@ export default function AddRoleForm({ onSuccess, editingRole = null }) {
                   <option value="100">100 Miles</option>
                   <option value="remote">Remote</option>
                 </select>
+              </div>
+            </div>
+
+            {/* Special Instructions */}
+            <div className="mt-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Special Instructions (Optional)</label>
+              <textarea
+                value={roleData.specialInstructions}
+                onChange={(e) => handleInputChange('specialInstructions', e.target.value)}
+                placeholder="Any special requirements or additional information..."
+                rows="4"
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-vertical"
+              />
+            </div>
+
+            {/* PDF Upload */}
+            <div className="mt-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Upload PDF (Optional)</label>
+              <div className="relative">
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => setSelectedFile(e.target.files[0])}
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+                {selectedFile && (
+                  <p className="mt-2 text-sm text-green-600">
+                    Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                  </p>
+                )}
+                <p className="mt-1 text-xs text-gray-500">
+                  Maximum file size: 5MB. Only PDF files are allowed.
+                </p>
               </div>
             </div>
           </div>

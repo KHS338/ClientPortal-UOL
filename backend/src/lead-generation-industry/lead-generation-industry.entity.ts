@@ -19,6 +19,15 @@ export class LeadGenerationIndustry {
   @Column({ name: 'lead_priority', length: 100 })
   leadPriority: string;
 
+  @Column({ name: 'is_recruitment_agency', nullable: true, length: 10 })
+  isRecruitmentAgency: string;
+
+  @Column({ name: 'special_instructions', nullable: true, type: 'text' })
+  specialInstructions: string;
+
+  @Column({ name: 'file_path', nullable: true, length: 500 })
+  filePath: string;
+
   // Relationship with User
   @Column({ name: 'user_id' })
   userId: number;

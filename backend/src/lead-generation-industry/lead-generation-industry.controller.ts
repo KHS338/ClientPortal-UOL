@@ -1,8 +1,32 @@
 // backend/src/lead-generation-industry/lead-generation-industry.controller.ts
-import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, HttpCode, HttpStatus, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { LeadGenerationIndustryService } from './lead-generation-industry.service';
 import { CreateLeadGenerationIndustryDto } from './dto/create-lead-generation-industry.dto';
 import { CreditDeductionUtil } from '../common/utils/credit-deduction.util';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+
+// Multer configuration for file upload
+const multerConfig = {
+  storage: diskStorage({
+    destination: './uploads/lead-generation-industry',
+    filename: (req, file, cb) => {
+      const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
+      cb(null, `${randomName}${extname(file.originalname)}`);
+    },
+  }),
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are allowed!'), false);
+    }
+  },
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+};
 
 @Controller('lead-generation-industry')
 export class LeadGenerationIndustryController {
@@ -13,8 +37,20 @@ export class LeadGenerationIndustryController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createLeadGenerationIndustryDto: CreateLeadGenerationIndustryDto) {
+  @UseInterceptors(FileInterceptor('file', multerConfig))
+  async create(
+    @Body() body: any,
+    @UploadedFile() file?: Express.Multer.File
+  ) {
     try {
+      // Process the body data to handle FormData properly
+      const createLeadGenerationIndustryDto: CreateLeadGenerationIndustryDto = { ...body };
+
+      // Add file path to DTO if file was uploaded
+      if (file) {
+        createLeadGenerationIndustryDto.filePath = file.path;
+      }
+
       // Check and deduct credit before creating the role
       const creditResult = await this.creditDeductionUtil.checkAndDeductCredit(
         createLeadGenerationIndustryDto.userId, 
@@ -113,8 +149,18 @@ export class LeadGenerationIndustryController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateData: Partial<CreateLeadGenerationIndustryDto>) {
+  @UseInterceptors(FileInterceptor('file', multerConfig))
+  async update(
+    @Param('id') id: string, 
+    @Body() updateData: Partial<CreateLeadGenerationIndustryDto>,
+    @UploadedFile() file?: Express.Multer.File
+  ) {
     try {
+      // Add file path to update data if file was uploaded
+      if (file) {
+        updateData.filePath = file.path;
+      }
+
       const leadGenerationIndustry = await this.leadGenerationIndustryService.update(parseInt(id), updateData);
       return {
         success: true,

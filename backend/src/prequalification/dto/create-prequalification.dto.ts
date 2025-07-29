@@ -1,5 +1,6 @@
 // backend/src/prequalification/dto/create-prequalification.dto.ts
 import { IsString, IsOptional, IsNumber, IsBoolean } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 
 export class CreatePrequalificationDto {
   @IsString()
@@ -20,10 +21,12 @@ export class CreatePrequalificationDto {
   country?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   salaryFrom?: number;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   salaryTo?: number;
 
@@ -36,6 +39,12 @@ export class CreatePrequalificationDto {
   salaryType?: string;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value === 'true' || value === '1';
+    }
+    return Boolean(value);
+  })
   @IsBoolean()
   salaryNotDefined?: boolean;
 
@@ -48,9 +57,19 @@ export class CreatePrequalificationDto {
   experienceRequired?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   searchRadius?: number;
 
+  @IsOptional()
+  @IsString()
+  specialInstructions?: string;
+
+  @IsOptional()
+  @IsString()
+  filePath?: string;
+
+  @Type(() => Number)
   @IsNumber()
   userId: number;
 }

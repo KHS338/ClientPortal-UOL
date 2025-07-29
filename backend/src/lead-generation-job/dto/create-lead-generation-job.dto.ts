@@ -1,5 +1,6 @@
 // backend/src/lead-generation-job/dto/create-lead-generation-job.dto.ts
 import { IsString, IsNumber, IsArray, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateLeadGenerationJobDto {
   @IsString()
@@ -28,6 +29,15 @@ export class CreateLeadGenerationJobDto {
   @IsString()
   hiringUrgency: string;
 
+  @IsOptional()
+  @IsString()
+  specialInstructions?: string;
+
+  @IsOptional()
+  @IsString()
+  filePath?: string;
+
+  @Type(() => Number)
   @IsNumber()
   userId: number;
 }

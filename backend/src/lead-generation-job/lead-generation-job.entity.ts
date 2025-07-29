@@ -31,6 +31,12 @@ export class LeadGenerationJob {
   @Column({ name: 'hiring_urgency', length: 100 })
   hiringUrgency: string;
 
+  @Column({ name: 'special_instructions', nullable: true, type: 'text' })
+  specialInstructions: string;
+
+  @Column({ name: 'file_path', nullable: true, length: 500 })
+  filePath: string;
+
   // Relationship with User
   @Column({ name: 'user_id' })
   userId: number;

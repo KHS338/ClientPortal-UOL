@@ -1,8 +1,30 @@
 // backend/src/cv-sourcing/cv-sourcing.controller.ts
-import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, HttpCode, HttpStatus, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import * as path from 'path';
+import * as fs from 'fs';
 import { CvSourcingService } from './cv-sourcing.service';
 import { CreateCvSourcingDto } from './dto/create-cv-sourcing.dto';
 import { CreditDeductionUtil } from '../common/utils/credit-deduction.util';
+
+// Ensure upload directory exists
+const uploadDir = 'uploads/cv-sourcing';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Multer configuration
+const storage = diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, `cv-sourcing-${uniqueSuffix}${ext}`);
+  },
+});
 
 @Controller('cv-sourcing')
 export class CvSourcingController {
@@ -13,8 +35,26 @@ export class CvSourcingController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createCvSourcingDto: CreateCvSourcingDto) {
+  @UseInterceptors(FileInterceptor('file', {
+    storage,
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype === 'application/pdf') {
+        cb(null, true);
+      } else {
+        cb(new Error('Only PDF files are allowed'), false);
+      }
+    },
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+  }))
+  async create(@Body() createCvSourcingDto: CreateCvSourcingDto, @UploadedFile() file?: Express.Multer.File) {
     try {
+      // Add file path to DTO if file was uploaded
+      if (file) {
+        createCvSourcingDto.filePath = file.path;
+      }
+
       // Check and deduct credit before creating the role
       const creditResult = await this.creditDeductionUtil.checkAndDeductCredit(
         createCvSourcingDto.userId, 

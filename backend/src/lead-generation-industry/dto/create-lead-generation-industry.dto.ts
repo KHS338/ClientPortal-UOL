@@ -1,5 +1,6 @@
 // backend/src/lead-generation-industry/dto/create-lead-generation-industry.dto.ts
-import { IsString, IsNumber } from 'class-validator';
+import { IsString, IsNumber, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateLeadGenerationIndustryDto {
   @IsString()
@@ -14,6 +15,18 @@ export class CreateLeadGenerationIndustryDto {
   @IsString()
   leadPriority: string;
 
+  @IsString()
+  isRecruitmentAgency: string;
+
+  @IsOptional()
+  @IsString()
+  specialInstructions?: string;
+
+  @IsOptional()
+  @IsString()
+  filePath?: string;
+
+  @Type(() => Number)
   @IsNumber()
   userId: number;
 }
