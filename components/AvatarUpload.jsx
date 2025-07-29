@@ -143,61 +143,23 @@ const AvatarUpload = ({
 
   return (
     <div className={`relative inline-block ${className}`}>
-      {/* Avatar Image */}
-      <div 
-        className={`relative overflow-hidden rounded-full bg-gray-200 ${
-          editable ? 'cursor-pointer group' : ''
-        }`}
+      <div
+        className={`overflow-hidden rounded-full bg-gray-200 ${editable ? 'cursor-pointer' : ''}`}
         style={{ width: size, height: size }}
         onClick={openFileDialog}
       >
-        {previewUrl && previewUrl !== '/images/profile.png' ? (
-          <Image
-            src={previewUrl}
-            alt="Avatar"
-            width={size}
-            height={size}
-            className="object-cover w-full h-full"
-            onError={() => {
-              console.log('Avatar image failed to load, falling back to default');
-              setPreviewUrl('/images/profile.png');
-            }}
-            unoptimized={previewUrl?.startsWith('blob:')} // For blob URLs during preview
-          />
-        ) : (
-          <div className="flex items-center justify-center w-full h-full bg-gray-300 text-gray-500">
-            <Image
-              src="/images/profile.png"
-              alt="Default Avatar"
-              width={size}
-              height={size}
-              className="object-cover w-full h-full opacity-60"
-            />
-          </div>
-        )}
-
-        {/* Upload Overlay */}
-        {editable && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            {isUploading ? (
-              <div className="flex flex-col items-center text-white">
-                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mb-1"></div>
-                <span className="text-xs">Uploading...</span>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center text-white">
-                <FiCamera size={size * 0.2} />
-                {showUploadText && (
-                  <span className="text-xs mt-1">Upload</span>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+        <Image
+          src={previewUrl || '/images/profile.png'}
+          alt="Avatar"
+          width={size}
+          height={size}
+          className="object-cover w-full h-full"
+          onError={() => setPreviewUrl('/images/profile.png')}
+          unoptimized={previewUrl?.startsWith('blob:')}
+        />
       </div>
-
-      {/* Remove Button */}
-      {editable && previewUrl && !isUploading && (
+      {/* Show remove button only if a custom image is selected and not uploading */}
+      {editable && previewUrl && previewUrl !== '/images/profile.png' && !isUploading && (
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -208,7 +170,6 @@ const AvatarUpload = ({
           <FiX size={12} />
         </button>
       )}
-
       {/* Hidden File Input */}
       {editable && (
         <input
@@ -218,23 +179,6 @@ const AvatarUpload = ({
           onChange={handleFileSelect}
           className="hidden"
         />
-      )}
-
-      {/* Upload Text for Registration */}
-      {editable && showUploadText && !previewUrl && (
-        <div className="text-center mt-2">
-          <button
-            onClick={openFileDialog}
-            disabled={isUploading}
-            className="text-sm text-blue-600 hover:text-blue-700 transition-colors duration-200 flex items-center justify-center gap-1"
-          >
-            <FiUpload size={14} />
-            Upload Photo
-          </button>
-          <p className="text-xs text-gray-500 mt-1">
-            Optional - JPEG, PNG, GIF, WebP (max 5MB)
-          </p>
-        </div>
       )}
     </div>
   );
