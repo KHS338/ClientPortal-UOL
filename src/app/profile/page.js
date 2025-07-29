@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { FiCamera, FiEdit3, FiSave, FiUser, FiBriefcase, FiMail, FiPhone, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiCalendar, FiX } from "react-icons/fi";
+import { FiEdit3, FiSave, FiUser, FiBriefcase, FiMail, FiPhone, FiLock, FiEye, FiEyeOff, FiCheckCircle, FiCalendar, FiX } from "react-icons/fi";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
+import AvatarUpload from "@/components/AvatarUpload.jsx";
 
 export default function ClientProfilePage({ initial = {} }) {
   const router = useRouter();
@@ -39,10 +40,9 @@ export default function ClientProfilePage({ initial = {} }) {
     twoFactorCode: ''
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
-  const fileRef = useRef();
 
   // Fetch detailed profile information from backend
-  const fetchDetailedProfile = async () => {
+  const fetchDetailedProfile = useCallback(async () => {
     if (!authUser?.id) return;
     
     setIsLoadingProfile(true);
@@ -84,7 +84,7 @@ export default function ClientProfilePage({ initial = {} }) {
           companySize: user.companySize || "",
           email: user.email || "",
           phone: user.phone || "",
-          avatar: user.avatar || null,
+          avatar: user.avatar || "/images/profile.png",
           joinDate: joinDate,
           lastLogin: lastLogin,
           twoFactorEnabled: user.twoFactorEnabled || false,
@@ -102,7 +102,7 @@ export default function ClientProfilePage({ initial = {} }) {
     } finally {
       setIsLoadingProfile(false);
     }
-  };
+  }, [authUser?.id]);
 
   // Load user data from authentication context and fetch detailed profile
   useEffect(() => {
@@ -118,7 +118,7 @@ export default function ClientProfilePage({ initial = {} }) {
       // Fetch detailed profile information from the server
       fetchDetailedProfile();
     }
-  }, [authUser, isAuthenticated, authLoading, router]);
+  }, [authUser, isAuthenticated, authLoading, router, fetchDetailedProfile]);
 
   // Cleanup: Clear detailed profile data when component unmounts
   useEffect(() => {
@@ -173,6 +173,7 @@ export default function ClientProfilePage({ initial = {} }) {
       if (form.email !== originalUser.email) updateData.email = form.email;
       if (form.phone !== originalUser.phone) updateData.phone = form.phone;
       if (form.companymail !== originalUser.companymail) updateData.companymail = form.companymail;
+      if (form.avatar !== originalUser.avatar) updateData.avatar = form.avatar;
 
       // Call the backend API to update user profile
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -201,6 +202,7 @@ export default function ClientProfilePage({ initial = {} }) {
           email: updatedUser.email || "",
           phone: updatedUser.phone || "",
           companymail: updatedUser.companymail || "",
+          avatar: updatedUser.avatar || null,
         }));
         
         setIsEditing(false);
@@ -323,34 +325,15 @@ export default function ClientProfilePage({ initial = {} }) {
                     <div className="space-y-6">
                       {/* Avatar */}
                       <div className="mx-auto">
-                        <div className="w-32 h-32 mx-auto rounded-full overflow-hidden border-4 border-white shadow-xl">
-                          <img
-                            src={form.avatar && form.avatar instanceof File 
-                              ? URL.createObjectURL(form.avatar) 
-                              : form.avatar 
-                              ? form.avatar 
-                              : "/images/profile.png"
-                            }
-                            alt="Profile"
-                            width={128}
-                            height={128}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <button
-                          onClick={() => fileRef.current?.click()}
-                          className="mx-auto mt-4 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-300 group flex"
-                        >
-                          <FiCamera size={18} className="text-[#1a84de] group-hover:scale-110 transition-transform" />
-                          <input
-                            type="file"
-                            name="avatar"
-                            accept="image/*"
-                            ref={fileRef}
-                            className="hidden"
-                            onChange={handleChange}
-                          />
-                        </button>
+                        <AvatarUpload
+                          currentAvatar={form.avatar}
+                          onAvatarChange={(avatarUrl) => setForm(prev => ({ ...prev, avatar: avatarUrl }))}
+                          userId={authUser?.id}
+                          size={128}
+                          editable={isEditing}
+                          className=""
+                          showUploadText={false}
+                        />
                       </div>
 
                       {/* User Info */}

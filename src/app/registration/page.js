@@ -1,12 +1,13 @@
 "use client";
  
-import { useState, useRef } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FiCamera, FiEye, FiEyeOff, FiUser, FiBriefcase, FiMail, FiPhone, FiLock, FiArrowLeft } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import AvatarUpload from "@/components/AvatarUpload.jsx";
 
 export default function ClientRegistrationPage() {
   const router = useRouter();
@@ -20,7 +21,7 @@ export default function ClientRegistrationPage() {
     companySize: "",
     email: "",
     phone: "",
-    avatar: null
+    avatar: "/images/profile.png"
   });
   
   const [showPassword, setShowPassword] = useState(false);
@@ -28,7 +29,6 @@ export default function ClientRegistrationPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState(null);
-  const fileRef = useRef();
  
   const handleChange = (e) => {
     const { name, value, files, type } = e.target;
@@ -93,7 +93,7 @@ export default function ClientRegistrationPage() {
         companyName: form.companyName,
         companySize: form.companySize,
         phone: form.phone,
-        avatar: form.avatar ? 'uploaded-avatar.jpg' : null // For now, just a placeholder
+        avatar: form.avatar && form.avatar !== "/images/profile.png" ? form.avatar : null // Only send avatar if it's not the default
       };
 
       console.log("Sending user data:", userData);
@@ -242,32 +242,14 @@ export default function ClientRegistrationPage() {
                 transition={{ duration: 0.5, delay: 0.8 }}
                 className="flex justify-center mb-8"
               >
-                <div className="relative">
-                  <div
-                    onClick={() => fileRef.current?.click()}
-                    className="w-32 h-32 mx-auto bg-[#0958d9] rounded-full overflow-hidden border-4 border-white shadow-xl"
-                  >
-                      <img
-                        src={"images/profile.png"}
-                        alt="Profile"
-                        width={130}
-                        height={130}
-                        className="w-full h-full object-cover"
-                      />
-                    
-                  </div>
-                  <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-2 shadow-lg border-2 border-gray-100">
-                    <FiUser size={16} className="text-gray-600" />
-                  </div>
-                  <input
-                    type="file"
-                    name="avatar"
-                    accept="image/*"
-                    ref={fileRef}
-                    className="hidden"
-                    onChange={handleChange}
-                  />
-                </div>
+                <AvatarUpload
+                  currentAvatar="/images/profile.png"
+                  onAvatarChange={(avatarUrl) => setForm(prev => ({ ...prev, avatar: avatarUrl }))}
+                  userId={`temp_${Date.now()}`} // Temporary ID for registration
+                  size={120}
+                  editable={true}
+                  showUploadText={true}
+                />
               </motion.div>
 
               {/* Form Fields */}
