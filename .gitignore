@@ -33,6 +33,12 @@ backend/coverage/
 .DS_Store
 *.pem
 
+# Avatar uploads (do not commit user-uploaded files)
+public/uploads/
+
+# Backend form uploads (do not commit user-uploaded files)
+backend/uploads/
+
 # debug
 npm-debug.log*
 yarn-debug.log*
