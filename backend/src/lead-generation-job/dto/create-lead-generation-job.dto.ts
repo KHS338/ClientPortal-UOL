@@ -29,6 +29,9 @@ export class CreateLeadGenerationJobDto {
   @IsString()
   hiringUrgency: string;
 
+  @IsString()
+  isRecruitmentAgency: string;
+
   @IsOptional()
   @IsString()
   specialInstructions?: string;

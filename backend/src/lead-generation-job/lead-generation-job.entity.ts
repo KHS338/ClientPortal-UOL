@@ -31,6 +31,9 @@ export class LeadGenerationJob {
   @Column({ name: 'hiring_urgency', length: 100 })
   hiringUrgency: string;
 
+  @Column({ name: 'is_recruitment_agency', length: 10, default: 'No' })
+  isRecruitmentAgency: string;
+
   @Column({ name: 'special_instructions', nullable: true, type: 'text' })
   specialInstructions: string;
 

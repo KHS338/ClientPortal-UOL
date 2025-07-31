@@ -21,6 +21,7 @@ export const jobsColumns = [
     }
   },
   { accessorKey: "hiringUrgency", header: "Urgency" },
+  { accessorKey: "isRecruitmentAgency", header: "Recruitment Agency" },
   { accessorKey: "submittedAt", header: "Submitted" },
   { 
     accessorKey: "status", 

@@ -493,6 +493,7 @@ const JobsForm = ({ onSubmit, editingData, onCancel, onError }) => {
     workType: "",
     location: [],
     hiringUrgency: "",
+    isRecruitmentAgency: "",
     skills: [],
     experience: "",
     jobTitle: "",
@@ -515,6 +516,7 @@ const JobsForm = ({ onSubmit, editingData, onCancel, onError }) => {
         workType: editingData.workType || "",
         location: Array.isArray(editingData.location) ? editingData.location : (editingData.location ? editingData.location.split(',') : []),
         hiringUrgency: editingData.hiringUrgency || "",
+        isRecruitmentAgency: editingData.isRecruitmentAgency || "",
         skills: Array.isArray(editingData.skills) ? editingData.skills : (editingData.skills ? editingData.skills.split(',') : []),
         experience: editingData.experience || "",
         jobTitle: editingData.jobTitle || "",
@@ -600,7 +602,7 @@ const JobsForm = ({ onSubmit, editingData, onCancel, onError }) => {
   };
 
   const handleSubmit = () => {
-    if (!formData.jobTitle || !formData.industryType || !formData.companySize || formData.location.length === 0 || !formData.experience) {
+    if (!formData.jobTitle || !formData.industryType || !formData.companySize || formData.location.length === 0 || !formData.experience || !formData.isRecruitmentAgency) {
       onError('Please fill in all required fields and select at least one location');
       return;
     }
@@ -612,6 +614,7 @@ const JobsForm = ({ onSubmit, editingData, onCancel, onError }) => {
       workType: "",
       location: [],
       hiringUrgency: "",
+      isRecruitmentAgency: "",
       skills: [],
       experience: "",
       jobTitle: "",
@@ -631,6 +634,33 @@ const JobsForm = ({ onSubmit, editingData, onCancel, onError }) => {
         Job Information
       </h2>
       <div className="space-y-6">
+        {/* Are you a recruitment agency? - First Question */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Are you a recruitment agency? *
+          </label>
+          <div className="grid grid-cols-2 gap-4">
+            {["Yes", "No"].map((option) => (
+              <label key={option} className="flex items-center space-x-2 cursor-pointer group">
+                <div className={`w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center transition-all duration-300 group-hover:border-[#1a84de] ${formData.isRecruitmentAgency === option ? 'border-[#1a84de] bg-[#1a84de]' : ''}`}>
+                  {formData.isRecruitmentAgency === option && (
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  )}
+                </div>
+                <input
+                  type="radio"
+                  name="isRecruitmentAgency"
+                  value={option}
+                  checked={formData.isRecruitmentAgency === option}
+                  onChange={handleChange}
+                  className="hidden"
+                />
+                <span className="text-sm font-medium text-gray-700 group-hover:text-[#1a84de]">{option}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Industry Type */}
           <div className="space-y-2">
@@ -1073,6 +1103,7 @@ export default function LeadsGenerationPage() {
           experience: job.experience,
           skills: job.skills || [],
           hiringUrgency: job.hiringUrgency,
+          isRecruitmentAgency: job.isRecruitmentAgency,
           submittedAt: new Date(job.createdAt).toLocaleDateString(),
           ...job
         }));
